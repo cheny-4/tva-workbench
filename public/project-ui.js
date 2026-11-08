@@ -8,7 +8,9 @@ function renderPipeline() {
   if(!state.workflow)return;
   $('#pipeline-grid').innerHTML=state.workflow.stages.map(stage=>{
     const loaded=stageSkills(stage).length;
-    return `<button class="pipeline-stage ${state.selectedStage===stage.id?'selected':''}" data-science-stage="${esc(stage.id)}" aria-expanded="${state.selectedStage===stage.id}"><span class="stage-number">0${stage.number}</span><span class="stage-title">${esc(stage.shortTitle)}</span><span class="stage-owner">${esc(stage.owner)}</span><span class="stage-status ${loaded?'loaded':stage.status==='recorded_available'?'recorded':''}"><i></i>${loaded?'Project skill loaded':esc(stage.statusLabel)}</span><span class="stage-output">${esc(stage.id==='headwater'?'Precipitation · air T · runoff':stage.id==='downscaling'?'Physical fields · 1 km target':stage.id==='water-availability'?'Weekly site water availability':'Generation · cost · risk')}</span><span class="stage-arrow">→</span></button>`;
+    const names={'headwater':'HEADWATER','downscaling':'Downscaling','water-availability':'LSTM','economics':'Economics'};
+    const status=loaded?'Skill loaded':stage.status==='recorded_available'?'Recorded':'Planned';
+    return `<button class="pipeline-stage ${state.selectedStage===stage.id?'selected':''}" data-science-stage="${esc(stage.id)}" aria-expanded="${state.selectedStage===stage.id}" title="${esc(stage.title+' · '+stage.statusLabel)}"><span class="stage-number">0${stage.number}</span><span class="stage-title">${esc(names[stage.id] || stage.shortTitle)}</span><span class="stage-status ${loaded?'loaded':stage.status==='recorded_available'?'recorded':''}"><i></i>${status}</span><span class="stage-arrow">→</span></button>`;
   }).join('');
   $$('#pipeline-grid [data-science-stage]').forEach(el=>el.addEventListener('click',()=>{
     state.selectedStage=state.selectedStage===el.dataset.scienceStage?null:el.dataset.scienceStage;renderPipeline();
@@ -28,7 +30,8 @@ function showWorkflowDetails() {
 }
 function renderPromptLibrary() {
   const featured=['end-to-end','network','skills'];
-  $('#starter-prompts').innerHTML=featured.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean).map((p,i)=>`<button class="starter-prompt" data-use-prompt="${esc(p.id)}"><span class="starter-index">0${i+1}</span><span><strong>${esc(p.title)}</strong><small>${esc(p.description)}</small></span>${icon('arrow')}</button>`).join('');
+  const shortTitles={'end-to-end':'Explain workflow','network':'Explore TVA','skills':'Show skills'};
+  $('#starter-prompts').innerHTML=featured.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean).map(p=>`<button class="starter-prompt" data-use-prompt="${esc(p.id)}" title="${esc(p.description)}">${esc(shortTitles[p.id])}</button>`).join('');
   const categories=['All',...new Set(state.prompts.map(p=>p.category))];
   $('#prompt-filter').innerHTML=categories.map(c=>`<button class="${c===state.promptCategory?'active':''}" data-prompt-category="${esc(c)}">${esc(c)}</button>`).join('');
   $('#prompt-library').innerHTML=state.prompts.filter(p=>state.promptCategory==='All'||p.category===state.promptCategory).map((p,i)=>`<article class="prompt-library-card"><span class="eyebrow">${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.description)}</p><button class="text-button" data-use-prompt="${esc(p.id)}">${state.mode==='recorded'?'Explore recorded guide':'Prepare live prompt'} ${icon('arrow')}</button></article>`).join('');
@@ -46,12 +49,29 @@ function usePrompt(id) {
     $('#prompt').focus();$('#chat-form').scrollIntoView({behavior:'smooth',block:'center'});
     toast('Prompt prepared. Review the request, then press Send.');
   }else{
-    addMessage('user',prompt.title);addMessage('agent',prompt.recordedAnswer);
+    addMessage('user',prompt.title);addGuideMessage(prompt);
     addActivity('Recorded project guide',`${prompt.category} · explanation from project references; no model call.`);
     if(id==='network')toast('Use TVA network to inspect all 52 sites and their recorded coverage.');
-    if(id==='skills' && Number.isInteger(state.skills?.count))addMessage('agent',`The connected project currently has ${state.skills.count} loaded skills: ${state.skills.skills.map(s=>s.name).join(', ')}. Open Skills for their descriptions and job definitions.`);
+    if(id==='skills' && Number.isInteger(state.skills?.count))addMessage('agent',`${state.skills.count} skills are loaded in the connected TVA project. Open Skills to inspect them.`);
     $('#chat-scroll').scrollIntoView({behavior:'smooth',block:'center'});
   }
+}
+function addGuideMessage(prompt) {
+  const summaries={
+    'end-to-end':'HEADWATER forecasts precipitation, temperature and runoff. Downscaling prepares high-resolution fields for the LSTM, which estimates TVA water availability. Georgia Tech uses the water records for economic assessment. The LSTM example is recorded; the other model connections are planned.',
+    'network':'The study covers all 52 TVA ELF sites. Choose a site on the map or open TVA network to browse them. Recorded evaluation coverage varies by site; missing results stay missing.',
+    'skills':'The Skills page shows the selected TVA project’s actual loaded skills and job definitions. Workflow stages are listed separately from installed skills.',
+    'headwater':'HEADWATER supplies precipitation, air temperature and runoff forecasts. Its handoff must preserve physical units, dates and ensemble IDs before downstream models can use the fields. This connection is planned.',
+    'downscaling':'Downscaling reconstructs physical scenarios and prepares high-resolution fields, targeting 1 km. Those fields are then aggregated into the basin inputs required by the LSTM. This integration is planned.',
+    'lstm':'The saved LSTM estimates weekly TVA water availability from basin forcing and static attributes. Use the chart to inspect recorded results. A live run first needs matched inputs and a verified compute environment.',
+    'plant-interface':'TRITON can add hydraulic detail, and RiTHyMs can provide river water temperature near plants. These supporting models feed the plant data handoff and remain separate planned integrations.',
+    'economics':'Georgia Tech combines plant water records with plant and economic data to assess generation, cost and risk. The partner interface and metrics still need agreement.'
+  };
+  const body=addMessage('agent',summaries[prompt.id] || prompt.recordedAnswer.split('\n\n')[0]);
+  const detail=document.createElement('details');detail.className='answer-detail';
+  const summary=document.createElement('summary');summary.textContent='More detail';
+  const content=document.createElement('div');content.className='expanded-answer';content.innerHTML=formatText(prompt.recordedAnswer);
+  detail.append(summary,content);body.append(detail);scrollChat();
 }
 async function refreshSkills() {
   const project=state.config.project,backend=state.config.backend_url;

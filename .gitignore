@@ -1,4 +1,12 @@
 .local/
 __pycache__/
-*.pyc
+*.py[cod]
 .DS_Store
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+.pytest_cache/
+*.log
+*.zip

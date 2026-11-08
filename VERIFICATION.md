@@ -1,4 +1,16 @@
-# v0.2.1 brand refresh verification
+# v0.3.0 presentation verification
+
+Verified November 7, 2026.
+
+- All **8 frontend JavaScript checks passed**.
+- Python syntax compilation passed; DOM IDs were unique and interaction selectors were checked.
+- Manual browser checks covered the compact main screen, starter prompts and expandable **More detail**, **Metrics & provenance**, **Demo options**, and resource navigation.
+- Laptop (1366-pixel) and narrow (390-pixel) layouts had no horizontal document overflow; the narrow **More** menu remained accessible. No browser console errors were observed.
+- All 52 site options remained available, and Nickajack retained its explicit no-saved-predictions state.
+- The full 52-site network, Skills and resource views remain available. Recorded/planned labels and live approval/Stop controls are retained.
+- No real VISTA inference or HPC job was run. Backend/scientific tests were **not rerun** for this presentation revision; their earlier results below remain baseline evidence.
+
+## v0.2.1 branding baseline
 
 Verified November 6, 2026.
 
@@ -7,7 +19,7 @@ Verified November 6, 2026.
 - Main interface contrast pairs measured: white on ORNL green 7.15:1, primary text on white 13.40:1, muted text on white 4.72:1, sidebar navigation text on navy 9.70:1.
 - Python and JavaScript syntax checks passed. This revision changes branding, logo placement and visual color tokens; scientific data and backend execution behavior are retained.
 
-The v0.2.0 functional/data verification below applies to the retained workflow. It is not a claim of new model or HPC execution.
+The earlier functional/data verification below applies to the retained workflow. It is not a claim of new model or HPC execution.
 
 ## v0.2.0 functional verification
 
@@ -24,4 +36,4 @@ The existing chat/streaming/file/report adapter is retained. Python tests cover 
 
 Not verified: live HEADWATER products, a runnable downscaling integration, actual TVA Frontier runtime/submission/transfers, Odo/Lux TVA job definitions, CCSI execution, Georgia Tech economics integration, Windows/Linux launch, or compatibility with other VISTA releases. Planned workflow cards clearly retain their integration status.
 
-Preview.jpg, Preview-network.jpg and Preview-skills.jpg were captured from this revision with local VISTA connected. Resource states and the loaded skill count vary with the laptop/project.
+The v0.2.0 network and Skills preview captures used local VISTA connected. Resource states and the loaded skill count vary with the laptop/project.

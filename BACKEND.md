@@ -17,7 +17,7 @@ The wrapper binds only to `127.0.0.1`. It is intended for presenting from the sa
 
 ## Browser contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.2.0"}`. Lightweight instance identification.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.3.0"}`. Lightweight instance identification.
 - `GET /api/config`: `{backend_url,project}`.
 - `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
 - `GET /api/status`: `{app,version,backend_url,project,connected,project_found,skills,resources,detail}`. Cached for 15 seconds; `?fresh=1` bypasses the wrapper cache for an explicit connection refresh. VISTA still owns its facility-status cache. `connected` means VISTA responded; `project_found` means its selected project exists. `resources` contains `{id,name,state,message,checked_at,planned}` for Odo, Frontier, Lux and planned CCSI. Facility readiness is distinct from TVA skill/runtime validation.
@@ -53,7 +53,7 @@ HTTP requests and file uploads have a 64 MiB limit. Upstream request inactivity 
 
 CCSI is a display placeholder for a future resource adapter. Adding its name to the interface does not register it in VISTA, authenticate to the node, or make existing Frontier-only scripts compatible with it. Similarly, Odo and Lux resource availability does not imply the TVA inference skill supports those clusters.
 
-The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.2.0.
+The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.3.0.
 
 ## Verification
 

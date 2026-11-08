@@ -45,6 +45,7 @@ function download(name, text, type='text/plain') {
 }
 function setBusy(value,label) {
   state.busy=value;
+  $('.agent-panel').classList.toggle('is-working',value);
   $('#send-button').hidden=value && state.mode==='live';
   $('#stop-button').hidden=!value || state.mode!=='live';
   $('#send-button').disabled=value; $('#workflow-button').disabled=value;
@@ -63,6 +64,7 @@ function setStage(index,complete=false) {
 function addActivity(title,detail='',kind='info',raw=null) {
   const item={time:new Date().toLocaleTimeString('en-US',{hour12:false}),title,detail,kind};
   state.events.push(item); if(state.events.length>250) state.events.shift();
+  $('.activity-drawer').classList.add('has-activity');
   const row=document.createElement('div'); row.className='activity-event';
   row.innerHTML=`<time>${esc(item.time)}</time><div><strong>${esc(title)}</strong>${detail?`<div>${esc(detail)}</div>`:''}${raw?`<details><summary>Event detail</summary><pre>${esc(JSON.stringify(raw,null,2).slice(0,12000))}</pre></details>`:''}</div>`;
   $('#activity-log').append(row);
@@ -72,6 +74,7 @@ function addActivity(title,detail='',kind='info',raw=null) {
 }
 function resetActivity() {
   state.events=[]; state.lastSeq=0; $('#activity-log').replaceChildren();
+  $('.activity-drawer').classList.remove('has-activity');
   $('#activity-count').textContent='0'; $('#activity-last').textContent='Events and tool calls appear here'; setStage(-1);
 }
 function formatText(text) {
@@ -92,21 +95,19 @@ function addMessage(role,text,options={}) {
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
   const live=state.mode==='live';
-  const featured=['end-to-end','lstm','skills'].map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean);
-  $('#chat-messages').innerHTML=`<div class="welcome"><div class="welcome-symbol">✳</div><h3>${live?'One project. A connected scientific workflow.':'The whole TVA network,<br>from forecast to impact.'}</h3><p>${live?'Use the skills loaded into your TVA project. The starter library can prepare a full-workflow request or an individual model plan.':'Explore all 52 ELF sites and the four-stage project design. Recorded LSTM evidence is ready to inspect; future integrations keep their own status.'}</p><div class="prompt-cards">${featured.map((p,i)=>`<button class="prompt-card" data-welcome-prompt="${esc(p.id)}"><span>0${i+1}</span>${esc(p.title)}${icon('arrow')}</button>`).join('')}</div></div>`;
-  $$('[data-welcome-prompt]').forEach(el=>el.addEventListener('click',()=>usePrompt(el.dataset.welcomePrompt)));
+  $('#chat-messages').innerHTML=`<div class="welcome"><div class="welcome-symbol">✳</div><h3>${live?'Ask the TVA agent.':'Explore the TVA workflow.'}</h3><p>${live?'Choose a prompt above, or ask a question.':'Choose a prompt above to begin.'}</p></div>`;
 }
 async function switchMode(mode,restore=true) {
   if(state.busy){toast('Finish or stop the current turn before switching modes.');return;}
-  state.mode=mode; state.liveStudy=null; state.liveFiles=[]; state.history=[];
+  state.mode=mode;document.body.dataset.mode=mode; state.liveStudy=null; state.liveFiles=[]; state.history=[];
   $('#mode-recorded').classList.toggle('selected',mode==='recorded'); $('#mode-live').classList.toggle('selected',mode==='live');
   $('#mode-recorded').setAttribute('aria-pressed',String(mode==='recorded')); $('#mode-live').setAttribute('aria-pressed',String(mode==='live'));
   $('#composer-mode').textContent=mode==='recorded'?'RECORDED EXAMPLE':'LIVE VISTA';
   $('#workflow-button span').textContent=mode==='recorded'?'Walk through recorded run':'Prepare live inference plan';
   $('#mode-banner').classList.toggle('live',mode==='live');
-  $('#mode-banner>span:nth-child(2)').innerHTML=mode==='recorded' ? '<strong>Explore the project workflow.</strong> Recorded LSTM results are included. Other science stages show their integration status; no job is running.' : '<strong>Live VISTA mode.</strong> Messages use the selected TVA project when connected. Review the plan and environment before approving a cluster job.';
+  $('#mode-banner>span:nth-child(2)').innerHTML=mode==='recorded' ? '<strong>Recorded LSTM results.</strong> Other model connections are planned.' : '<strong>Live VISTA.</strong> Review the agent’s plan before approving execution.';
   $('#workflow-strip').innerHTML=(mode==='recorded'?['Prepare','Execute','Interpret']:['Agent turn','Tool activity','Artifacts']).map((label,i)=>`${i?'<i></i>':''}<div data-step="${i}"><span>0${i+1}</span>${label}</div>`).join('');
-  $('#mode-info').textContent=mode==='live'?'Connection details ↗':'About this example ↗';
+  $('#mode-info').textContent=mode==='live'?'Connection details ↗':'About this demo ↗';
   $('#resource').value='frontier';
   $('#resource').querySelectorAll('option').forEach(o=>o.disabled= o.value==='ccsi' || (mode==='live' && o.value!=='frontier'));
   $('#resource-note').textContent=mode==='recorded'?'Recorded results are independent of this selection.':'The current TVA inference skill targets Frontier. Odo and Lux need matching job definitions.';
@@ -123,9 +124,10 @@ function switchView(view) {
   state.view=view;
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Workspace',network:'TVA network',skills:'Skills',prompts:'Prompt library',history:'Conversations',files:'Project files',resources:'Compute resources'}[view];
+  $('#view-breadcrumb').textContent={workspace:'Demo',network:'TVA network',skills:'Skills',prompts:'Prompt library',history:'Conversations',files:'Project files',resources:'Compute resources'}[view];
   if(view==='history') renderHistory(); if(view==='files') renderFiles(); if(view==='resources') renderResources();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();if(view==='prompts')renderPromptLibrary();
+  const more=$('.nav-more');if(more)more.open=['prompts','history','files','resources'].includes(view);
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -177,7 +179,8 @@ function selectStudy() {
 function currentStudy() { return state.mode==='recorded' ? state.study : state.liveStudy; }
 function renderResults() {
   const study=currentStudy();
-  $('#results-description').textContent=state.mode==='live' ? study?'Predictions parsed from a file displayed in this VISTA conversation.':'Files explicitly displayed by the agent in this conversation appear here.' : state.study.subtitle;
+  $('#results-description').textContent=state.mode==='live' ? study?'Results displayed by the agent.':'Results appear here after collection.' : `${dateLabel(state.study.period.start,{year:'numeric'})} – ${dateLabel(state.study.period.end,{year:'numeric'})} · recorded historical evaluation`;
+  $('#results-title').textContent=study?`${study.sites[Math.min(state.siteIndex,study.sites.length-1)].name} · water availability`:'Water availability';
   $('#chart-site-tabs').innerHTML='';$('#result-site').innerHTML='';$('#result-site').closest('.chart-site-picker').hidden=!study; $('#result-chart').innerHTML='';$('#result-stats').innerHTML='';
   $('.chart-legend').hidden=!study; $('#chart-axis-label').hidden=!study;
   $('.live-artifacts')?.remove();
@@ -224,7 +227,7 @@ function niceStep(value) { const p=10**Math.floor(Math.log10(value));return [1,2
 function showProvenance() {
   const study=currentStudy();
   if(!study) {showDetails('Live result provenance','<p>No live prediction file has been loaded. The agent’s displayed files and original provenance will appear after collection.</p>');return;}
-  showDetails('The evidence behind this result',`<p>${esc(study.source || 'File displayed in the selected VISTA conversation.')}</p><h3>Interpretation limits</h3><ul>${(study.caveats || []).map(c=>`<li>${esc(c)}</li>`).join('')}</ul><h3>Provenance</h3><pre>${esc(JSON.stringify(study.provenance,null,2))}</pre><h3>Original artifacts</h3>${(study.downloads || []).map(f=>`<p><a href="${esc(f.url)}" download>${esc(f.label)} ↗</a></p>`).join('')}`);
+  showDetails('The evidence behind this result',`<p>${esc(study.source || 'File displayed in the selected VISTA conversation.')}</p><h3>Selected-site metrics</h3><p>${esc(study.sites[state.siteIndex].name)} (${esc(study.sites[state.siteIndex].id)})</p><div class="metrics-detail">${$('#result-stats').innerHTML}</div><h3>Interpretation limits</h3><ul>${(study.caveats || []).map(c=>`<li>${esc(c)}</li>`).join('')}</ul><h3>Provenance</h3><pre>${esc(JSON.stringify(study.provenance,null,2))}</pre><h3>Original artifacts</h3>${(study.downloads || []).map(f=>`<p><a href="${esc(f.url)}" download>${esc(f.label)} ↗</a></p>`).join('')}`);
 }
 function recordedAnswer(prompt) { recordedProjectAnswer(prompt); }
 async function playback() {
@@ -563,7 +566,7 @@ async function init() {
     const [historical,gefs,geo,config,network,workflow,prompts]=await Promise.all([api('/data/demo.json'),api('/data/pilot.json'),api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/workflow.json'),api('/data/prompts.json')]);
     state.studies={historical,gefs};state.geo=geo;state.config=config;state.network=network;state.workflow=workflow;state.prompts=prompts.prompts;
     renderPipeline();renderPromptLibrary();renderSkills();
-    selectStudy();$('#mode-recorded').setAttribute('aria-pressed','true');$('#mode-live').setAttribute('aria-pressed','false');
+    selectStudy();document.body.dataset.mode='recorded';$('#mode-recorded').setAttribute('aria-pressed','true');$('#mode-live').setAttribute('aria-pressed','false');
     refreshConnection();
   }catch(error){addMessage('system',`The app could not load its included files: ${error.message}. Start it using the launcher rather than opening index.html directly.`,{error:true});}
 }
