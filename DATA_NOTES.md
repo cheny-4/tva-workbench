@@ -1,35 +1,27 @@
-# Recorded study assets
+# Study locations and generated results
 
-The bundled assets are recorded extracts and an inventory for a local TVA demonstration. No model was executed while preparing them. They do not include checkpoint files, full training datasets, raw six-hour source files, credentials, or absolute personal filesystem paths.
+## Catalog
 
-## JSON interface
+The study catalog contains 54 named locations: the original 52 reservoir/gage references from the supplied TVA flow-network material, plus Wolf Creek and Dale Hollow. The 12 headwater reservoirs are designated from Sean's project list supplied by the user: Norris, Douglas, South Holston, Watauga, Fontana, Blue Ridge, Normandy, Tims Ford, Chatuge, Nottely, Wolf Creek and Dale Hollow.
 
-- `public/data/demo.json`: the complete 52-site ELF01–ELF52 network, using the selected epoch-19 `total_runoff` checkpoint. Each site has 26 calendar positions; 1,233 saved eligible paired rows are available across 51 sites. Missing eligible rows remain explicitly null. Nickajack (`ELF46`) has no saved eligible test predictions in this selected model run and has no plotted values or accuracy metrics.
-- `public/data/demo-surface.json`: the matching saved cases using the selected epoch-20 `surface_runoff_static8` checkpoint. This model uses surface runoff, not surface-plus-subsurface runoff.
-- `public/data/pilot.json`: two saved weekly cases per site from the completed GEFSv12 retrospective control-member pilot. It uses the total-runoff model only.
-- `public/data/geo.json`: a GeoJSON FeatureCollection with 43 simplified forcing regions and a separate `sites` array containing the 52 site IDs and their source-region centroid anchors.
-- `public/data/network.json`: a 52-site inventory of the user-supplied `All basin ELFs` files, with human site names, source file names, SHA256 values, source units/interval, header ranges, valid-record ranges and missing-record counts. It also links the supplied original location map and schematic.
-- `public/data/network-validation.json`: checks of site coverage, paired-record counts, missing positions and displayed per-site totals.
-- `public/data/reference/elf_map.jpg` and `schematic.gif`: unmodified original source images for viewing the full river-network context. These historical references also show nodes 53 and 54; no corresponding source files or model outputs are bundled for those two nodes.
+ELF means **Estimated Local Flow**. It names a reference quantity, rather than a location type. Original source/model IDs are retained internally where needed to match real artifacts. The interface presents location names and the headwater grouping. The catalog is study scope, not a statement of operator/ownership or supported model coverage.
 
-Each study JSON has `title`, `subtitle`, `mode`, `model`, `modelLabel`, `units`, `valueLabel`, `period`, `sites`, `provenance`, `caveats`, `steps`, and `downloads`. Each site contains `series` rows with `date` (week start), `end`, `predicted`, and `observed` values. Those chart values are **million cubic metres per week**. Downloaded CSVs retain the original **cubic metres per week**. The conversion is division by 1,000,000 only.
+`public/data/network.json` defines the study catalog; `geo.json` contains simplified coverage geometry and reference coordinates. The original reference diagrams in `public/data/reference/` retain their source labels. Their numbered nodes are source diagram identifiers, not newly inferred support or connectivity.
 
-The historical window has week starts from 4 January through 28 June 2010; the final week ends 4 July. Not every site has 26 eligible prediction pairs. The associated metrics and volume totals use only the available saved eligible pairs for that site within this window. Missing weeks are not zero and are not interpolated. The metrics must not be described as complete test-set or general forecast performance.
+## Geography
 
-ELF means **Estimated Local Flows**, as identified in the supplied source material. It remains each site's reference flow quantity, potentially local, incremental, or allocated. It is not universally total upstream inflow; do not sum outputs across overlapping sites. The raw source files use six-hourly streamflow in **CFS** and identify `-999` as missing. File header ranges begin in 1902, but valid records differ by site; the header range is not a promise of uninterrupted observations.
+The original 52 location anchors are forcing-region reference points from 43 reconstructed regions. They are not verified dam or streamgage outlet coordinates, and some share a reference point. The polygons are a simplified USGS-derived reconstruction; scientific aggregation must use the original model geometry.
 
-## Map interpretation
+Wolf Creek is represented by the [USGS Lake Cumberland near Jamestown station, 03413500](https://waterdata.usgs.gov/monitoring-location/USGS-03413500/statistics/). Dale Hollow uses the [USGS Dale Hollow Lake near Celina station, 03416500](https://waterdata.usgs.gov/monitoring-location/USGS-03416500/statistics/). These are reservoir reference points. No forcing polygon, model ID or prediction support is fabricated for either addition.
 
-Map markers are **forcing-region centroids**, not reservoir, dam, or gauge outlet coordinates. Sites sharing a forcing region can share a marker. Boundaries are a USGS-derived reconstruction, not original TVA GIS. The display geometry is simplified at 0.006 degrees and rounded to five decimal places; scientific aggregation must use the original frozen geometry. `geo.json` contains a source SHA256 and these qualifications. The original schematic is provided as an image; no machine-readable routing graph or numerical directed connectivity was inferred from it.
+The map is a study-coverage overview. It does not infer routing links, exact dam positions, watershed membership for the new locations, or operational control from the source schematic.
 
-## Provenance and downloads
+## Live data and storage
 
-`public/data/recorded/` holds the paired prediction CSVs, sanitized provenance JSON, and plain-text summaries. SHA256 values identify the exact saved predictions and selected model checkpoint. The historical sources are the active frozen-model run directories named in `models.json`, not the older reference-model artifacts.
+The current package has no bundled recorded predictions, historical evaluation windows or example forcing inputs. Prior versions preserve those assets in Git history.
 
-## Prepared inputs
+The Results Library reads saved files from the selected VISTA project's output directory through the scoped local adapter. VISTA retains those files. Input uploads remain separate and are available through chat attachments. Figures, tables and reports appear when the agent writes them as output files. A displayed-file list belongs to its conversation; the library browses outputs across the project.
 
-`public/data/inputs/` provides the repository's small Norris/Normandy historical CSV/metadata examples for the two distinct model families. These are prepared physical-unit inputs, with twelve weeks of prior context. They are separate from the 26-week recorded chart sample and will not reproduce that entire chart. Each example yields eight target-window predictions in the current model package. They contain no observed ELF targets. A browser download alone does not place these files in a VISTA sandbox; the live workflow must upload them or use the installed skill's packaged defaults.
+Recognized prediction CSVs require a location identifier, a week start and an explicit `predicted_volume_m3` column. Plot conversion divides cubic metres by 1,000,000. Missing values remain missing and absent calendar weeks create gaps. These files describe their own quantities; local/incremental/allocated ELF volumes must not automatically be described as total upstream inflow or summed across overlapping locations.
 
-## Retrospective GEFS limitations
-
-The pilot has one archived issue, one control member, two sites and two weeks. GEFSv12 Phase 2 initializes at 03 UTC despite the nominal 00 UTC archive label; its first three hours include a reanalysis correction. Actual operational publication latency is unverified. The pilot establishes pipeline execution, not general forecast skill. Norris's close two-week total includes offsetting weekly errors.
+A displayed artifact or completed agent turn does not independently verify its scientific provenance or the completion of a compute job. Original files remain downloadable for inspection.

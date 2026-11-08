@@ -1,14 +1,13 @@
 {
-  "version": "0.2.0",
+  "version": "0.4.0",
   "title": "TVA water–energy workflow",
-  "summary": "HEADWATER forecasts feed high-resolution downscaling, Yang’s LSTM water-availability model, and Georgia Tech’s economic assessment. VISTA coordinates the model handoffs and records the evidence.",
+  "summary": "HEADWATER forecasts feed high-resolution downscaling, the LSTM water-availability model, and economic assessment. VISTA coordinates model handoffs and saves generated evidence in the project.",
   "stages": [
     {
       "id": "headwater",
       "number": 1,
       "title": "HEADWATER prediction",
       "shortTitle": "HEADWATER",
-      "owner": "HEADWATER team",
       "status": "planned",
       "statusLabel": "Handoff planned",
       "description": "Provide forecast precipitation, air temperature and runoff for the TVA region. Preserve forecast timing and ensemble information through the workflow.",
@@ -43,7 +42,6 @@
       "number": 2,
       "title": "Reconstruction & downscaling",
       "shortTitle": "Downscaling",
-      "owner": "Downscaling team",
       "status": "planned",
       "statusLabel": "Integration planned",
       "description": "Reconstruct physical scenarios from the forecast maps and historical references, then downscale regional information for the TVA domains.",
@@ -80,10 +78,9 @@
       "number": 3,
       "title": "LSTM water availability",
       "shortTitle": "Water availability",
-      "owner": "Yang Chen / ORNL",
-      "status": "recorded_available",
-      "statusLabel": "Recorded model results",
-      "description": "Use Yang’s saved LSTM model to estimate weekly TVA site water availability from prepared basin forcing. The app’s recorded examples expose predictions, reference values and provenance.",
+      "status": "skill_required",
+      "statusLabel": "Connect project skill",
+      "description": "Estimate weekly site water availability from prepared basin forcing using the saved LSTM model. A live plan verifies the input contract, model mapping and runtime before execution.",
       "input": [
         "Prepared basin-week precipitation, temperature and runoff",
         "Static basin attributes required by the chosen model",
@@ -91,11 +88,11 @@
         "Matched input metadata and frozen checkpoint"
       ],
       "output": [
-        "Weekly site ELF / inflow-reference predictions",
+        "Weekly site water-availability predictions with quantity definitions",
         "Prediction CSV and model provenance",
         "Input-quality flags and a run summary"
       ],
-      "targetResolution": "TVA ELF sites / weekly outputs",
+      "targetResolution": "Mapped study locations / weekly outputs",
       "sourceRefs": [
         {
           "kind": "user",
@@ -106,7 +103,7 @@
           "path": "repos/tva-weekly-inflow/README.md"
         }
       ],
-      "integrationNote": "ELF means Estimated Local Flow. Site quantities can be local, incremental or allocated flows, so interpret each site’s reference definition before deriving plant inflow or aggregating across sites. A loaded VISTA skill and a verified runtime are separate from recorded-result availability.",
+      "integrationNote": "Confirm each location’s model identifier, forcing inputs and quantity definition before inference. Estimated Local Flow is a reference quantity, not a site class or universally total upstream inflow. Wolf Creek and Dale Hollow are in the study selection; their model mapping and forcing inputs still need to be established. A loaded skill is not proof of a verified runtime.",
       "skillKeywords": [
         "tva-weekly-inflow"
       ]
@@ -115,8 +112,7 @@
       "id": "economics",
       "number": 4,
       "title": "Economic assessment",
-      "shortTitle": "Georgia Tech economics",
-      "owner": "Georgia Tech",
+      "shortTitle": "Economics",
       "status": "planned",
       "statusLabel": "Partner handoff planned",
       "description": "Deliver plant-level water records to Georgia Tech for assessment of generation, cost and risk, using agreed scientific and economic assumptions.",
@@ -154,7 +150,6 @@
     {
       "id": "triton",
       "title": "TRITON hydraulics",
-      "owner": "TRITON team",
       "status": "planned",
       "statusLabel": "Optional integration",
       "description": "Add hydraulic detail near plants where the economic handoff needs depth, stage or section discharge.",
@@ -179,7 +174,6 @@
     {
       "id": "rithyms",
       "title": "RiTHyMs water temperature",
-      "owner": "Water-temperature modeling team",
       "status": "planned",
       "statusLabel": "Optional integration",
       "description": "Provide river temperature near plants when Georgia Tech’s assessment requires thermal effects.",
@@ -239,9 +233,8 @@
     }
   ],
   "disclosures": [
-    "Workflow cards describe the project design. Installed skills and their count come from the selected live VISTA project.",
-    "The included LSTM results are recorded historical examples. HEADWATER, downscaling and economic assessment are not claimed as live executions.",
-    "The TRITON discussion permits a first demonstration with clearly labeled selected historical inputs and synthetic scenario assumptions.",
-    "The earlier discussion names ORBIT/LANDSIM under prediction and RiTHyMs/RiverWare under impact models. The current four-stage spine follows the user’s later HEADWATER/LSTM/Georgia Tech clarification."
+    "Workflow cards describe the project design. Installed skills and their count come from the selected VISTA project.",
+    "HEADWATER, downscaling and economic integrations retain their planned status until verified. Displayed workflow stages do not run models by themselves.",
+    "The headwater reservoir selection defines study context. Actual model coverage and compatible inputs must be verified before execution."
   ]
 }

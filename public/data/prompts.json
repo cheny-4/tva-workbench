@@ -1,74 +1,73 @@
 {
-  "version": "0.2.0",
-  "notice": "Click a starter prompt to explore its recorded guide or prepare a live VISTA request. Live execution uses only skills loaded into this project.",
+  "version": "0.4.0",
+  "notice": "A starter prepares an editable request. Review it and send it to the connected VISTA project.",
   "prompts": [
     {
       "id": "end-to-end",
       "category": "Overview",
-      "title": "Explain the full TVA workflow",
-      "description": "HEADWATER through Georgia Tech, with each handoff in view.",
-      "livePrompt": "Explain our TVA water–energy workflow across the whole ELF network: HEADWATER precipitation, air-temperature and runoff forecasts; physical reconstruction and high-resolution downscaling; Yang’s LSTM water-availability model; and Georgia Tech economic assessment. Describe each team’s inputs, outputs and current integration status. Explain the optional TRITON hydraulics and RiTHyMs water-temperature paths when plant analysis requires them. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "The project has four main stages.\n\n1. HEADWATER supplies precipitation, air-temperature and runoff forecasts for the TVA region. The TRITON discussion describes a 25 km residual/probability-map handoff.\n2. Reconstruction and downscaling use forecast maps and historical references to form physical scenarios, with 4 km intermediate and 1 km target grids.\n3. Yang’s LSTM estimates weekly water availability at TVA ELF sites from prepared basin forcing and static attributes. Recorded model results are available in this workspace.\n4. Georgia Tech receives plant water records and combines them with plant/economic data to assess generation, cost and risk. Those metrics and the partner interface still need agreement.\n\nTRITON can add hydraulic detail, and RiTHyMs can supply water temperature near plants. These are additional paths where the plant handoff needs them. VISTA orchestrates scientific tools and records their evidence. The workflow diagram describes the project design; the Skills view shows what is actually loaded."
+      "title": "Plan the full TVA workflow",
+      "description": "Review the four science stages and their handoffs.",
+      "livePrompt": "Prepare a read-only plan for our TVA water–energy workflow: HEADWATER precipitation, air-temperature and runoff forecasts; physical reconstruction and high-resolution downscaling; LSTM water availability; and economic assessment. Describe each stage’s inputs, outputs and verified integration status. Include the optional TRITON and RiTHyMs paths only when the plant handoff requires them. Identify missing skills, files, model mappings and runtime prerequisites. For approved tasks, plan to save generated figures, tables, reports and provenance in the VISTA project outputs and display the result files. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "network",
       "category": "TVA network",
-      "title": "Explore all 52 TVA ELF sites",
-      "description": "Study the full network and understand the reference quantities.",
-      "livePrompt": "Review the TVA network for ELF01 through ELF52 using the supplied ELF site inventory and network reference maps. Explain the site coverage and distinguish Estimated Local Flow reference quantities from total upstream inflow. Identify which selected sites have prepared inputs and recorded or live predictions, and what remains to run the whole network. Do not sum overlapping or allocated site flows. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "The TVA network covers ELF01 through ELF52. ELF stands for Estimated Local Flow. Use the full-network map, site selector and original map/schematic references to inspect the site context.\n\nA site’s ELF reference may represent local, incremental or allocated flow. Confirm that definition before calling the quantity plant inflow or adding it to another site. The LSTM produces site-specific predictions; overlapping reference quantities should not be summed into a network total. Recorded examples and any live result must retain their own site IDs, dates and provenance."
+      "title": "Explore reservoirs and gages",
+      "description": "Distinguish the 12 headwater reservoirs from other study locations.",
+      "livePrompt": "Review the TVA study network of reservoirs and gages. Prioritize the requested headwater reservoirs: Norris, Douglas, South Holston, Watauga, Fontana, Blue Ridge, Normandy, Tims Ford, Chatuge, Nottely, Wolf Creek, Dale Hollow. Distinguish those 12 reservoirs from the other study locations. Treat Estimated Local Flow as a reference quantity, not a site type. Verify available location mappings, quantity definitions, forcing coverage and runnable model support. Wolf Creek and Dale Hollow are included study locations, but their model-site mappings and inputs are not supplied; do not claim they are ready for inference. Do not sum overlapping or allocated flows. Use read-only inspection and planning. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "skills",
       "category": "Capabilities",
       "title": "Show the project’s loaded skills",
-      "description": "See the skill count and what each skill can do.",
-      "livePrompt": "List the skills currently loaded into this TVA project, report the total count, and explain each skill’s scientific purpose and available jobs. Map the verified capabilities onto HEADWATER, downscaling, LSTM water availability, optional TRITON/RiTHyMs and Georgia Tech assessment. Clearly distinguish a project workflow stage from an installed runnable skill. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "Open Skills to see the selected VISTA project’s loaded skills and their current count when VISTA is connected. That list comes from VISTA, rather than from the workflow illustration.\n\nThe four main workflow stages show the intended scientific handoffs. A stage can be part of the project design before its executable skill is installed. LSTM recorded-result availability, an installed inference skill and a verified cluster runtime are separate facts."
+      "description": "Inspect the live count, available tools and model coverage.",
+      "livePrompt": "List the skills currently loaded into this TVA project, report their total count, and explain the available scientific tools and jobs. Map verified capabilities onto HEADWATER, downscaling, LSTM water availability, optional TRITON/RiTHyMs and economic assessment. Distinguish a science-stage definition from an installed runnable skill. Use read-only inspection; identify missing prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "headwater",
       "category": "Forecast",
       "stageId": "headwater",
       "title": "Inspect the HEADWATER handoff",
-      "description": "Variables, forecast timing, ensemble members and units.",
-      "livePrompt": "Prepare a HEADWATER-to-TVA forecast handoff check for precipitation, air temperature and runoff. Inspect any available files for grid, coordinate reference, units, forecast issue time, valid time and ensemble member IDs. The discussion describes 25 km residual/probability maps; explain how historical reference maps would reconstruct physical scenarios and identify any unresolved transformation. Report only properties supported by the files. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "The HEADWATER handoff supplies precipitation, air temperature and runoff. The TRITON discussion labels the incoming fields as residual/probability maps at 25 km. Downstream models need physical scenarios, so the handoff must specify the historical reference used for reconstruction.\n\nRetain grid/coordinate metadata, variable definitions, units, forecast issue time, valid time and member IDs. The included recorded LSTM examples do not demonstrate a live HEADWATER forecast ingestion."
+      "description": "Check variables, forecast timing, ensemble members and units.",
+      "livePrompt": "Prepare a read-only HEADWATER handoff check for precipitation, air temperature and runoff for the headwater reservoirs. Inspect available files for grid, coordinate reference, physical units, forecast issue time, valid time and ensemble member IDs. The project discussion describes residual/probability maps; establish the physical-variable reconstruction and reference contract before downstream use. Report only properties supported by the files and identify missing prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "downscaling",
       "category": "High resolution",
       "stageId": "downscaling",
       "title": "Plan high-resolution downscaling",
-      "description": "Follow the regional fields to the 1 km target.",
-      "livePrompt": "Prepare the TVA reconstruction and downscaling plan using HEADWATER forecast maps and historical reference maps. The project slides name a 4 km intermediate grid and 1 km target. Identify the available downscaling implementation or skill, its input/output grids, precipitation and temperature fields, runoff treatment, physical units and time/member metadata. Explain aggregation from high-resolution grids into the forcing regions required by Yang’s LSTM. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "Reconstruction combines the forecast maps with historical reference maps to obtain physical scenarios. The project discussion then targets high-resolution TVA fields, with 4 km intermediate and 1 km target grids.\n\nBefore the LSTM stage, those gridded fields must satisfy the model’s basin-week forcing contract. Preserve the variable definitions, units and time/member identities during downscaling and spatial aggregation. The target grid in the slides is a design target; it does not establish that a downscaling skill is installed."
+      "description": "Follow the regional fields toward the 1 km target.",
+      "livePrompt": "Prepare a read-only reconstruction and downscaling plan from HEADWATER forecast maps to physical precipitation, air-temperature and runoff fields. The project discussion names a 4 km intermediate grid and 1 km target. Identify the actual available implementation or skill, grids, units and time/member metadata. Explain aggregation into the forcing regions required by the LSTM. Report implementation and input gaps rather than assuming the target is runnable. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "lstm",
       "category": "Water availability",
       "stageId": "water-availability",
-      "title": "Prepare the LSTM inference plan",
-      "description": "Validate the selected sites and saved-model inputs first.",
-      "livePrompt": "Prepare an inference plan for Yang’s saved TVA LSTM across the selected ELF sites, with the whole ELF01–ELF52 network as the intended study scope. Use the loaded TVA inference skill. Identify the selected model, matched basin-week CSV/metadata, twelve preceding weeks plus each target week, static attributes, frozen checkpoint, Python environment and compatible compute resource. Explain output units and each site’s ELF meaning. Show the exact proposed job settings and expected artifacts, then wait for my explicit confirmation before submission. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "Yang’s LSTM uses prepared basin-week precipitation, temperature and runoff, plus the static attributes required by the chosen model. A target week uses its forcing together with twelve preceding weeks of history. This is a thirteen-week input window, rather than a thirteen-week forecast lead.\n\nThe existing model outputs weekly ELF reference quantities and can retain predictions, provenance and input-quality flags. Select sites in the network/evidence views to inspect the recorded sample. A live plan must verify the loaded skill, matched CSV/metadata/model, frozen checkpoint and accessible compute environment before submission."
+      "title": "Prepare an LSTM inference plan",
+      "description": "Verify the selected location, model mapping and inputs first.",
+      "livePrompt": "Prepare a read-only inference plan for the saved TVA LSTM at the selected study location, prioritizing the requested headwater reservoirs. Identify the loaded skill, verified model-site mapping, matched forcing CSV/metadata, required preceding input weeks, static attributes, checkpoint, environment and compatible compute resource. Explain output units and the site reference quantity. Verify every requested location’s input coverage; do not assume the study list is model coverage. Wolf Creek and Dale Hollow require new model mappings and inputs before inference. Show exact proposed job settings and expected saved project-output artifacts. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "plant-interface",
-      "category": "Plant impacts",
-      "title": "Explain hydraulics and water temperature",
-      "description": "How TRITON and RiTHyMs support plant records.",
-      "livePrompt": "Describe the optional plant-impact paths in TRITON_discussion: TRITON for hydraulics and RiTHyMs for river temperature. Check which matching skills are loaded. Explain terrain, roughness, upstream Q/runoff and boundary conditions for TRITON, and the extraction needed to turn H and QX/QY into depth, stage and section discharge. Explain meteorology/flow/attributes for RiTHyMs, and keep the later reservoir/CE-QUAL-W2 path separate. Relate the outputs to Yang’s LSTM and the plant data interface. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "The plant handoff may need more than a weekly water-availability quantity. TRITON can add hydraulic information using runoff or upstream discharge, terrain, roughness and initial/boundary conditions. Its H and QX/QY outputs require appropriate extraction to report depth, stage and section discharge.\n\nRiTHyMs uses meteorology, suitable flow and site/reach attributes to estimate river water temperature in °C. The discussion leaves reservoir setup and a CE-QUAL-W2 reservoir/release-temperature path for later work. These optional models complement the LSTM water-availability stage. The slides explicitly leave TRITON TVA readiness, routing needs and an agentic skill unresolved."
+      "category": "Plant handoff",
+      "title": "Check the plant data interface",
+      "description": "Align water quantity, temperature, timestamps and provenance.",
+      "livePrompt": "Review the available plant handoff files using read-only tools. Check site-to-plant mapping, water quantity and its definition, units, water temperature when needed, time aggregation, forecast issue/member IDs, quality flags and provenance. Identify whether TRITON hydraulics or RiTHyMs water temperature is required and whether the corresponding capability exists. Propose a consistent handoff schema from verified data. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     },
     {
       "id": "economics",
       "category": "Economic assessment",
       "stageId": "economics",
-      "title": "Prepare Georgia Tech’s data handoff",
-      "description": "Plant water records, assumptions and economic metrics.",
-      "livePrompt": "Prepare the Georgia Tech economic-assessment handoff for the TVA case. Draft a data contract using plant/site mapping, water quantity with its physical definition and units, water temperature when required, daily/weekly timing, forecast issue/member IDs, quality flags and provenance, plus optional hydraulic depth/stage/section discharge. Identify partner-supplied plant/economic inputs and which generation, cost and risk metrics still require agreement. Do not infer economic impacts from an LSTM prediction without the partner model and assumptions. Use read-only inspection and planning only. Identify missing skills, files or runtime prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs.",
-      "recordedAnswer": "Georgia Tech is responsible for economic assessment. The TRITON discussion sends daily/weekly plant water records, site/plant IDs, units and quality flags to the partner, with water temperature and optional hydraulics when the assessment needs them.\n\nGeorgia Tech combines those records with plant/economic data to evaluate generation, cost and risk. The metrics still need agreement. The handoff should preserve forecast timing/member IDs and scientific provenance, and confirm how each ELF site quantity maps to a plant. The workspace does not create economic estimates from the recorded LSTM chart alone."
+      "title": "Prepare the economic assessment",
+      "description": "Clarify generation, cost and risk inputs and assumptions.",
+      "livePrompt": "Prepare a read-only economic-assessment handoff plan for Georgia Tech using verified plant water records. Identify the plant/economic data, model/interface and assumptions needed for generation, cost and risk metrics. Separate available files from missing partner inputs. Do not infer economic impacts from an LSTM output alone. Specify the figures, result tables and provenance that an approved assessment should save in project outputs. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
+    },
+    {
+      "id": "results",
+      "category": "Results",
+      "title": "Organize the generated results",
+      "description": "Collect figures, tables and reports in the Results Library.",
+      "livePrompt": "Review this conversation’s actual generated files and the selected VISTA project outputs. Identify available figures, prediction tables, reports and provenance. Save a concise result summary as a project output and use display_file for the resulting summary and relevant figures/tables so they appear in this workspace and Results Library. Retain original file names, scientific units and provenance, distinguish pending jobs from completed results, and identify missing artifacts. Do not manufacture a result when a file or completed run is absent. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
     }
   ]
 }

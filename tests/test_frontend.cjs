@@ -41,19 +41,34 @@ test('missing totals cannot be exported as zero volume', () => {
   assert.equal(context.parse.format(''),'—');
   assert.equal(context.parse.format(0),'0.0');
 });
-test('full-workflow requests take priority over individual stage words', () => {
-  vm.runInContext("usePrompt = id => { globalThis.lastRoute=id; }; state.prompts=[];",context);
-  vm.runInContext("recordedProjectAnswer('Explain the full workflow including HEADWATER and economics');",context);
-  assert.equal(context.lastRoute,'end-to-end');
-  vm.runInContext("recordedProjectAnswer('Explain LSTM water availability prerequisites');",context);
-  assert.equal(context.lastRoute,'lstm');
+test('starter prompts prepare a request without sending it or claiming a result', () => {
+  const prompt={id:'lstm',livePrompt:'Verify the model mapping before proposing a job.'};
+  const field={value:'',focus(){this.focused=true;}};
+  const form={scrollIntoView(){}};
+  const controls={'#prompt':field,'#chat-form':form};
+  context.document={querySelector:selector=>controls[selector]};
+  context.promptFixture=prompt;
+  vm.runInContext("state.busy=false; state.prompts=[promptFixture]; state.network={sites:[{id:'WOLF_CREEK',name:'Wolf Creek',headwater:true,modelSiteId:null}]}; state.focusSiteId='WOLF_CREEK'; globalThis.sent=0; sendLive=()=>{sent++;}; switchView=view=>{globalThis.openedView=view;}; toast=()=>{}; usePrompt('lstm');",context);
+  assert.equal(context.openedView,'workspace');
+  assert.equal(context.sent,0);
+  assert.equal(field.focused,true);
+  assert.match(field.value,/Wolf Creek \(headwater reservoir\)/);
+  assert.match(field.value,/No model-site mapping is supplied/);
+  assert.match(field.value,/Verify the model mapping/);
+  const before=field.value;
+  vm.runInContext("state.busy=true; usePrompt('lstm');",context);
+  assert.equal(field.value,before);
 });
-test('workflow and prompt catalogs distinguish science stages from loaded skills', () => {
+test('science stages retain truthful integration status and live prompts require job review', () => {
   const workflow=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/workflow.json')));
   const prompts=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/prompts.json'))).prompts;
   assert.deepEqual(workflow.stages.map(s=>s.id),['headwater','downscaling','water-availability','economics']);
-  assert.equal(prompts.length,8);
-  assert.equal(new Set(prompts.map(p=>p.id)).size,8);
-  assert.ok(prompts.every(p=>p.livePrompt.includes('Do not submit jobs') && p.recordedAnswer));
   assert.equal(workflow.stages.filter(s=>s.status==='planned').length,3);
+  assert.ok(workflow.stages.every(s=>!Object.hasOwn(s,'owner') && !/recorded/i.test(s.statusLabel)));
+  assert.equal(new Set(prompts.map(p=>p.id)).size,prompts.length);
+  assert.ok(prompts.every(p=>p.livePrompt.includes('Do not submit jobs') && p.livePrompt.includes('explicit confirmation') && !Object.hasOwn(p,'recordedAnswer')));
+  assert.ok(prompts.some(p=>p.id==='results' && p.livePrompt.includes('project output')));
+  const network=prompts.find(p=>p.id==='network').livePrompt;
+  assert.match(network,/Wolf Creek and Dale Hollow/);
+  assert.match(network,/not supplied/);
 });

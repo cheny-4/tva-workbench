@@ -17,7 +17,7 @@ The wrapper binds only to `127.0.0.1`. It is intended for presenting from the sa
 
 ## Browser contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.3.0"}`. Lightweight instance identification.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.4.0"}`. Lightweight instance identification.
 - `GET /api/config`: `{backend_url,project}`.
 - `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
 - `GET /api/status`: `{app,version,backend_url,project,connected,project_found,skills,resources,detail}`. Cached for 15 seconds; `?fresh=1` bypasses the wrapper cache for an explicit connection refresh. VISTA still owns its facility-status cache. `connected` means VISTA responded; `project_found` means its selected project exists. `resources` contains `{id,name,state,message,checked_at,planned}` for Odo, Frontier, Lux and planned CCSI. Facility readiness is distinct from TVA skill/runtime validation.
@@ -53,8 +53,12 @@ HTTP requests and file uploads have a 64 MiB limit. Upstream request inactivity 
 
 CCSI is a display placeholder for a future resource adapter. Adding its name to the interface does not register it in VISTA, authenticate to the node, or make existing Frontier-only scripts compatible with it. Similarly, Odo and Lux resource availability does not imply the TVA inference skill supports those clusters.
 
-The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.3.0.
+The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.4.0.
 
 ## Verification
 
 Run `python3 -m unittest discover -s tests -v`. The 17 integration checks use an in-process fake VISTA server. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. A separate read-only check confirmed two skills loaded in the local `Genesis_Water4Energy` project, including `tva-weekly-inflow-path2` with an `infer` job.
+
+## Results Library
+
+The library uses the selected project's existing `GET /outputs` listing and scoped individual output-file downloads. VISTA stores output files in its project output directory; the wrapper does not create a second file store. Input uploads are excluded from this library. Safe image previews use the same file endpoint with `?preview=true`; original files remain downloadable. The library refreshes after agent work and through its refresh control.

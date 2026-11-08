@@ -4,11 +4,11 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const state = {
-  mode: 'recorded', view: 'workspace', config: {project: 'Genesis_Water4Energy'},
-  status: null, studies: {}, study: null, geo: null, siteIndex: 0,
+  mode: 'live', view: 'workspace', config: {project: 'Genesis_Water4Energy'},
+  status: null, geo: null, siteIndex: 0,
   busy: false, sessionId: null, history: [], events: [], lastSeq: 0,
-  stream: null, pending: null, liveFiles: [], liveStudy: null, playback: 0,
-  network: null, workflow: null, prompts: [], skills: null, focusSiteId: 'ELF01', selectedStage: null, promptCategory: 'All',
+  stream: null, pending: null, liveFiles: [], liveStudy: null,
+  network: null, workflow: null, prompts: [], skills: null, focusSiteId: 'ELF13', selectedStage: null, promptCategory: 'All',
 };
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
@@ -45,14 +45,12 @@ function download(name, text, type='text/plain') {
 }
 function setBusy(value,label) {
   state.busy=value;
-  $('.agent-panel').classList.toggle('is-working',value);
-  $('#send-button').hidden=value && state.mode==='live';
-  $('#stop-button').hidden=!value || state.mode!=='live';
+  $('#send-button').hidden=value;
+  $('#stop-button').hidden=!value;
   $('#send-button').disabled=value; $('#workflow-button').disabled=value;
   $('#new-chat').disabled=value; $('#history-new').disabled=value;
-  $('#scenario').disabled=value; $('#resource').disabled=value; $('#focus-site').disabled=value;
-  $('#mode-live').disabled=value; $('#mode-recorded').disabled=value;
-  $('#agent-state').textContent=label || (value ? 'Working…' : state.mode==='live' ? 'VISTA agent' : 'Ready to explore');
+  $('#resource').disabled=value; $('#focus-site').disabled=value;
+  $('#agent-state').textContent=label || (value ? 'Working…' : state.status?.project_found ? 'VISTA agent' : 'Connect VISTA');
   $('#agent-state').classList.toggle('working',value);
 }
 function setStage(index,complete=false) {
@@ -64,7 +62,6 @@ function setStage(index,complete=false) {
 function addActivity(title,detail='',kind='info',raw=null) {
   const item={time:new Date().toLocaleTimeString('en-US',{hour12:false}),title,detail,kind};
   state.events.push(item); if(state.events.length>250) state.events.shift();
-  $('.activity-drawer').classList.add('has-activity');
   const row=document.createElement('div'); row.className='activity-event';
   row.innerHTML=`<time>${esc(item.time)}</time><div><strong>${esc(title)}</strong>${detail?`<div>${esc(detail)}</div>`:''}${raw?`<details><summary>Event detail</summary><pre>${esc(JSON.stringify(raw,null,2).slice(0,12000))}</pre></details>`:''}</div>`;
   $('#activity-log').append(row);
@@ -74,7 +71,6 @@ function addActivity(title,detail='',kind='info',raw=null) {
 }
 function resetActivity() {
   state.events=[]; state.lastSeq=0; $('#activity-log').replaceChildren();
-  $('.activity-drawer').classList.remove('has-activity');
   $('#activity-count').textContent='0'; $('#activity-last').textContent='Events and tool calls appear here'; setStage(-1);
 }
 function formatText(text) {
@@ -88,46 +84,23 @@ function formatText(text) {
 function addMessage(role,text,options={}) {
   $('#chat-messages .welcome')?.remove();
   const el=document.createElement('div'); el.className=`message ${role}${options.error?' error':''}`;
-  const label=role==='agent' ? `<div class="message-label"><b>✳ ${state.mode==='recorded'?'RECORDED GUIDE':'TVA AGENT'}</b><span>${state.mode==='recorded'?'LOCAL EXAMPLE · NO MODEL CALL':'VIA VISTA'}</span></div>` : '';
+  const label=role==='agent' ? '<div class="message-label"><b>✳ TVA AGENT</b><span>VIA VISTA</span></div>' : '';
   el.innerHTML=`${label}<div class="message-body">${formatText(text)}</div>`;
   $('#chat-messages').append(el); scrollChat(); return el.querySelector('.message-body');
 }
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
-  const live=state.mode==='live';
-  $('#chat-messages').innerHTML=`<div class="welcome"><div class="welcome-symbol">✳</div><h3>${live?'Ask the TVA agent.':'Explore the TVA workflow.'}</h3><p>${live?'Choose a prompt above, or ask a question.':'Choose a prompt above to begin.'}</p></div>`;
-}
-async function switchMode(mode,restore=true) {
-  if(state.busy){toast('Finish or stop the current turn before switching modes.');return;}
-  state.mode=mode;document.body.dataset.mode=mode; state.liveStudy=null; state.liveFiles=[]; state.history=[];
-  $('#mode-recorded').classList.toggle('selected',mode==='recorded'); $('#mode-live').classList.toggle('selected',mode==='live');
-  $('#mode-recorded').setAttribute('aria-pressed',String(mode==='recorded')); $('#mode-live').setAttribute('aria-pressed',String(mode==='live'));
-  $('#composer-mode').textContent=mode==='recorded'?'RECORDED EXAMPLE':'LIVE VISTA';
-  $('#workflow-button span').textContent=mode==='recorded'?'Walk through recorded run':'Prepare live inference plan';
-  $('#mode-banner').classList.toggle('live',mode==='live');
-  $('#mode-banner>span:nth-child(2)').innerHTML=mode==='recorded' ? '<strong>Recorded LSTM results.</strong> Other model connections are planned.' : '<strong>Live VISTA.</strong> Review the agent’s plan before approving execution.';
-  $('#workflow-strip').innerHTML=(mode==='recorded'?['Prepare','Execute','Interpret']:['Agent turn','Tool activity','Artifacts']).map((label,i)=>`${i?'<i></i>':''}<div data-step="${i}"><span>0${i+1}</span>${label}</div>`).join('');
-  $('#mode-info').textContent=mode==='live'?'Connection details ↗':'About this demo ↗';
-  $('#resource').value='frontier';
-  $('#resource').querySelectorAll('option').forEach(o=>o.disabled= o.value==='ccsi' || (mode==='live' && o.value!=='frontier'));
-  $('#resource-note').textContent=mode==='recorded'?'Recorded results are independent of this selection.':'The current TVA inference skill targets Frontier. Odo and Lux need matching job definitions.';
-  $('#result-mode-label').textContent=mode==='recorded'?'Recorded result':'Live session artifacts';
-  $('#scenario-kind').textContent=mode==='live'?'CONTEXT ONLY':'HISTORICAL';
-  resetActivity(); showWelcome(); renderResults(); renderPromptLibrary(); renderSiteContext(); setBusy(false);
-  if(mode==='live') {
-    if(!state.status?.project_found) {addMessage('system','VISTA is not connected to the selected TVA project. Open VISTA, then check Connection settings. Recorded mode remains available.');return;}
-    state.sessionId=restore?readSessionId():null;
-    if(state.sessionId) await loadSession(state.sessionId,true);
-  }
+  const featured=['end-to-end','lstm','skills'].map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean);
+  $('#chat-messages').innerHTML=`<div class="welcome"><div class="welcome-symbol">✳</div><h3>One project.<br>A connected scientific workflow.</h3><p>Choose a study location and a starter prompt, or ask your own question. The agent uses the skills loaded into your TVA project.</p><div class="prompt-cards">${featured.map((p,i)=>`<button class="prompt-card" data-welcome-prompt="${esc(p.id)}"><span>0${i+1}</span>${esc(p.title)}${icon('arrow')}</button>`).join('')}</div></div>`;
+  $$('[data-welcome-prompt]').forEach(el=>el.addEventListener('click',()=>usePrompt(el.dataset.welcomePrompt)));
 }
 function switchView(view) {
   state.view=view;
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Demo',network:'TVA network',skills:'Skills',prompts:'Prompt library',history:'Conversations',files:'Project files',resources:'Compute resources'}[view];
+  $('#view-breadcrumb').textContent={workspace:'Workspace',network:'TVA network',skills:'Skills',prompts:'Prompt library',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
   if(view==='history') renderHistory(); if(view==='files') renderFiles(); if(view==='resources') renderResources();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();if(view==='prompts')renderPromptLibrary();
-  const more=$('.nav-more');if(more)more.open=['prompts','history','files','resources'].includes(view);
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -139,7 +112,7 @@ async function refreshConnection() {
     $('#connection-pill').classList.toggle('connected',ok);
     $('#connection-pill').innerHTML=`<i></i>${ok?'VISTA connected':state.status.connected?'Check project name':'VISTA offline'}`;
     $('#connection-pill').title=state.status.detail;
-    renderResources();await refreshSkills();
+    renderResources();await refreshSkills();await renderFiles();setBusy(state.busy);
     if($('#settings-dialog').open) $('#settings-status').textContent=state.status.detail;
   } catch(error) {$('#connection-pill').classList.remove('connected');$('#connection-pill').innerHTML='<i></i> Connection unavailable';}
 }
@@ -167,30 +140,22 @@ function renderMap() {
   drawNetworkMap('basin-map');
   if(state.view==='network')drawNetworkMap('network-map',1000,410);
 }
-function selectStudy() {
-  state.study=state.studies[$('#scenario').value] || state.studies.historical;
-  if(!state.study.sites.some(s=>s.id===state.focusSiteId))state.focusSiteId=state.study.sites[0].id;
-  state.siteIndex=Math.max(0,state.study.sites.findIndex(s=>s.id===state.focusSiteId));
-  $('#model-label').textContent=state.study.modelLabel;
-  $('#scenario-kind').textContent=state.mode==='live'?'CONTEXT ONLY':$('#scenario').value==='gefs'?'RETROSPECTIVE · 2 SITES':'HISTORICAL · NETWORK';
-  renderSiteContext();renderMap();renderResults();
-  if(state.mode==='recorded') {resetActivity();showWelcome();}
-}
-function currentStudy() { return state.mode==='recorded' ? state.study : state.liveStudy; }
+function currentStudy() { return state.liveStudy; }
 function renderResults() {
   const study=currentStudy();
-  $('#results-description').textContent=state.mode==='live' ? study?'Results displayed by the agent.':'Results appear here after collection.' : `${dateLabel(state.study.period.start,{year:'numeric'})} – ${dateLabel(state.study.period.end,{year:'numeric'})} · recorded historical evaluation`;
-  $('#results-title').textContent=study?`${study.sites[Math.min(state.siteIndex,study.sites.length-1)].name} · water availability`:'Water availability';
+  $('#results-panel').classList.toggle('has-live-study',!!study);
+  $('#results-panel').classList.toggle('has-live-artifacts',!!state.liveFiles.length);
+  $('#results-description').textContent=study?'Predictions from a file displayed by the agent in this conversation.':'Figures, data and other outputs appear when the agent displays them.';
   $('#chart-site-tabs').innerHTML='';$('#result-site').innerHTML='';$('#result-site').closest('.chart-site-picker').hidden=!study; $('#result-chart').innerHTML='';$('#result-stats').innerHTML='';
   $('.chart-legend').hidden=!study; $('#chart-axis-label').hidden=!study;
   $('.live-artifacts')?.remove();
   if(!study) {
-    $('#result-chart').innerHTML='<div class="live-result-empty">The live evidence workspace is ready.<br>Ask the agent to collect and display its output files. Recorded example results are available in Recorded mode.</div>';
-    $('#provenance-short').textContent='No live result loaded. Completion is based on VISTA events.';
+    $('#result-chart').innerHTML='<div class="live-result-empty">Your results workspace is ready.<br>Ask the agent to generate and display figures or data. Saved outputs are available in the Results Library.</div>';
+    $('#provenance-short').textContent='Waiting for agent-generated outputs.';
     renderLiveArtifacts(); return;
   }
   state.siteIndex=Math.min(state.siteIndex,study.sites.length-1);
-  $('#result-site').innerHTML=study.sites.map((s,i)=>`<option value="${i}" ${i===state.siteIndex?'selected':''}>${esc(s.id)} · ${esc(s.name)}</option>`).join('');
+  $('#result-site').innerHTML=study.sites.map((s,i)=>`<option value="${i}" ${i===state.siteIndex?'selected':''}>${esc(s.name)}</option>`).join('');
   $('#chart-site-tabs').hidden=study.sites.length>4;
   if(study.sites.length<=4){
     $('#chart-site-tabs').innerHTML=study.sites.map((s,i)=>`<button class="${i===state.siteIndex?'active':''}" data-site="${i}" aria-pressed="${i===state.siteIndex}">${esc(s.name)}</button>`).join('');
@@ -199,7 +164,7 @@ function renderResults() {
   const site=study.sites[state.siteIndex],rows=site.series;
   const hasObs=rows.some(r=>Number.isFinite(r.observed));
   $('.chart-legend span:last-child').hidden=!hasObs;
-  $('#chart-axis-label').textContent=`${study.valueLabel || 'Weekly ELF volume'} · ${study.units || 'million m³'} / WEEK`;
+  $('#chart-axis-label').textContent=`${study.valueLabel || 'Weekly predicted volume'} · ${study.units || 'million m³'} / WEEK`;
   const w=800,h=207,l=40,r=15,t=15,b=31;
   const vals=rows.flatMap(r=>[r.predicted,r.observed]).filter(Number.isFinite);
   const rawMax=Math.max(...vals,1)*1.13,step=niceStep(rawMax/4),maxY=Math.ceil(rawMax/step)*step;
@@ -214,36 +179,18 @@ function renderResults() {
   const allValid=rows.every((v,i)=>Number.isFinite(v.predicted) && (!i || dates[i]-dates[i-1]<=7.01*86400000));
   const area=allValid?`<path class="chart-area" d="${predicted}L${x(rows.length-1)},${h-b}L${x(0)},${h-b}Z"/>`:'';
   const points=rows.map((v,i)=>Number.isFinite(v.predicted)?`<circle class="data-point" cx="${x(i)}" cy="${y(v.predicted)}" r="${rows.length>5?2.5:4}"><title>${esc(site.name)} · ${esc(v.date)}\nPrediction: ${format(v.predicted,2)} million m³${Number.isFinite(v.observed)?`\nObserved: ${format(v.observed,2)} million m³`:''}</title></circle>`:'').join('');
-  $('#result-chart').innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(site.name)} weekly ELF volume. ${state.mode==='recorded'?'Recorded':'Live file'} model predictions${hasObs?' compared with observed values':''}, in million cubic metres per week.">${grid}${area}<path class="series-observed" d="${observed}"/><path class="series-predicted" d="${predicted}"/>${points}${labels}</svg>`;
-  const metrics=site.metrics || {};
+  $('#result-chart').innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(site.name)} weekly predicted volume. Agent file model predictions${hasObs?' compared with observed values':''}, in million cubic metres per week.">${grid}${area}<path class="series-observed" d="${observed}"/><path class="series-predicted" d="${predicted}"/>${points}${labels}</svg>`;
   const valid=rows.filter(r=>Number.isFinite(r.predicted));
-  $('#result-stats').innerHTML=`<div class="stat"><small>RECORDED WEEKS${state.mode==='live'?' / FILE':''}</small><strong>${valid.length}<span>weeks</span></strong></div>${Number.isFinite(metrics.nse)?`<div class="stat"><small>SAMPLE NSE</small><strong>${format(metrics.nse,2)}</strong><p>Displayed weeks only</p></div>`:`<div class="stat"><small>MODEL</small><strong style="font-size:15px;letter-spacing:0">${state.mode==='live'?'TVA output':'Frozen LSTM'}</strong><p>${state.mode==='recorded'?'Saved checkpoint':''}</p></div>`}<div class="stat"><small>PREDICTED VOLUME</small><strong>${valid.length?format(valid.reduce((a,r)=>a+r.predicted,0),0):'—'}<span>Mm³</span></strong><p>${esc(site.name)} · valid weeks only</p></div>`;
-  if(!valid.length)$('#result-chart').innerHTML=`<div class="live-result-empty"><strong>${esc(site.name)} (${esc(site.id)})</strong> is part of the TVA network, but no saved predictions are available for this recorded evaluation. No substitute values are plotted.</div>`;
-  if(state.mode==='live') $('#result-stats .stat small').textContent='VALID WEEKS IN FILE';
-  $('#provenance-short').textContent=state.mode==='recorded' ? `Epoch ${study.provenance.selectedEpoch} · No bias correction · Recorded ${$('#scenario').value==='gefs'?'retrospective pilot':'historical evaluation'}` : `Live session file · ${study.provenance.sourceFile} · Volumes converted from m³`;
-  if(state.mode==='live') renderLiveArtifacts();
+  $('#result-stats').innerHTML=`<div class="stat"><small>VALID WEEKS IN FILE</small><strong>${valid.length}<span>weeks</span></strong></div><div class="stat"><small>RESULT SOURCE</small><strong style="font-size:15px;letter-spacing:0">VISTA output</strong><p>${esc(site.name)}</p></div><div class="stat"><small>PREDICTED VOLUME</small><strong>${valid.length?format(valid.reduce((a,r)=>a+r.predicted,0),0):'—'}<span>Mm³</span></strong><p>Sum of available weeks</p></div>`;
+  if(!valid.length)$('#result-chart').innerHTML=`<div class="live-result-empty"><strong>${esc(site.name)}</strong> has no valid predictions in the displayed file. Missing values remain gaps.</div>`;
+  $('#provenance-short').textContent=`Agent file · ${study.provenance.sourceFile} · Volumes converted from m³`;
+  renderLiveArtifacts();
 }
 function niceStep(value) { const p=10**Math.floor(Math.log10(value));return [1,2,2.5,5,10].map(v=>v*p).find(v=>v>=value) || 10*p; }
 function showProvenance() {
   const study=currentStudy();
   if(!study) {showDetails('Live result provenance','<p>No live prediction file has been loaded. The agent’s displayed files and original provenance will appear after collection.</p>');return;}
-  showDetails('The evidence behind this result',`<p>${esc(study.source || 'File displayed in the selected VISTA conversation.')}</p><h3>Selected-site metrics</h3><p>${esc(study.sites[state.siteIndex].name)} (${esc(study.sites[state.siteIndex].id)})</p><div class="metrics-detail">${$('#result-stats').innerHTML}</div><h3>Interpretation limits</h3><ul>${(study.caveats || []).map(c=>`<li>${esc(c)}</li>`).join('')}</ul><h3>Provenance</h3><pre>${esc(JSON.stringify(study.provenance,null,2))}</pre><h3>Original artifacts</h3>${(study.downloads || []).map(f=>`<p><a href="${esc(f.url)}" download>${esc(f.label)} ↗</a></p>`).join('')}`);
-}
-function recordedAnswer(prompt) { recordedProjectAnswer(prompt); }
-async function playback() {
-  if(state.busy) return;
-  const token=++state.playback; resetActivity(); showWelcome();
-  addMessage('user',`Walk me through the recorded ${$('#scenario').value==='gefs'?'GEFS retrospective pilot':'TVA historical evaluation'}.`);
-  setBusy(true,'Recorded walkthrough'); $('#activity-log').hidden=false;$('#activity-toggle').setAttribute('aria-expanded','true');
-  for(let i=0;i<state.study.steps.length;i++) {
-    if(token!==state.playback) return;
-    const step=state.study.steps[i]; setStage(i<2?0:i===2?1:2);
-    addActivity(step.title,step.detail,'recorded');
-    await new Promise(resolve=>setTimeout(resolve,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:430));
-  }
-  setStage(2,true); setBusy(false,'Recorded result reviewed');
-  const a=state.study.sites[0];
-  addMessage('agent',`The recorded workflow is ready to review.\n\n${state.study.subtitle}. The chart below compares the saved model predictions with observed weekly ELF volumes. Select a site to inspect the result; open provenance for the checkpoint and source hashes.\n\n${state.study.caveats[0]} ${Number.isFinite(a.metrics.nse)?'Accuracy metrics shown here apply only to the displayed sample.':'This small retrospective pilot is not an estimate of general forecast skill.'}`);
+  showDetails('The evidence behind this result',`<p>${esc(study.source || 'File displayed in the selected VISTA conversation.')}</p><h3>Interpretation limits</h3><ul>${(study.caveats || []).map(c=>`<li>${esc(c)}</li>`).join('')}</ul><h3>Provenance</h3><pre>${esc(JSON.stringify(study.provenance,null,2))}</pre><h3>Original artifacts</h3>${(study.downloads || []).map(f=>`<p><a href="${esc(f.url)}" download>${esc(f.label)} ↗</a></p>`).join('')}`);
 }
 
 async function ensureSession(title) {
@@ -266,7 +213,7 @@ async function sendLive(prompt) {
 async function watchStream(url,options={}) {
   state.stream=new AbortController();let finished=false,bodyNode=null,parts=new Map(),lastIndex=null;
   const response=await fetch(url,{...options,signal:state.stream.signal});
-  if(response.status===204){state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);return;}
+  if(response.status===204){state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);await renderFiles();return;}
   if(!response.ok){let data;try{data=await response.json();}catch{};throw new Error(typeof data?.detail==='string'?data.detail:`VISTA request failed (${response.status}).`);}
   if(!response.body)throw new Error('This browser does not support streaming responses.');
   const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
@@ -326,6 +273,7 @@ async function watchStream(url,options={}) {
     if(buffer.trim())await eventReceived(buffer);
     if(!finished)throw new Error('The event stream ended before VISTA reported completion.');
     await loadSession(state.sessionId,false);
+    await renderFiles();
   } finally {bodyNode?.classList.remove('stream-cursor');state.stream=null;}
 }
 function messagesFromHistory(session) {
@@ -366,29 +314,20 @@ async function loadSession(id,reconnect=false) {
 async function newConversation() {
   if(state.busy)return;
   state.sessionId=null;rememberSession();state.history=[];state.liveFiles=[];state.liveStudy=null;
-  resetActivity();showWelcome();renderResults();switchView('workspace');toast(state.mode==='live'?'A new conversation will be created when you send your first message.':'Recorded example reset.');
+  resetActivity();showWelcome();renderResults();switchView('workspace');toast('A new conversation will be created when you send your first message.');
 }
 async function renderHistory() {
-  $('#history-list').innerHTML=`<button class="history-card" id="open-recorded">${icon('clock')}<div><h3>TVA historical evaluation</h3><p>52-site network · Included recorded evaluation</p></div><span class="tag recorded-tag">Recorded</span>${icon('arrow')}</button><div id="live-history"><div class="empty-state">Loading VISTA conversations…</div></div>`;
-  $('#open-recorded').addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}await switchMode('recorded');switchView('workspace');});
+  $('#history-list').innerHTML='<div id="live-history"><div class="empty-state">Loading VISTA conversations…</div></div>';
   if(!state.status?.project_found){$('#live-history').innerHTML='<div class="empty-state">Connect VISTA to view this laptop’s TVA conversations.</div>';return;}
   try {
     const sessions=await api(projectUrl('/chat-sessions'));
-    $('#live-history').innerHTML=sessions.length?sessions.sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).map(s=>`<button class="history-card" data-session="${esc(s.id)}">${icon('file')}<div><h3>${esc(s.title || 'TVA conversation')}</h3><p>${esc(new Date(s.updated_at).toLocaleString())}</p></div><span class="tag">VISTA</span>${icon('arrow')}</button>`).join(''):'<div class="empty-state">No live conversations yet. Start one in Live VISTA mode.</div>';
-    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}await switchMode('live',false);state.sessionId=el.dataset.session;state.lastSeq=0;await loadSession(state.sessionId,true);switchView('workspace');}));
+    $('#live-history').innerHTML=sessions.length?sessions.sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).map(s=>`<button class="history-card" data-session="${esc(s.id)}">${icon('file')}<div><h3>${esc(s.title || 'TVA conversation')}</h3><p>${esc(new Date(s.updated_at).toLocaleString())}</p></div><span class="tag">VISTA</span>${icon('arrow')}</button>`).join(''):'<div class="empty-state">No conversations yet. Send a message to begin.</div>';
+    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}state.liveFiles=[];state.liveStudy=null;state.history=[];resetActivity();state.sessionId=el.dataset.session;state.lastSeq=0;await loadSession(state.sessionId,true);switchView('workspace');}));
   }catch(error){$('#live-history').innerHTML=`<div class="empty-state">${esc(error.message)}</div>`;}
 }
 function fileRow(name,detail,url,label='Download') {return `<div class="file-row">${icon('file')}<div><strong>${esc(name)}</strong><small>${esc(detail)}</small></div><a href="${esc(url)}" download>${label}${icon('down')}</a></div>`;}
 async function renderFiles() {
-  $('#recorded-files').innerHTML=Object.values(state.studies).flatMap(study=>study.downloads.map(f=>fileRow(f.url.split('/').pop(),study.modelLabel+' · '+study.subtitle,f.url))).join('');
-  $('#live-files').innerHTML='<div class="empty-state">Loading local project files…</div>';
-  if(!state.status?.project_found){$('#live-files').innerHTML='<div class="empty-state">Open VISTA and connect your TVA project to see inputs and outputs.</div>';return;}
-  try {
-    const [uploads,outputs]=await Promise.all([api(projectUrl('/uploads')),api(projectUrl('/outputs'))]);
-    const files=[...uploads.map(f=>({...f,kind:'uploads'})),...outputs.map(f=>({...f,kind:'outputs'}))];
-    $('#file-count').textContent=files.length;
-    $('#live-files').innerHTML=files.length?files.map(f=>fileRow(f.name,`${f.kind==='uploads'?'Input':'Output'} · ${format(f.size/1024,1)} KB`,fileUrl(f.kind,f.name))).join(''):'<div class="empty-state">No files in this VISTA project yet. Upload your input CSV and metadata, or run the agent to produce outputs.</div>';
-  }catch(error){$('#live-files').innerHTML=`<div class="empty-state">${esc(error.message)}</div>`;}
+  return TVAResultsLibrary.render({projectFound:state.status?.project_found,project:state.config.project,api,projectUrl,fileUrl,showDetails,toast});
 }
 async function uploadFiles(files) {
   if(!files.length)return;
@@ -397,12 +336,12 @@ async function uploadFiles(files) {
   try {
     const result=await api(projectUrl('/uploads'),{method:'POST',body:form});
     toast(`${files.length} file${files.length===1?'':'s'} uploaded to ${state.config.project}.`);
-    if(state.mode==='live')addActivity('Input files uploaded',Array.isArray(result)?result.join(', '):Array.from(files).map(f=>f.name).join(', '));
+    addActivity('Input files uploaded',Array.isArray(result)?result.join(', '):Array.from(files).map(f=>f.name).join(', '));
     if(state.view==='files')renderFiles();
   }catch(error){toast(`Upload failed: ${error.message}`);}
 }
 async function loadLiveArtifacts() {
-  if(!state.sessionId || state.mode!=='live')return;
+  if(!state.sessionId)return;
   try {
     state.liveFiles=await api(projectUrl(`/chat-sessions/${state.sessionId}/displayed-files`));
     state.liveStudy=null;
@@ -410,13 +349,15 @@ async function loadLiveArtifacts() {
       if(file.status && file.status!=='current')continue;
       const name=file.path || file.name;
       if(!name || !/\.csv$/i.test(name))continue;
-      const response=await fetch(fileUrl(file.kind || 'outputs',name));
+      const kind=file.kind || 'outputs';
+      if(!['uploads','outputs'].includes(kind))continue;
+      const response=await fetch(fileUrl(kind,name));
       if(!response.ok)continue;
-      const study=parsePredictionCSV(await response.text(),name);
+      const study=parsePredictionCSV(await response.text(),name,kind);
       if(study){state.liveStudy=study;state.siteIndex=Math.max(0,study.sites.findIndex(s=>s.id===state.focusSiteId));break;}
     }
     renderResults();
-  }catch{state.liveFiles=[];renderResults();}
+  }catch{state.liveFiles=[];state.liveStudy=null;renderResults();}
 }
 function parseCSV(text) {
   const rows=[];let row=[],cell='',quoted=false;
@@ -431,7 +372,8 @@ function parseCSV(text) {
   const headers=(rows.shift()||[]).map(h=>h.trim().replace(/^\uFEFF/,''));
   return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i] ?? ''])));
 }
-function parsePredictionCSV(text,name) {
+function parsePredictionCSV(text,name,kind='outputs') {
+  if(!['uploads','outputs'].includes(kind))return null;
   const rows=parseCSV(text);if(!rows.length)return null;
   const idKey=['basin_id','site_id'].find(k=>k in rows[0]);const dateKey=['start','week_start','date'].find(k=>k in rows[0]);
   if(!idKey||!dateKey||!('predicted_volume_m3' in rows[0]))return null;
@@ -444,12 +386,12 @@ function parsePredictionCSV(text,name) {
     const num=v=>v==null||v.trim()===''||!Number.isFinite(Number(v))?null:Number(v)/1e6;
     grouped.get(id).push({date:day,end:row.end || row.week_end || null,predicted:num(row.predicted_volume_m3),observed:num(row.observed_volume_m3)});
   }
-  const sites=[...grouped].map(([id,series])=>({id,name:state.geo?.sites.find(s=>s.id===id)?.name || id,series:series.sort((a,b)=>a.date.localeCompare(b.date))}));
+  const sites=[...grouped].map(([id,series])=>({id,name:state.network?.sites?.find(s=>s.id===id || s.modelSiteId===id)?.name || id,series:series.sort((a,b)=>a.date.localeCompare(b.date))}));
   if(!sites.length)return null;
-  return {sites,units:'million m³',valueLabel:'Weekly ELF volume',source:'Prediction CSV explicitly displayed by the agent in this VISTA conversation.',provenance:{sourceFile:name,sourceColumns:['predicted_volume_m3','observed_volume_m3 (when present)'],displayConversion:'m³ divided by 1,000,000'},caveats:['The chart reads the displayed file; it does not independently verify a cluster job or model provenance.','Missing predictions stay missing. No accuracy metrics are inferred from unpaired data.'],downloads:[{label:'Original prediction CSV',url:fileUrl('outputs',name)}]};
+  return {sites,units:'million m³',valueLabel:'Weekly predicted volume',source:'Prediction CSV explicitly displayed by the agent in this VISTA conversation.',provenance:{sourceFile:name,sourceFileKind:kind,sourceColumns:['predicted_volume_m3','observed_volume_m3 (when present)'],displayConversion:'m³ divided by 1,000,000'},caveats:['The chart reads the displayed file; it does not independently verify a cluster job or model provenance.','Missing predictions stay missing. Values reflect only the displayed file.'],downloads:[{label:'Original prediction CSV',url:fileUrl(kind,name)}]};
 }
 function renderLiveArtifacts() {
-  if(state.mode!=='live'||!state.liveFiles.length)return;
+  if(!state.liveFiles.length)return;
   const container=document.createElement('div');container.className='live-artifacts';
   container.innerHTML=state.liveFiles.map(f=>{
     const path=f.path||f.name;return fileRow(path,`Displayed by this conversation · ${f.kind || 'outputs'}${f.status && f.status!=='current'?' · '+f.status+' since display':''}`,fileUrl(f.kind||'outputs',path));
@@ -497,23 +439,16 @@ async function resolveElicitation(action) {
 async function exportBrief() {
   const button=$('#export-report');button.disabled=true;
   try {
-    if(state.mode==='live'){
-      if(!state.sessionId||!state.history.length){toast('Start a live conversation before exporting its brief.');return;}
-      const report=await api(projectUrl('/reports/generate'),{method:'POST',body:JSON.stringify({chat_session_id:state.sessionId,message_history:state.history,hint:'Write a concise TVA Water4Energy scientific demonstration brief. Distinguish proposed work, actual tool execution, pending jobs, verified outputs, and scientific limitations.'})});
-      download((report.slug_suggestion || 'tva-live-brief')+'.md',`# ${report.title}\n\n${report.summary || ''}\n\n${report.body || ''}`,'text/markdown');toast('VISTA report draft downloaded. Review it before presenting.');
-    }else{
-      const s=state.study;
-      download(`${s.id}-brief.md`,`# ${s.title}\n\n${s.subtitle}\n\nRecorded results; no live VISTA agent or HPC job was run to produce this brief.\n\n## Model\n\n${s.modelLabel}, selected epoch ${s.provenance.selectedEpoch}.\n\n## Displayed sample\n\n${s.sites.map(site=>`${site.name} (${site.id}): ${site.metrics.nWeeks ?? site.series.filter(r=>Number.isFinite(r.predicted)).length} valid paired weeks; predicted volume ${format(site.metrics.predictedTotal)} million m³; observed ${format(site.metrics.observedTotal)} million m³.${Number.isFinite(site.metrics.nse)?' Sample NSE: '+format(site.metrics.nse,3)+'.':''}`).join('\n\n')}\n\n## Limitations\n\n${s.caveats.map(c=>'- '+c).join('\n')}\n\n## Provenance\n\n\`\`\`json\n${JSON.stringify(s.provenance,null,2)}\n\`\`\`\n`,'text/markdown');toast('Recorded study brief downloaded.');
-    }
+    if(!state.sessionId||!state.history.length){toast('Start a conversation before exporting its brief.');return;}
+    const report=await api(projectUrl('/reports/generate'),{method:'POST',body:JSON.stringify({chat_session_id:state.sessionId,message_history:state.history,hint:'Write a concise TVA Water4Energy scientific demonstration brief. Distinguish proposed work, actual tool execution, pending jobs, verified outputs, and scientific limitations.'})});
+    download((report.slug_suggestion || 'tva-live-brief')+'.md',`# ${report.title}\n\n${report.summary || ''}\n\n${report.body || ''}`,'text/markdown');toast('VISTA report draft downloaded. Review it before presenting.');
   }catch(error){toast(`Could not export brief: ${error.message}`);}finally{button.disabled=false;}
 }
+
 
 // Bind once. All execution actions originate in explicit user interaction.
 $$('.nav-item').forEach(el=>el.addEventListener('click',()=>switchView(el.dataset.view)));
 $('.brand').addEventListener('click',event=>{event.preventDefault();switchView('workspace');});
-$('#mode-recorded').addEventListener('click',()=>switchMode('recorded'));
-$('#mode-live').addEventListener('click',()=>switchMode('live'));
-$('#scenario').addEventListener('change',selectStudy);
 $('#focus-site').addEventListener('change',event=>selectNetworkSite(event.target.value));
 $('#result-site').addEventListener('change',event=>{state.siteIndex=Number(event.target.value);state.focusSiteId=currentStudy().sites[state.siteIndex].id;renderSiteContext();renderMap();renderResults();});
 $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
@@ -521,7 +456,6 @@ $('#skills-refresh').addEventListener('click',refreshSkills);
 $('#open-prompt-library').addEventListener('click',()=>switchView('prompts'));
 $('#open-network').addEventListener('click',()=>switchView('network'));
 $('#workflow-details').addEventListener('click',showWorkflowDetails);
-$('#view-original-network').addEventListener('click',showOriginalNetwork);
 $('#site-search').addEventListener('input',renderNetworkRoster);
 $('#connection-button').addEventListener('click',showSettings);$('#resource-settings').addEventListener('click',showSettings);
 $('#refresh-button').addEventListener('click',()=>{refreshConnection();if(state.view==='files')renderFiles();toast('Checking the local VISTA connection.');});
@@ -530,22 +464,22 @@ $$('[data-close-dialog]').forEach(el=>el.addEventListener('click',()=>el.closest
 $('#settings-form').addEventListener('submit',async event=>{
   event.preventDefault();if(state.busy){$('#settings-status').textContent='Finish or stop the current turn before changing connections.';return;}
   const button=event.submitter;button.disabled=true;
-  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;$('#settings-status').textContent='Checking VISTA…';await refreshConnection();if(state.mode==='live'){resetActivity();showWelcome();renderResults();}toast('Local connection saved.');}
+  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
   catch(error){$('#settings-status').textContent=error.message;}finally{button.disabled=false;}
 });
 $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log');log.hidden=!log.hidden;$('#activity-toggle').setAttribute('aria-expanded',String(!log.hidden));});
-$('#mode-info').addEventListener('click',()=>state.mode==='live'?showSettings():showProvenance());
+$('#mode-info').addEventListener('click',showSettings);
 $('#provenance-button').addEventListener('click',showProvenance);
 $('#export-report').addEventListener('click',exportBrief);
 $('#new-chat').addEventListener('click',newConversation);$('#history-new').addEventListener('click',newConversation);
 $('#workflow-button').addEventListener('click',()=>{
-  if(state.mode==='recorded'){playback();return;}
-  if($('#scenario').value==='gefs') {toast('The GEFS example is a recorded pilot. For live execution, use the installed skill with prepared weekly inputs.');return;}
   const focus=state.network.sites.find(s=>s.id===state.focusSiteId);
-  const prompt=`Prepare a saved-checkpoint TVA inference plan for the full ELF01–ELF52 network, starting with the currently inspected site ${focus.id} (${focus.name}) on ${$('#resource').value}, using the installed TVA skill and the total_runoff model. First identify the actual input CSV/metadata pair, verify the frozen artifact and runoff contract, and check the Python environment and account prerequisites with read-only tools. Propose one node, one rank, four CPU cores and a ten-minute CPU job if supported by the skill. Do not submit any job until I explicitly confirm the exact plan. Do not train, install software, calibrate or apply bias correction. After a confirmed run, retrieve predictions CSV, summary, and provenance; use display_file for result artifacts. Report actual job state separately from agent-turn completion.`;
-  $('#prompt').value=prompt;$('#prompt').focus();toast('The plan request is ready. Review it and send when you are ready.');
+  if(!focus)return;
+  const prompt=`Prepare a TVA Water4Energy workflow plan for ${focus.name}${focus.headwater?' (headwater reservoir)':''} on ${$('#resource').value}, from HEADWATER precipitation, temperature and runoff through downscaling, LSTM water availability and economic assessment. First inspect the actual loaded skills, available inputs and model coverage with read-only tools. Distinguish planned integrations from runnable steps, and explicitly report any missing support for this location. Do not submit jobs until I explicitly confirm the exact plan. Do not train, install software, calibrate or apply bias correction without a separate request. After confirmed work, save generated figures, prediction data, reports and provenance as VISTA project outputs, and use display_file so they appear in this conversation and the Results Library. Report actual job state separately from agent-turn completion.`;
+  $('#prompt').value=prompt;$('#prompt').focus();toast('The workflow request is ready. Review it and send when you are ready.');
 });
-$('#chat-form').addEventListener('submit',event=>{event.preventDefault();const prompt=$('#prompt').value.trim();if(!prompt||state.busy)return;$('#prompt').value='';state.mode==='recorded'?recordedAnswer(prompt):sendLive(prompt);});
+
+$('#chat-form').addEventListener('submit',event=>{event.preventDefault();const prompt=$('#prompt').value.trim();if(!prompt||state.busy)return;if(state.status?.project_found)$('#prompt').value='';sendLive(prompt);});
 $('#prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('#chat-form').requestSubmit();}});
 $('#stop-button').addEventListener('click',async()=>{
   if(!state.sessionId)return;
@@ -553,7 +487,7 @@ $('#stop-button').addEventListener('click',async()=>{
   catch(error){toast(error.message);}
 });
 function chooseUpload(){if(!state.status?.project_found){toast('Open VISTA and connect your TVA project first.');showSettings();return;}$('#upload-input').click();}
-$('#attach-button').addEventListener('click',chooseUpload);$('#files-upload').addEventListener('click',chooseUpload);
+$('#attach-button').addEventListener('click',chooseUpload);
 $('#upload-input').addEventListener('change',async event=>{await uploadFiles(event.target.files);event.target.value='';});
 $('#reload-files').addEventListener('click',renderFiles);
 $('#elicitation-form').addEventListener('submit',event=>{event.preventDefault();resolveElicitation('accept');});
@@ -561,13 +495,14 @@ $('#elicitation-decline').addEventListener('click',()=>resolveElicitation('decli
 $('#elicitation-dialog').addEventListener('cancel',event=>{event.preventDefault();toast('Accept or decline this VISTA request so the workflow can continue.');});
 
 async function init() {
-  renderResources();showWelcome();
+  renderResources();showWelcome();renderResults();
   try {
-    const [historical,gefs,geo,config,network,workflow,prompts]=await Promise.all([api('/data/demo.json'),api('/data/pilot.json'),api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/workflow.json'),api('/data/prompts.json')]);
-    state.studies={historical,gefs};state.geo=geo;state.config=config;state.network=network;state.workflow=workflow;state.prompts=prompts.prompts;
-    renderPipeline();renderPromptLibrary();renderSkills();
-    selectStudy();document.body.dataset.mode='recorded';$('#mode-recorded').setAttribute('aria-pressed','true');$('#mode-live').setAttribute('aria-pressed','false');
-    refreshConnection();
-  }catch(error){addMessage('system',`The app could not load its included files: ${error.message}. Start it using the launcher rather than opening index.html directly.`,{error:true});}
+    const [geo,config,network,workflow,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/workflow.json'),api('/data/prompts.json')]);
+    state.geo=geo;state.config=config;state.network=network;state.workflow=workflow;state.prompts=prompts.prompts;
+    renderPipeline();renderPromptLibrary();renderSkills();renderSiteContext();renderMap();renderResults();showWelcome();
+    await refreshConnection();
+    state.sessionId=readSessionId();
+    if(state.sessionId && state.status?.project_found)await loadSession(state.sessionId,true);
+  }catch(error){addMessage('system',`The workspace could not load: ${error.message}. Start it using the launcher rather than opening index.html directly.`,{error:true});}
 }
 init();
