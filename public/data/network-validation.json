@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "sourceELFFiles": 52,
+  "mappedSites": 52,
+  "forcingRegionGeometries": 43,
+  "historicalCalendarPositions": 1352,
+  "historicalSavedPairs": 1233,
+  "historicalMissingSiteWeeks": 119,
+  "sitesWithSavedPredictions": 51,
+  "siteWithNoSavedTestPrediction": "ELF46",
+  "gefsPilotSites": 2,
+  "newModelExecutions": 0,
+  "checks": [
+    "All supplied ELF01\u2013ELF52 IDs match inventory, geometry anchors and historical study.",
+    "All per-site sample metrics and valid-row volume totals agree with displayed rows.",
+    "Missing site-week values remain null.",
+    "Original source units verified CFS, interval six hours.",
+    "Source reference image files present and original SHA256 metadata recorded."
+  ]
+}

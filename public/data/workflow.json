@@ -1,0 +1,247 @@
+{
+  "version": "0.2.0",
+  "title": "TVA water–energy workflow",
+  "summary": "HEADWATER forecasts feed high-resolution downscaling, Yang’s LSTM water-availability model, and Georgia Tech’s economic assessment. VISTA coordinates the model handoffs and records the evidence.",
+  "stages": [
+    {
+      "id": "headwater",
+      "number": 1,
+      "title": "HEADWATER prediction",
+      "shortTitle": "HEADWATER",
+      "owner": "HEADWATER team",
+      "status": "planned",
+      "statusLabel": "Handoff planned",
+      "description": "Provide forecast precipitation, air temperature and runoff for the TVA region. Preserve forecast timing and ensemble information through the workflow.",
+      "input": [
+        "Observations and reanalysis",
+        "Earth-system simulations and seasonal forecast products"
+      ],
+      "output": [
+        "Precipitation (P)",
+        "Air temperature (T, or TMAX/TMIN where supplied)",
+        "Runoff",
+        "Forecast issue, valid time and ensemble member IDs"
+      ],
+      "targetResolution": "25 km handoff in the TRITON discussion",
+      "sourceRefs": [
+        {
+          "deck": "Dali-earth-Google-ORNL-GM.pptx",
+          "slide": 2
+        },
+        {
+          "deck": "TRITON_discussion.pptx",
+          "slide": 1
+        }
+      ],
+      "integrationNote": "The slides describe residual/probability maps. A physical-variable reconstruction and an agreed handoff contract are needed before downstream model execution.",
+      "skillKeywords": [
+        "headwater"
+      ]
+    },
+    {
+      "id": "downscaling",
+      "number": 2,
+      "title": "Reconstruction & downscaling",
+      "shortTitle": "Downscaling",
+      "owner": "Downscaling team",
+      "status": "planned",
+      "statusLabel": "Integration planned",
+      "description": "Reconstruct physical scenarios from the forecast maps and historical references, then downscale regional information for the TVA domains.",
+      "input": [
+        "HEADWATER forecast maps",
+        "Historical reference maps",
+        "Grid and coordinate metadata",
+        "Forecast issue, valid time and member IDs"
+      ],
+      "output": [
+        "High-resolution physical precipitation and air-temperature fields",
+        "Runoff fields prepared for the downstream model contract",
+        "Time- and member-resolved scenario metadata"
+      ],
+      "targetResolution": "4 km intermediate / 1 km target",
+      "sourceRefs": [
+        {
+          "deck": "Dali-earth-Google-ORNL-GM.pptx",
+          "slide": 2
+        },
+        {
+          "deck": "TRITON_discussion.pptx",
+          "slide": 1
+        }
+      ],
+      "integrationNote": "The supplied slides name a 1 km target. They do not establish that a runnable downscaling skill is installed in this VISTA project.",
+      "skillKeywords": [
+        "downscale",
+        "downscaling"
+      ]
+    },
+    {
+      "id": "water-availability",
+      "number": 3,
+      "title": "LSTM water availability",
+      "shortTitle": "Water availability",
+      "owner": "Yang Chen / ORNL",
+      "status": "recorded_available",
+      "statusLabel": "Recorded model results",
+      "description": "Use Yang’s saved LSTM model to estimate weekly TVA site water availability from prepared basin forcing. The app’s recorded examples expose predictions, reference values and provenance.",
+      "input": [
+        "Prepared basin-week precipitation, temperature and runoff",
+        "Static basin attributes required by the chosen model",
+        "Target week and twelve preceding weeks",
+        "Matched input metadata and frozen checkpoint"
+      ],
+      "output": [
+        "Weekly site ELF / inflow-reference predictions",
+        "Prediction CSV and model provenance",
+        "Input-quality flags and a run summary"
+      ],
+      "targetResolution": "TVA ELF sites / weekly outputs",
+      "sourceRefs": [
+        {
+          "kind": "user",
+          "message": "User-specified LSTM stage in the TVA workflow"
+        },
+        {
+          "kind": "project",
+          "path": "repos/tva-weekly-inflow/README.md"
+        }
+      ],
+      "integrationNote": "ELF means Estimated Local Flow. Site quantities can be local, incremental or allocated flows, so interpret each site’s reference definition before deriving plant inflow or aggregating across sites. A loaded VISTA skill and a verified runtime are separate from recorded-result availability.",
+      "skillKeywords": [
+        "tva-weekly-inflow"
+      ]
+    },
+    {
+      "id": "economics",
+      "number": 4,
+      "title": "Economic assessment",
+      "shortTitle": "Georgia Tech economics",
+      "owner": "Georgia Tech",
+      "status": "planned",
+      "statusLabel": "Partner handoff planned",
+      "description": "Deliver plant-level water records to Georgia Tech for assessment of generation, cost and risk, using agreed scientific and economic assumptions.",
+      "input": [
+        "Plant water-quantity records",
+        "Plant water-temperature records where required",
+        "Site-to-plant mapping and time/member IDs",
+        "Plant and economic data supplied by the partner"
+      ],
+      "output": [
+        "Generation impacts",
+        "Cost impacts",
+        "Risk metrics, to be agreed with Georgia Tech"
+      ],
+      "targetResolution": "Plant level / daily or weekly records",
+      "sourceRefs": [
+        {
+          "deck": "TRITON_discussion.pptx",
+          "slide": 1
+        },
+        {
+          "kind": "user",
+          "message": "Georgia Tech is responsible for economic assessment"
+        }
+      ],
+      "integrationNote": "Economic outputs require Georgia Tech’s model/interface and agreed metrics. The app does not invent costs, generation impacts or risk estimates from an LSTM prediction alone.",
+      "skillKeywords": [
+        "economic",
+        "economics",
+        "georgia-tech"
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "id": "triton",
+      "title": "TRITON hydraulics",
+      "owner": "TRITON team",
+      "status": "planned",
+      "statusLabel": "Optional integration",
+      "description": "Add hydraulic detail near plants where the economic handoff needs depth, stage or section discharge.",
+      "input": [
+        "Runoff or upstream Q",
+        "Terrain and roughness",
+        "Initial and boundary conditions"
+      ],
+      "output": [
+        "H and QX/QY",
+        "Depth and stage",
+        "Section discharge after appropriate extraction"
+      ],
+      "sourceRefs": [
+        {
+          "deck": "TRITON_discussion.pptx",
+          "slide": 1
+        }
+      ],
+      "integrationNote": "TRITON is an additional hydraulic path. The discussion explicitly leaves TVA readiness, routing needs and an agentic skill open."
+    },
+    {
+      "id": "rithyms",
+      "title": "RiTHyMs water temperature",
+      "owner": "Water-temperature modeling team",
+      "status": "planned",
+      "statusLabel": "Optional integration",
+      "description": "Provide river temperature near plants when Georgia Tech’s assessment requires thermal effects.",
+      "input": [
+        "Meteorology",
+        "Appropriate flow for the model domain",
+        "Reach and site attributes"
+      ],
+      "output": [
+        "River water temperature (°C)",
+        "A future reservoir/release-temperature path with CE-QUAL-W2"
+      ],
+      "sourceRefs": [
+        {
+          "deck": "Dali-earth-Google-ORNL-GM.pptx",
+          "slide": 2
+        },
+        {
+          "deck": "TRITON_discussion.pptx",
+          "slide": 1
+        }
+      ],
+      "integrationNote": "The discussion identifies reservoir setup and CE-QUAL-W2 as later work. These capabilities are distinct from the LSTM water-availability model."
+    }
+  ],
+  "handoff": {
+    "title": "Plant data interface",
+    "fields": [
+      "Plant and site IDs",
+      "Water quantity with units and quantity definition",
+      "Water temperature (°C), when supplied",
+      "Daily or weekly timestamps",
+      "Forecast issue and member IDs",
+      "Quality flags",
+      "Optional hydraulic depth/stage/section discharge",
+      "Scientific provenance"
+    ],
+    "note": "Agree the plant mapping, time aggregation, flow meaning and metrics before Georgia Tech evaluates economic impacts."
+  },
+  "sources": [
+    {
+      "id": "google-discussion",
+      "deck": "Dali-earth-Google-ORNL-GM.pptx",
+      "slide": 2,
+      "title": "End-to-End Water-for-Energy Prediction Workflow"
+    },
+    {
+      "id": "triton-discussion",
+      "deck": "TRITON_discussion.pptx",
+      "slide": 1,
+      "title": "From HEADWATER forecasts to plant-level water–energy impacts"
+    },
+    {
+      "id": "user-workflow",
+      "kind": "user",
+      "title": "User clarification: HEADWATER, downscaling, Yang’s LSTM and Georgia Tech economic assessment"
+    }
+  ],
+  "disclosures": [
+    "Workflow cards describe the project design. Installed skills and their count come from the selected live VISTA project.",
+    "The included LSTM results are recorded historical examples. HEADWATER, downscaling and economic assessment are not claimed as live executions.",
+    "The TRITON discussion permits a first demonstration with clearly labeled selected historical inputs and synthetic scenario assumptions.",
+    "The earlier discussion names ORBIT/LANDSIM under prediction and RiTHyMs/RiverWare under impact models. The current four-stage spine follows the user’s later HEADWATER/LSTM/Georgia Tech clarification."
+  ]
+}

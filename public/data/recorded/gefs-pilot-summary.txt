@@ -1,0 +1,14 @@
+GEFS → TVA recorded retrospective pilot
+
+Issue: nominal 2010-03-01 00 UTC, initialized 03 UTC; control member c00.
+Period: 1–14 March 2010. Model: total_runoff, frozen selected epoch 19.
+Norris: predicted total 109.548 million m³, reference ELF 110.675 million m³, signed error −1.02%.
+Normandy: predicted total 5.788 million m³, reference ELF 10.272 million m³, signed error −43.65%.
+
+One nominal cycle, control member only, two sites, two weeks; not a skill estimate.
+Antecedent Daymet/NLDAS rows are retrospective context; real-time data latency is not verified.
+Uncorrected GEFS forcing may differ systematically from training Daymet/NLDAS.
+Nominal 00UTC GEFSv12 Phase2 initialization is 03UTC; first three hours are analysis adjusted.
+The initial three hours include an archive reanalysis correction; nominal 00 UTC is not a strict information cutoff.
+Norris total error includes offsetting weekly errors; a close cumulative volume does not establish accurate weekly forecasts.
+This is a recorded retrospective pipeline demonstration, not live Frontier execution.

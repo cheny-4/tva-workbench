@@ -1,0 +1,154 @@
+{
+  "id": "gefs-retrospective-pilot",
+  "title": "GEFS \u2192 TVA retrospective pilot",
+  "subtitle": "One archived issue \u00b7 control member c00 \u00b7 Mar 1\u201314, 2010",
+  "mode": "recorded",
+  "source": "Completed NOAA GEFSv12 retrospective forcing pilot",
+  "model": "total_runoff",
+  "modelLabel": "Total runoff + elevation",
+  "units": "million m\u00b3",
+  "valueLabel": "Weekly ELF volume",
+  "period": {
+    "start": "2010-03-01",
+    "end": "2010-03-14"
+  },
+  "sites": [
+    {
+      "id": "ELF13",
+      "name": "Norris",
+      "lat": 36.7018,
+      "lon": -82.91884,
+      "regionId": "ELF13",
+      "areaKm2": 7440.405993551515,
+      "locationType": "forcing-region centroid",
+      "series": [
+        {
+          "date": "2010-03-01",
+          "end": "2010-03-07",
+          "predicted": 60.067510387064765,
+          "observed": 48.8646379335515
+        },
+        {
+          "date": "2010-03-08",
+          "end": "2010-03-14",
+          "predicted": 49.48018002516477,
+          "observed": 61.810488533014976
+        }
+      ],
+      "metrics": {
+        "nWeeks": 2,
+        "observedTotal": 110.67512646656647,
+        "predictedTotal": 109.54769041222954,
+        "pbiasPercent": -1.0186896462933062,
+        "scope": "Only this two-week retrospective pilot; not a forecast-skill estimate."
+      }
+    },
+    {
+      "id": "ELF39",
+      "name": "Normandy",
+      "lat": 35.48975,
+      "lon": -86.11527,
+      "regionId": "ELF39",
+      "areaKm2": 513.3211889545679,
+      "locationType": "forcing-region centroid",
+      "series": [
+        {
+          "date": "2010-03-01",
+          "end": "2010-03-07",
+          "predicted": 3.3645705782577897,
+          "observed": 3.3395756737225737
+        },
+        {
+          "date": "2010-03-08",
+          "end": "2010-03-14",
+          "predicted": 2.4237074205487192,
+          "observed": 6.9323718744786476
+        }
+      ],
+      "metrics": {
+        "nWeeks": 2,
+        "observedTotal": 10.271947548201222,
+        "predictedTotal": 5.7882779988065085,
+        "pbiasPercent": -43.64965385926132,
+        "scope": "Only this two-week retrospective pilot; not a forecast-skill estimate."
+      }
+    }
+  ],
+  "provenance": {
+    "model": "total_runoff",
+    "modelLabel": "GEFS-forced total-runoff model",
+    "selectedEpoch": 19,
+    "checkpointSha256": "a37b068f9ecb6413e7f2a1e36e0b387b07a59b2277cfb693b0093120ca0e449b",
+    "forcingSha256": "ffb93e15186f79bf44697789289df848cf3ca24572a17c47f66676e77ce4dbf9",
+    "sourcePredictions": "output/sean_followup_audit/gefs_pilot/model_inference/paired_weekly_predictions.csv",
+    "savedPredictionsSha256": "e2c863207546707b69f40694ff8cdba49503fc9176566ee9c9ee72260bf08646",
+    "nominalIssue": "2010-03-01T00:00:00Z",
+    "initializationQualification": "Nominal00 archive cycle is initialized03UTC; do not claim a strict00 forecast or verified real-time publication latency",
+    "member": "c00",
+    "futureObservedForcingRowsUsed": 0,
+    "targetDataUsedOnlyAfterInference": true,
+    "frozenFilesUnchanged": true,
+    "recordType": "Completed local CPU inference, archived GEFSv12 control member; not live submission",
+    "displayConversion": "Source m\u00b3 / 1,000,000",
+    "biasCorrection": false,
+    "training": false
+  },
+  "caveats": [
+    "One nominal cycle, control member only, two sites, two weeks; not a skill estimate.",
+    "Antecedent Daymet/NLDAS rows are retrospective context; real-time data latency is not verified.",
+    "Uncorrected GEFS forcing may differ systematically from training Daymet/NLDAS.",
+    "Nominal 00UTC GEFSv12 Phase2 initialization is 03UTC; first three hours are analysis adjusted.",
+    "The initial three hours include an archive reanalysis correction; nominal 00 UTC is not a strict information cutoff.",
+    "Norris total error includes offsetting weekly errors; a close cumulative volume does not establish accurate weekly forecasts.",
+    "This is a recorded retrospective pipeline demonstration, not live Frontier execution."
+  ],
+  "steps": [
+    {
+      "id": "scope",
+      "title": "Select archived forecast issue",
+      "detail": "Nominal GEFSv12 cycle 2010-03-01 00 UTC; control member c00.",
+      "status": "recorded"
+    },
+    {
+      "id": "validate",
+      "title": "Aggregate weather and runoff",
+      "detail": "Area-weight real forecast fields over Norris and Normandy forcing regions; retain initialization timing qualification.",
+      "status": "recorded"
+    },
+    {
+      "id": "execute",
+      "title": "Run frozen total-runoff LSTM",
+      "detail": "Archived CPU execution, selected epoch 19; 12 historical context weeks plus target-week forecast forcing.",
+      "status": "recorded"
+    },
+    {
+      "id": "collect",
+      "title": "Collect four predictions",
+      "detail": "Two sites \u00d7 two weeks; frozen files verified unchanged.",
+      "status": "recorded"
+    },
+    {
+      "id": "interpret",
+      "title": "Compare with reference ELF",
+      "detail": "Inspect weekly and cumulative errors; one issue cannot establish general forecast skill.",
+      "status": "recorded"
+    }
+  ],
+  "downloads": [
+    {
+      "label": "Prediction CSV",
+      "url": "/data/recorded/gefs-pilot-predictions.csv",
+      "type": "text/csv"
+    },
+    {
+      "label": "Provenance JSON",
+      "url": "/data/recorded/gefs-pilot-provenance.json",
+      "type": "application/json"
+    },
+    {
+      "label": "Pilot summary",
+      "url": "/data/recorded/gefs-pilot-summary.txt",
+      "type": "text/plain"
+    }
+  ]
+}

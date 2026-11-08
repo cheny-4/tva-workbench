@@ -1,0 +1,70 @@
+TVA full-network recorded historical evaluation
+52 source ELF sites; selected frozen total-runoff model epoch 19.
+Window: January 4–July 4, 2010 (26 Monday–Sunday week positions).
+Coverage: 1,233 saved paired eligible rows at 51 sites; 119 missing site-week positions remain null.
+Nickajack (ELF46): no saved eligible test predictions in this selected model run.
+Chart units: million cubic metres per week. CSV units: cubic metres per week.
+No new model/HPC execution, training, calibration or bias correction.
+Totals are per-site eligible-row volumes only. Do not sum across overlapping sites.
+
+ELF01 Douglas: 26/26 eligible weeks; predicted volume=3049.7795135409824 million m3; observed=3834.8567033023614 million m3; NSE=0.7584958837299696
+ELF02 Sevierville: 26/26 eligible weeks; predicted volume=327.39581359777753 million m3; observed=396.16480392445646 million m3; NSE=0.7205231918611692
+ELF03 South Holston: 26/26 eligible weeks; predicted volume=588.1807084101379 million m3; observed=513.0996960285935 million m3; NSE=0.6608941571321204
+ELF04 Watauga: 26/26 eligible weeks; predicted volume=344.89307754917735 million m3; observed=398.1966852679577 million m3; NSE=0.7144009645904095
+ELF05 Elizabethton: 26/26 eligible weeks; predicted volume=147.92795481371508 million m3; observed=212.94347461220772 million m3; NSE=0.2412017933921059
+ELF06 Boone: 26/26 eligible weeks; predicted volume=208.60642125876694 million m3; observed=204.20847341737252 million m3; NSE=0.8698628525226876
+ELF07 Kingsport: 26/26 eligible weeks; predicted volume=44.630885391204046 million m3; observed=42.20989162677651 million m3; NSE=0.8929149398467526
+ELF08 Cherokee: 25/26 eligible weeks; predicted volume=1017.8029115671128 million m3; observed=1004.8156183500654 million m3; NSE=0.8734105306703834
+ELF09 Maryville: 26/26 eligible weeks; predicted volume=244.67512260472978 million m3; observed=232.8436526200959 million m3; NSE=0.778486070855915
+ELF10 Fontana: 26/26 eligible weeks; predicted volume=1860.5310386186118 million m3; observed=2135.1686956365324 million m3; NSE=0.8657676427611741
+ELF11 Chilhowee: 26/26 eligible weeks; predicted volume=177.50771623651426 million m3; observed=380.13478605132246 million m3; NSE=-1.2491062071397532
+ELF12 Tellico: 17/26 eligible weeks; predicted volume=371.0474313753556 million m3; observed=419.28702109835035 million m3; NSE=0.7853518534701989
+ELF13 Norris: 26/26 eligible weeks; predicted volume=2308.2615388599074 million m3; observed=2360.9435677058145 million m3; NSE=0.8679560155621143
+ELF14 Clinton: 26/26 eligible weeks; predicted volume=171.53527971212117 million m3; observed=154.90873911129134 million m3; NSE=0.7995465928074151
+ELF15 Melton Hill: 26/26 eligible weeks; predicted volume=313.252405672431 million m3; observed=308.7510593698037 million m3; NSE=0.8596820488389303
+ELF16 Oakdale: 26/26 eligible weeks; predicted volume=882.9573017558345 million m3; observed=887.2897635898987 million m3; NSE=0.754871793402278
+ELF17 Chatuge: 26/26 eligible weeks; predicted volume=196.84500102961175 million m3; observed=249.4418336845836 million m3; NSE=0.724782406731509
+ELF18 Nottely: 26/26 eligible weeks; predicted volume=169.22547110973647 million m3; observed=214.38485187235352 million m3; NSE=0.6785428911669481
+ELF19 Hiwassee: 26/26 eligible weeks; predicted volume=525.1302384927416 million m3; observed=685.5577355238557 million m3; NSE=0.6179783425216114
+ELF20 Apalachia: 26/26 eligible weeks; predicted volume=49.42894130736671 million m3; observed=60.671858743259925 million m3; NSE=0.6608608144943853
+ELF21 Blue Ridge: 26/26 eligible weeks; predicted volume=271.54563176809296 million m3; observed=323.6452466527628 million m3; NSE=0.718219197368636
+ELF22 Copperhill: 26/26 eligible weeks; predicted volume=136.48361212389887 million m3; observed=155.267868300055 million m3; NSE=0.7765444990190253
+ELF23 Ocoee No. 1: 26/26 eligible weeks; predicted volume=260.18951408122905 million m3; observed=284.4604854669023 million m3; NSE=0.8535457143009517
+ELF24 Charleston: 26/26 eligible weeks; predicted volume=487.6003557854173 million m3; observed=750.7212287965735 million m3; NSE=0.4624647124867166
+ELF25 South Chickamauga Creek: 26/26 eligible weeks; predicted volume=390.606573993754 million m3; observed=430.79302231761 million m3; NSE=0.823932385731149
+ELF26 Whitwell: 26/26 eligible weeks; predicted volume=506.0016694180142 million m3; observed=529.6817712231242 million m3; NSE=0.8950221454809918
+ELF27 Woodville: 26/26 eligible weeks; predicted volume=360.16493845637194 million m3; observed=293.9609462281028 million m3; NSE=0.5907171108929592
+ELF28 Chase: 26/26 eligible weeks; predicted volume=277.2375109867796 million m3; observed=396.5911184417782 million m3; NSE=0.6066135325291995
+ELF29 Tims Ford: 26/26 eligible weeks; predicted volume=513.4415757928094 million m3; observed=532.7779092808045 million m3; NSE=0.8378392843012138
+ELF30 Fayetteville: 26/26 eligible weeks; predicted volume=343.47592640424944 million m3; observed=265.64672818261715 million m3; NSE=0.704777171887879
+ELF31 Prospect: 26/26 eligible weeks; predicted volume=958.414167272964 million m3; observed=1036.8534245782569 million m3; NSE=0.41893855209561226
+ELF32 Iron City: 26/26 eligible weeks; predicted volume=352.47257494753296 million m3; observed=390.6911986008036 million m3; NSE=0.2594772378123422
+ELF33 Upper Bear Creek: 26/26 eligible weeks; predicted volume=105.87863533449132 million m3; observed=148.22394467380863 million m3; NSE=0.7353650718888258
+ELF34 Bear Creek: 19/26 eligible weeks; predicted volume=98.2485089255624 million m3; observed=52.50412281144861 million m3; NSE=-0.15182909526689548
+ELF35 Little Bear Creek: 25/26 eligible weeks; predicted volume=55.36330440244331 million m3; observed=57.40767162137978 million m3; NSE=0.8194376740215153
+ELF36 Cedar Creek: 26/26 eligible weeks; predicted volume=146.98623236678654 million m3; observed=154.9222433452764 million m3; NSE=0.8207860825986499
+ELF37 Bishop: 15/26 eligible weeks; predicted volume=122.28241366600943 million m3; observed=148.8313733247776 million m3; NSE=0.6478096828210844
+ELF38 Lobelville: 26/26 eligible weeks; predicted volume=945.1398390083629 million m3; observed=1015.88850399205 million m3; NSE=0.5121885748676188
+ELF39 Normandy: 26/26 eligible weeks; predicted volume=198.64893758859625 million m3; observed=224.96701443576183 million m3; NSE=0.8040681368856892
+ELF40 Shelbyville: 26/26 eligible weeks; predicted volume=286.365229237023 million m3; observed=276.3124529451097 million m3; NSE=0.420282589308104
+ELF41 Hurricane Mills: 26/26 eligible weeks; predicted volume=2456.4342784174064 million m3; observed=3125.477777591855 million m3; NSE=0.48707895423596803
+ELF42 Knoxville: 17/26 eligible weeks; predicted volume=381.03306939004796 million m3; observed=374.14102062642087 million m3; NSE=0.8137094726870774
+ELF43 Fort Loudoun: 17/26 eligible weeks; predicted volume=252.6693151238617 million m3; observed=244.41112786210337 million m3; NSE=0.8423898885336722
+ELF44 Watts Bar: 23/26 eligible weeks; predicted volume=1149.4284801216586 million m3; observed=1268.1612511483795 million m3; NSE=0.8098001984441149
+ELF45 Chickamauga: 21/26 eligible weeks; predicted volume=1083.4612931854836 million m3; observed=908.1988600727653 million m3; NSE=0.642965310085224
+ELF46 Nickajack: 0/26 eligible weeks; predicted volume=None million m3; observed=None million m3; NSE=None
+ELF47 Guntersville: 24/26 eligible weeks; predicted volume=3311.7853583346073 million m3; observed=2762.4927253564783 million m3; NSE=0.8101193887376923
+ELF48 Decatur: 25/26 eligible weeks; predicted volume=1559.703709783019 million m3; observed=1813.5415438995685 million m3; NSE=0.7790999053438123
+ELF49 Wheeler: 24/26 eligible weeks; predicted volume=846.2606045568364 million m3; observed=900.8618230440325 million m3; NSE=0.5446797986214847
+ELF50 Wilson: 15/26 eligible weeks; predicted volume=483.9461880366308 million m3; observed=569.777849097292 million m3; NSE=0.7792528212580163
+ELF51 Pickwick: 15/26 eligible weeks; predicted volume=876.5405156492707 million m3; observed=984.4443599665387 million m3; NSE=0.5180196040625908
+ELF52 Savannah: 15/26 eligible weeks; predicted volume=324.7479764676389 million m3; observed=224.58511194675603 million m3; NSE=-1.685533243198062
+
+Recorded historical evaluation, not a new model execution or a live forecast.
+All 52 ELF sites are included. The selected window has 1,233 saved paired rows across 51 sites; gaps remain null. Nickajack (ELF46) has no saved eligible test predictions in the selected model run.
+Each model input uses the target week plus twelve preceding weeks; this is not a thirteen-week forecast lead.
+Historical reconstruction uses target-week historical forcing. It is not an out-of-sample weather forecast.
+ELF means Estimated Local Flows. Site quantities can be local, incremental, or allocated; they are not universally total upstream inflow. Do not sum across overlapping sites.
+Displayed per-site metrics and volume totals cover only saved eligible pairs in this window. Missing weeks are not zero and are not included in cumulative totals.
+No retraining, calibration or bias correction was performed to prepare this display.
+Interactive map boundaries are USGS-derived reconstructions, and markers are forcing-region centroids, not dam/outlet positions. The supplied historical reference map and schematic include nodes 53 and 54 outside the supplied ELF01–52 file set.

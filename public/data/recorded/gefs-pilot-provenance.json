@@ -1,0 +1,19 @@
+{
+  "model": "total_runoff",
+  "modelLabel": "GEFS-forced total-runoff model",
+  "selectedEpoch": 19,
+  "checkpointSha256": "a37b068f9ecb6413e7f2a1e36e0b387b07a59b2277cfb693b0093120ca0e449b",
+  "forcingSha256": "ffb93e15186f79bf44697789289df848cf3ca24572a17c47f66676e77ce4dbf9",
+  "sourcePredictions": "output/sean_followup_audit/gefs_pilot/model_inference/paired_weekly_predictions.csv",
+  "savedPredictionsSha256": "e2c863207546707b69f40694ff8cdba49503fc9176566ee9c9ee72260bf08646",
+  "nominalIssue": "2010-03-01T00:00:00Z",
+  "initializationQualification": "Nominal00 archive cycle is initialized03UTC; do not claim a strict00 forecast or verified real-time publication latency",
+  "member": "c00",
+  "futureObservedForcingRowsUsed": 0,
+  "targetDataUsedOnlyAfterInference": true,
+  "frozenFilesUnchanged": true,
+  "recordType": "Completed local CPU inference, archived GEFSv12 control member; not live submission",
+  "displayConversion": "Source m\u00b3 / 1,000,000",
+  "biasCorrection": false,
+  "training": false
+}
