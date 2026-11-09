@@ -31,7 +31,25 @@ class FakeVista(BaseHTTPRequestHandler):
     def do_GET(self):
         self.calls.append(("GET", self.path, None))
         if self.path == "/projects/Genesis_Water4Energy":
-            self.reply(200, {"name": "Genesis_Water4Energy", "skills": ["tva-weekly-inflow-path2"], "system_prompt": "not sent by status"})
+            self.reply(200, {"name": "Genesis_Water4Energy", "skills": ["tva-weekly-inflow-path2"], "knowledge_bases": ["lab-ready", "lab-pending", "lab-ready"], "system_prompt": "not sent by status"})
+        elif self.path == "/projects/TVA_ReadyKB":
+            self.reply(200, {"name": "TVA_ReadyKB", "skills": [], "knowledge_bases": ["lab-ready"]})
+        elif self.path == "/projects/TVA_EmptyKB":
+            self.reply(200, {"name": "TVA_EmptyKB", "skills": [], "knowledge_bases": []})
+        elif self.path == "/projects/TVA_UnknownKB":
+            self.reply(200, {"name": "TVA_UnknownKB", "skills": [], "knowledge_bases": ["lab-missing", "../outside"]})
+        elif self.path == "/projects/TVA_NoKnowledgeContract":
+            self.reply(200, {"name": "TVA_NoKnowledgeContract", "skills": []})
+        elif self.path == "/projects/TVA_UnindexedKB":
+            self.reply(200, {"name": "TVA_UnindexedKB", "skills": [], "knowledge_bases": ["lab-unindexed"]})
+        elif self.path == "/knowledge-bases/lab-ready":
+            self.reply(200, {"slug": "lab-ready", "name": "HEADWATER references", "build_status": "ready", "last_built_at": "2026-11-08T12:00:00Z", "pdfs_dir": "/private/not-exposed", "rag_db_path": "/private/index", "publications": [{"filename": "/private/hypothesis_lab.pdf", "title": "Lab", "index_status": "indexed", "abstract": "not-exposed"}]})
+        elif self.path == "/knowledge-bases/lab-pending":
+            self.reply(200, {"slug": "lab-pending", "name": "Trial 0", "build_status": "pending", "publications": [{"filename": "scorecard.pdf", "index_status": "queued"}]})
+        elif self.path == "/knowledge-bases/lab-unindexed":
+            self.reply(200, {"slug": "lab-unindexed", "build_status": "ready", "publications": [{"filename": "scorecard.pdf", "index_status": "failed"}]})
+        elif self.path == "/knowledge-bases/lab-missing":
+            self.reply(404, {"detail": "Unavailable"})
         elif self.path == "/projects/Missing_Project":
             self.reply(404, {"detail": "Project not found"})
         elif self.path == "/projects/TVA_MissingDetail":
@@ -81,7 +99,7 @@ class ServerTests(unittest.TestCase):
         cls.upstream.daemon_threads = True
         threading.Thread(target=cls.upstream.serve_forever, daemon=True).start()
         cls.backend_url = "http://127.0.0.1:{}".format(cls.upstream.server_port)
-        cls.wrapper = create_server(0, root=root, backend_url=cls.backend_url, persist=False)
+        cls.wrapper = create_server(0, root=root, backend_url=cls.backend_url, project="Genesis_Water4Energy", persist=False)
         threading.Thread(target=cls.wrapper.serve_forever, daemon=True).start()
         cls.port = cls.wrapper.server_port
 
@@ -192,6 +210,88 @@ class ServerTests(unittest.TestCase):
             self.assertFalse(any("outside" in path for method, path, _ in FakeVista.calls[before:]))
         finally:
             self.request("POST", "/api/config", {"project": "Genesis_Water4Energy"})
+
+    def test_knowledge_only_reads_attached_slugs_and_sanitizes_metadata(self):
+        before = len(FakeVista.calls)
+        status, body, _ = self.request("GET", "/api/knowledge?fresh=1")
+        payload = json.loads(body)
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["count"], 2)
+        self.assertEqual(payload["ready_count"], 1)
+        self.assertFalse(payload["all_ready"])
+        self.assertEqual(payload["knowledge_bases"][0]["documents"][0]["filename"], "hypothesis_lab.pdf")
+        self.assertNotIn(b"/private/", body)
+        self.assertNotIn(b"not-exposed", body)
+        paths = [path for method, path, _ in FakeVista.calls[before:]]
+        self.assertNotIn("/knowledge-bases", paths)
+        self.assertEqual(paths.count("/knowledge-bases/lab-ready"), 1)
+        self.assertIn("/knowledge-bases/lab-pending", paths)
+        self.assertEqual(self.request("GET", "/api/vista/knowledge-bases/lab-ready")[0], 403)
+
+    def test_knowledge_cache_refresh_and_project_change(self):
+        self.request("GET", "/api/knowledge?fresh=1")
+        before = len(FakeVista.calls)
+        self.request("GET", "/api/knowledge")
+        self.assertEqual(len(FakeVista.calls), before)
+        self.request("GET", "/api/knowledge?fresh=1")
+        self.assertGreater(len(FakeVista.calls), before)
+        try:
+            self.request("POST", "/api/config", {"project": "TVA_ReadyKB"})
+            _, body, _ = self.request("GET", "/api/knowledge")
+            payload = json.loads(body)
+            self.assertEqual(payload["project"], "TVA_ReadyKB")
+            self.assertEqual(payload["count"], 1)
+            self.assertTrue(payload["all_ready"])
+        finally:
+            self.request("POST", "/api/config", {"project": "Genesis_Water4Energy"})
+
+    def test_knowledge_empty_missing_and_unsupported_contracts_are_distinct(self):
+        try:
+            for project, count, ready in [("TVA_EmptyKB", 0, False), ("Missing_Project", None, None), ("TVA_NoKnowledgeContract", None, None)]:
+                with self.subTest(project=project):
+                    self.request("POST", "/api/config", {"project": project})
+                    _, body, _ = self.request("GET", "/api/knowledge?fresh=1")
+                    payload = json.loads(body)
+                    self.assertEqual(payload["count"], count)
+                    self.assertEqual(payload["all_ready"], ready)
+        finally:
+            self.request("POST", "/api/config", {"project": "Genesis_Water4Energy"})
+
+    def test_knowledge_unknown_slugs_do_not_fetch_unsafe_or_global_paths(self):
+        try:
+            self.request("POST", "/api/config", {"project": "TVA_UnknownKB"})
+            before = len(FakeVista.calls)
+            _, body, _ = self.request("GET", "/api/knowledge?fresh=1")
+            payload = json.loads(body)
+            self.assertEqual(payload["count"], 2)
+            self.assertEqual(payload["ready_count"], 0)
+            self.assertIsNone(payload["all_ready"])
+            self.assertTrue(all(not item["detail_available"] for item in payload["knowledge_bases"]))
+            self.assertFalse(any("outside" in path for method, path, _ in FakeVista.calls[before:]))
+        finally:
+            self.request("POST", "/api/config", {"project": "Genesis_Water4Energy"})
+
+    def test_declared_ready_with_unindexed_documents_is_not_ready(self):
+        try:
+            self.request("POST", "/api/config", {"project": "TVA_UnindexedKB"})
+            _, body, _ = self.request("GET", "/api/knowledge?fresh=1")
+            payload = json.loads(body)
+            self.assertEqual(payload["knowledge_bases"][0]["build_status"], "ready")
+            self.assertFalse(payload["knowledge_bases"][0]["ready"])
+            self.assertFalse(payload["all_ready"])
+        finally:
+            self.request("POST", "/api/config", {"project": "Genesis_Water4Energy"})
+
+    def test_knowledge_offline_is_unknown(self):
+        try:
+            self.request("POST", "/api/config", {"backend_url": "http://127.0.0.1:1"})
+            _, body, _ = self.request("GET", "/api/knowledge?fresh=1")
+            payload = json.loads(body)
+            self.assertFalse(payload["connected"])
+            self.assertIsNone(payload["count"])
+            self.assertIsNone(payload["all_ready"])
+        finally:
+            self.request("POST", "/api/config", {"backend_url": self.backend_url})
 
     def test_scoped_proxy_forwards_files(self):
         status, body, _ = self.request("GET", "/api/vista/projects/Genesis_Water4Energy/outputs")

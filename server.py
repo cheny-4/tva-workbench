@@ -5,6 +5,8 @@ Python 3.9+. Does not start VISTA, handle credentials, or submit jobs on startup
 """
 import argparse
 import concurrent.futures
+import errno
+import hashlib
 import http.client
 import ipaddress
 import json
@@ -21,11 +23,27 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 import webbrowser
 
 APP_ROOT = Path(__file__).resolve().parent
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 MAX_BODY = 64 * 1024 * 1024
-DEFAULT_CONFIG = {"backend_url": "http://127.0.0.1:8001", "project": "Genesis_Water4Energy"}
+DEFAULT_CONFIG = {"backend_url": "http://127.0.0.1:8001", "project": "Water4Energy-TVA-agent-loop"}
 PROJECT_PATTERN = re.compile(r"[A-Za-z0-9_ .-]{2,80}\Z")
 SESSION = r"[0-9a-fA-F-]{36}"
+
+
+def workbench_identity(root):
+    """Opaque identity for this folder and backend/release build, never its path."""
+    root = Path(root).resolve()
+    digest = hashlib.sha256((str(root) + "\n" + VERSION).encode("utf-8"))
+    for name in ("server.py", "MANIFEST.sha256"):
+        try:
+            digest.update((root / name).read_bytes())
+        except OSError:
+            digest.update(("missing:" + name).encode("ascii"))
+    return digest.hexdigest()
+
+
+def connection_identity(config):
+    return hashlib.sha256(json.dumps(config, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def valid_backend(value):
@@ -57,6 +75,9 @@ class AppState:
         self.status_at = 0
         self.skills_cache = None
         self.skills_at = 0
+        self.knowledge_cache = None
+        self.knowledge_at = 0
+        self.instance_id = workbench_identity(self.root)
         self.config = dict(DEFAULT_CONFIG)
         try:
             saved = json.loads(self.config_file.read_text(encoding="utf-8"))
@@ -99,6 +120,7 @@ class AppState:
             self.config = updated
             self.status_cache = None
             self.skills_cache = None
+            self.knowledge_cache = None
             return dict(updated)
 
     def request_json(self, path, timeout=5, config=None):
@@ -155,6 +177,76 @@ class AppState:
         with self.lock:
             if config == self.config:
                 self.status_cache, self.status_at = result, time.monotonic()
+        return result
+
+    def knowledge(self, fresh=False):
+        """Read readiness only for KB slugs attached to this selected project."""
+        with self.lock:
+            if not fresh and self.knowledge_cache and time.monotonic() - self.knowledge_at < 15:
+                return dict(self.knowledge_cache)
+        config = self.snapshot()
+        result = {"project": config["project"], "connected": False, "project_found": False,
+                  "count": None, "ready_count": None, "all_ready": None, "knowledge_bases": [],
+                  "detail": "Open VISTA to inspect this project's knowledge bases."}
+        try:
+            code, project = self.request_json("/projects/" + quote(config["project"], safe=""), timeout=3, config=config)
+            result["connected"] = code < 500
+            result["project_found"] = code == 200 and isinstance(project, dict)
+            if not result["project_found"]:
+                result["detail"] = "The selected project is unavailable. Check Connection settings."
+            elif not isinstance(project.get("knowledge_bases"), list) or not all(isinstance(x, str) for x in project["knowledge_bases"]):
+                result["detail"] = "VISTA did not expose a supported project knowledge-base attachment list. Readiness is unknown."
+            else:
+                slugs = list(dict.fromkeys(project["knowledge_bases"]))
+                result["count"] = len(slugs)
+
+                def read_knowledge(slug):
+                    item = {"slug": slug, "name": slug, "build_status": "unknown", "last_built_at": None,
+                            "detail_available": False, "documents": [], "document_count": None, "ready": None}
+                    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", slug):
+                        return item
+                    try:
+                        status, payload = self.request_json("/knowledge-bases/" + quote(slug, safe=""), timeout=5, config=config)
+                        if status != 200 or not isinstance(payload, dict) or payload.get("slug") != slug:
+                            return item
+                        item.update(detail_available=True, name=str(payload.get("name") or slug)[:200],
+                                    last_built_at=payload.get("last_built_at")[:64] if isinstance(payload.get("last_built_at"), str) else None)
+                        status = payload.get("build_status")
+                        item["build_status"] = status if status in ("pending", "ready", "stale", "failed") else "unknown"
+                        publications = payload.get("publications")
+                        if isinstance(publications, list):
+                            complete = True
+                            for publication in publications:
+                                if not isinstance(publication, dict) or not isinstance(publication.get("filename"), str) or not publication["filename"] or "\x00" in publication["filename"]:
+                                    complete = False
+                                    continue
+                                filename = publication["filename"].replace("\\", "/").split("/")[-1][:512]
+                                index_status = publication.get("index_status")
+                                item["documents"].append({"filename": filename,
+                                    "title": str(publication.get("title") or filename)[:300],
+                                    "index_status": index_status if index_status in ("unindexed", "queued", "indexing", "indexed", "failed") else "unknown"})
+                            item["document_count"] = len(item["documents"]) if complete else None
+                            if complete and item["build_status"] != "unknown":
+                                progress = payload.get("index_progress")
+                                indexing = isinstance(progress, dict) and progress.get("phase") not in (None, "done")
+                                item["ready"] = bool(item["documents"]) and item["build_status"] == "ready" and not indexing and all(d["index_status"] == "indexed" for d in item["documents"])
+                    except (OSError, ValueError, TypeError, http.client.HTTPException):
+                        pass
+                    return item
+
+                if slugs:
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=min(4, len(slugs))) as executor:
+                        result["knowledge_bases"] = list(executor.map(read_knowledge, slugs))
+                result["ready_count"] = sum(kb["ready"] is True for kb in result["knowledge_bases"])
+                readiness = [kb["ready"] for kb in result["knowledge_bases"]]
+                result["all_ready"] = False if not readiness or False in readiness else None if None in readiness else True
+                result["detail"] = ("No knowledge bases are attached to this project." if not slugs else
+                                    "{} of {} attached knowledge bases have a Ready index and indexed documents. This does not verify the required demo source coverage.".format(result["ready_count"], len(slugs)))
+        except (OSError, ValueError, TypeError, http.client.HTTPException):
+            pass
+        with self.lock:
+            if config == self.config:
+                self.knowledge_cache, self.knowledge_at = result, time.monotonic()
         return result
 
     def skills(self, fresh=False):
@@ -303,7 +395,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == "/api/health":
-            self.json_response(200, {"app": "tva-workbench", "version": VERSION})
+            self.json_response(200, {"app": "tva-workbench", "version": VERSION,
+                                     "instance_id": self.app.instance_id,
+                                     "connection_id": connection_identity(self.app.snapshot())})
         elif path == "/api/config":
             self.json_response(200, self.app.snapshot())
         elif path == "/api/status":
@@ -312,6 +406,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         elif path == "/api/skills":
             query = parse_qs(urlsplit(self.path).query)
             self.json_response(200, self.app.skills(fresh=query.get("fresh", [""])[0] in ("1", "true")))
+        elif path == "/api/knowledge":
+            query = parse_qs(urlsplit(self.path).query)
+            self.json_response(200, self.app.knowledge(fresh=query.get("fresh", [""])[0] in ("1", "true")))
         elif path.startswith("/api/vista/"):
             self.proxy()
         elif path.startswith("/api/"):
@@ -435,54 +532,137 @@ def create_server(port=8765, root=APP_ROOT, backend_url=None, project=None, pers
     return server
 
 
-def existing_workbench(port):
+def existing_workbench(port, instance_id, config_id):
+    """Reuse this exact copy/configuration; never open an unrelated app/copy."""
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        return False
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
     try:
         connection.request("GET", "/api/health")
         response = connection.getresponse()
         data = json.loads(response.read(4096))
-        if response.status != 200 or data.get("app") != "tva-workbench":
-            return False
-        if data.get("version") != VERSION:
-            print("An older TVA Workbench ({}) is still running. Stop its launcher terminal with Ctrl+C, then start this updated launcher again.".format(data.get("version", "unknown")), file=sys.stderr)
-            return False
-        return True
+        return (response.status == 200 and isinstance(data, dict) and
+                data.get("app") == "tva-workbench" and data.get("version") == VERSION and
+                data.get("instance_id") == instance_id and data.get("connection_id") == config_id)
     except (OSError, ValueError, http.client.HTTPException):
         return False
     finally:
         connection.close()
 
 
-def main():
+def remembered_port(root, preferred_port, instance_id):
+    try:
+        record = json.loads((Path(root) / ".local" / "instance.json").read_text(encoding="utf-8"))
+        port = record["port"]
+        if (record.get("version") == VERSION and record.get("instance_id") == instance_id and
+                record.get("preferred_port") == preferred_port and not isinstance(port, bool) and
+                isinstance(port, int) and 1 <= port <= 65535):
+            return port
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+    return None
+
+
+def remember_instance(root, preferred_port, port, instance_id):
+    try:
+        path = Path(root) / ".local" / "instance.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(json.dumps({"version": VERSION, "instance_id": instance_id,
+                                         "preferred_port": preferred_port, "port": port}) + "\n", encoding="utf-8")
+        os.chmod(str(temporary), 0o600)
+        temporary.replace(path)
+    except OSError:
+        print("This folder cannot remember its local port. The app still works at its printed address.", file=sys.stderr)
+
+
+def forget_instance(root, port, instance_id):
+    path = Path(root) / ".local" / "instance.json"
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(record, dict) and record.get("port") == port and record.get("instance_id") == instance_id:
+            path.unlink()
+    except (OSError, ValueError, TypeError):
+        pass
+
+
+def prepare_server(port=8765, root=APP_ROOT, backend_url=None, project=None, verbose=False):
+    """Return (new server or None, actual port); None means an exact copy exists.
+
+    --port is a preferred loopback port. An occupied port, including an explicit
+    one, falls back to an OS-assigned port; no existing process is stopped.
+    """
+    expected = AppState(root, backend_url, project, persist=False)
+    config_id = connection_identity(expected.snapshot())
+    if port:
+        saved = remembered_port(root, port, expected.instance_id)
+        if saved and existing_workbench(saved, expected.instance_id, config_id):
+            return None, saved
+    try:
+        server = create_server(port, root=root, backend_url=backend_url, project=project, verbose=verbose)
+    except OSError as exc:
+        if exc.errno != errno.EADDRINUSE:
+            raise
+        if existing_workbench(port, expected.instance_id, config_id):
+            return None, port
+        server = create_server(0, root=root, backend_url=backend_url, project=project, verbose=verbose)
+        print("Port {} is occupied. Starting this Workbench copy on an available local port.".format(port))
+    actual_port = server.server_address[1]
+    remember_instance(root, port, actual_port, server.app.instance_id)
+    return server, actual_port
+
+
+def open_browser(url):
+    try:
+        opened = webbrowser.open_new_tab(url)
+    except Exception:
+        opened = False
+    if not opened:
+        print("The browser did not open automatically. Open this address: " + url, file=sys.stderr)
+    return opened
+
+
+def main(argv=None, root=APP_ROOT):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", type=int, default=int(os.environ.get("TVA_PORT", "8765")))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("TVA_PORT", "8765")),
+                        help="Preferred local port; an occupied port falls back to an available port.")
     parser.add_argument("--backend-url", default=os.environ.get("TVA_VISTA_URL"))
     parser.add_argument("--project", default=os.environ.get("TVA_PROJECT"))
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--verbose", action="store_true")
-    args = parser.parse_args()
-    url = "http://127.0.0.1:{}".format(args.port)
+    args = parser.parse_args(argv)
+    if not 0 <= args.port <= 65535:
+        parser.error("--port must be between 0 and 65535")
     try:
-        server = create_server(args.port, backend_url=args.backend_url, project=args.project, verbose=args.verbose)
-    except OSError as exc:
-        if existing_workbench(args.port):
-            print("TVA Workbench is already running at " + url)
-            if not args.no_browser:
-                webbrowser.open(url)
-            return 0
-        print("Cannot start TVA Workbench on port {}: {}. Try --port 8766.".format(args.port, exc), file=sys.stderr)
+        server, port = prepare_server(args.port, root=root, backend_url=args.backend_url,
+                                      project=args.project, verbose=args.verbose)
+    except (OSError, ValueError) as exc:
+        print("Cannot start TVA Workbench: {}".format(exc), file=sys.stderr)
         return 1
-    print("TVA Workbench " + VERSION)
-    print("Open " + url)
+    url = "http://127.0.0.1:{}".format(port)
+    print("TVA Workbench " + VERSION, flush=True)
+    print("Folder: " + str(Path(root).resolve()), flush=True)
+    print("Open " + url, flush=True)
+    if server is None:
+        print("This Workbench copy is already running.")
+        if not args.no_browser:
+            open_browser(url)
+        return 0
     print("Keep this window open. Press Ctrl+C to stop. VISTA runs separately.")
+    timer = None
     if not args.no_browser:
-        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+        timer = threading.Timer(0.5, open_browser, args=(url,))
+        timer.daemon = True
+        timer.start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nTVA Workbench stopped. VISTA jobs, if any, are managed separately.")
     finally:
+        if timer:
+            timer.cancel()
         server.server_close()
+        forget_instance(root, port, server.app.instance_id)
     return 0
 
 

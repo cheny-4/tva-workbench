@@ -1,27 +1,13 @@
-# Study locations and generated results
+# Data and evidence scope
 
-## Catalog
+The active demonstration is fixed to **16–22 April 2019, issued 15 April**. `public/data/demo-case.json` contains the case definition, eight required skill IDs, optional dam skill, panel source requirements, six acceptance questions and lead-source references. `demo-evidence.schema.json` defines the saved-output adapter format. These files contain interface/specification metadata, not model predictions or completed test results.
 
-The study catalog contains 54 named locations: the original 52 reservoir/gage references from the supplied TVA flow-network material, plus Wolf Creek and Dale Hollow. The 12 headwater reservoirs are designated from Sean's project list supplied by the user: Norris, Douglas, South Holston, Watauga, Fontana, Blue Ridge, Normandy, Tims Ford, Chatuge, Nottely, Wolf Creek and Dale Hollow.
+Actual figures and supporting values are read from the selected VISTA project's output files through **tva-demo-20190416-20190422.json**. The interface checks declared dates, source contracts and file availability. These checks do not independently reproduce a model score or prove an artifact's authenticity. No private HEADWATER ledger, prediction arrays, ERA5 shards, checkpoint or scientific example results are bundled.
 
-ELF means **Estimated Local Flow**. It names a reference quantity, rather than a location type. Original source/model IDs are retained internally where needed to match real artifacts. The interface presents location names and the headwater grouping. The catalog is study scope, not a statement of operator/ownership or supported model coverage.
+Temperature and precipitation refer to the frozen climate-week plus residual 9×9 result. Runoff is explicitly ERA5 surface-runoff observation; the HEADWATER forecast slot remains unavailable. Downscaling is the existing September 7 Trial 0 comparison, 1° to 0.25°, for a day within this week. Its presence does not establish a newly coupled HEADWATER/downscale forecast chain.
 
-`public/data/network.json` defines the study catalog; `geo.json` contains simplified coverage geometry and reference coordinates. The original reference diagrams in `public/data/reference/` retain their source labels. Their numbered nodes are source diagram identifiers, not newly inferred support or connectivity.
+Optional dam output is display-only and requires the same case, selected Normandy/Norris reservoir, exact agreed rule and a source artifact. The browser does not invent a rule, threshold, fill/hold policy, release or operating instruction.
 
-## Geography
+The secondary network retains 54 study references and Sean's 12 headwater reservoirs. The original 52 anchors are forcing-region reference points across 43 reconstructed regions, rather than verified dam/gage coordinates. Wolf Creek uses [USGS Lake Cumberland station03413500](https://waterdata.usgs.gov/monitoring-location/USGS-03413500/statistics/); Dale Hollow uses [USGS station03416500](https://waterdata.usgs.gov/monitoring-location/USGS-03416500/statistics/). Neither addition invents model/forcing coverage. Background location browsing does not change the fixed case or optional dam selection.
 
-The original 52 location anchors are forcing-region reference points from 43 reconstructed regions. They are not verified dam or streamgage outlet coordinates, and some share a reference point. The polygons are a simplified USGS-derived reconstruction; scientific aggregation must use the original model geometry.
-
-Wolf Creek is represented by the [USGS Lake Cumberland near Jamestown station, 03413500](https://waterdata.usgs.gov/monitoring-location/USGS-03413500/statistics/). Dale Hollow uses the [USGS Dale Hollow Lake near Celina station, 03416500](https://waterdata.usgs.gov/monitoring-location/USGS-03416500/statistics/). These are reservoir reference points. No forcing polygon, model ID or prediction support is fabricated for either addition.
-
-The map is a study-coverage overview. It does not infer routing links, exact dam positions, watershed membership for the new locations, or operational control from the source schematic.
-
-## Live data and storage
-
-The current package has no bundled recorded predictions, historical evaluation windows or example forcing inputs. Prior versions preserve those assets in Git history.
-
-The Results Library reads saved files from the selected VISTA project's output directory through the scoped local adapter. VISTA retains those files. Input uploads remain separate and are available through chat attachments. Figures, tables and reports appear when the agent writes them as output files. A displayed-file list belongs to its conversation; the library browses outputs across the project.
-
-Recognized prediction CSVs require a location identifier, a week start and an explicit `predicted_volume_m3` column. Plot conversion divides cubic metres by 1,000,000. Missing values remain missing and absent calendar weeks create gaps. These files describe their own quantities; local/incremental/allocated ELF volumes must not automatically be described as total upstream inflow or summed across overlapping locations.
-
-A displayed artifact or completed agent turn does not independently verify its scientific provenance or the completion of a compute job. Original files remain downloadable for inspection.
+ELF means Estimated Local Flow, a quantity rather than a location type. Original matching IDs and reference diagrams are retained in the secondary catalog. Generic conversation files and Results Library remain separate from case-qualified evidence. Files remain stored and managed by VISTA.

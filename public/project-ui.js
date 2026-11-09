@@ -1,49 +1,29 @@
 'use strict';
 
-// Project-specific views. Scientific stages and installed skills stay distinct.
-function stageSkills(stage) {
-  return (state.skills?.skills || []).filter(skill=>(stage.skillKeywords || []).some(word=>skill.name.toLowerCase().includes(word)));
-}
-function renderPipeline() {
-  if(!state.workflow)return;
-  $('#pipeline-grid').innerHTML=state.workflow.stages.map(stage=>{
-    const loaded=stageSkills(stage).length;
-    return `<button class="pipeline-stage ${state.selectedStage===stage.id?'selected':''}" data-science-stage="${esc(stage.id)}" aria-expanded="${state.selectedStage===stage.id}"><span class="stage-number">0${stage.number}</span><span class="stage-title">${esc(stage.shortTitle)}</span><span class="stage-status ${loaded?'loaded':''}"><i></i>${loaded?'Project skill loaded':esc(stage.statusLabel)}</span><span class="stage-output">${esc(stage.id==='headwater'?'Precipitation · air T · runoff':stage.id==='downscaling'?'Physical fields · 1 km target':stage.id==='water-availability'?'Weekly site water availability':'Generation · cost · risk')}</span><span class="stage-arrow">→</span></button>`;
-  }).join('');
-  $$('#pipeline-grid [data-science-stage]').forEach(el=>el.addEventListener('click',()=>{
-    state.selectedStage=state.selectedStage===el.dataset.scienceStage?null:el.dataset.scienceStage;renderPipeline();
-  }));
-  const stage=state.workflow.stages.find(s=>s.id===state.selectedStage);
-  $('#pipeline-detail').hidden=!stage;
-  if(stage){
-    $('#pipeline-detail').innerHTML=`<div class="stage-detail-intro"><span class="eyebrow">SCIENCE STAGE</span><h3>${esc(stage.title)}</h3><p>${esc(stage.description)}</p><span class="tag">${esc(stage.targetResolution || '')}</span></div><div><h4>INPUTS</h4><ul>${stage.input.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div><h4>OUTPUTS</h4><ul>${stage.output.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="stage-integration-note"><span>${esc(stage.integrationNote)}</span><button class="text-button" id="use-stage-prompt">Use this stage’s prompt →</button></div>`;
-    $('#use-stage-prompt').addEventListener('click',()=>usePrompt(state.prompts.find(p=>p.stageId===stage.id)?.id || 'end-to-end'));
-  }
-  renderStageCoverage();
-}
+// Project views accompany a fixed, ledger-first hypothesis-lab demonstration.
+// The case module owns loop, evidence and required-skill readiness.
+function renderPipeline() {}
+function renderStageCoverage() {}
 function showWorkflowDetails() {
-  if(!state.workflow)return;
-  const w=state.workflow;
-  showDetails('TVA workflow & scientific handoffs',`<p>${esc(w.summary)}</p>${w.stages.map(s=>`<h3>0${s.number} · ${esc(s.title)}</h3><p>${esc(s.statusLabel)}</p><p>${esc(s.description)}</p><p>${esc(s.integrationNote)}</p>`).join('')}<h3>Supporting pathways</h3>${w.branches.map(b=>`<p><strong>${esc(b.title)}</strong> · ${esc(b.statusLabel)}<br>${esc(b.description)} ${esc(b.integrationNote)}</p>`).join('')}<h3>${esc(w.handoff.title)}</h3><ul>${w.handoff.fields.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p>${esc(w.handoff.note)}</p><h3>Project references</h3>${w.sources.filter(s=>s.deck).map(s=>`<p>${esc(s.deck)} · slide ${s.slide}</p>`).join('')}<p>These are science-stage definitions, not a claim that every model is installed or has executed.</p>`);
+  showDetails('The April 2019 hypothesis-lab demo',`<p>This is one VISTA project, <strong>Water4Energy-TVA-agent-loop</strong>, for the week <strong>16–22 April 2019</strong>, issued 15 April.</p><h3>The walkthrough</h3><p>Read the experiment ledger before proposing a new hypothesis. The Proposer, Critic and Referee use existing scored evidence to identify an open gap and describe a protocol. A person still authorizes any training.</p><h3>The evidence on screen</h3><p>Temperature and precipitation use the saved climate-week plus residual 9×9 results. Runoff is labeled ERA5 observation; the HEADWATER forecast slot is unavailable. The downscale panel compares frozen Trial 0 U-Net and bilinear results at 1° → 0.25°.</p><h3>Optional final panel</h3><p>A dam readout is shown only when enabled, with Normandy or Norris and an agreed plain-language rule. The interface does not infer an operating rule or run RiverWare.</p><p><a href="https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md" target="_blank" rel="noopener noreferrer">Read the source demonstration plan ↗</a></p>`);
 }
 function renderPromptLibrary() {
-  const featured=['end-to-end','network','skills'];
-  $('#starter-prompts').innerHTML=featured.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean).map((p,i)=>`<button class="starter-prompt" data-use-prompt="${esc(p.id)}"><span class="starter-index">0${i+1}</span><span><strong>${esc(p.title)}</strong><small>${esc(p.description)}</small></span>${icon('arrow')}</button>`).join('');
+  const featured=['walkthrough','ledger','runoff'];
+  const starters=featured.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean);
+  $('#starter-prompts').innerHTML=starters.map((p,i)=>`<button class="starter-prompt" data-use-prompt="${esc(p.id)}"><span class="starter-index">0${i+1}</span><span><strong>${esc(p.title)}</strong><small>${esc(p.description)}</small></span>${icon('arrow')}</button>`).join('');
   const categories=['All',...new Set(state.prompts.map(p=>p.category))];
   $('#prompt-filter').innerHTML=categories.map(c=>`<button class="${c===state.promptCategory?'active':''}" data-prompt-category="${esc(c)}">${esc(c)}</button>`).join('');
   $('#prompt-library').innerHTML=state.prompts.filter(p=>state.promptCategory==='All'||p.category===state.promptCategory).map(p=>`<article class="prompt-library-card"><span class="eyebrow">${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.description)}</p><button class="text-button" data-use-prompt="${esc(p.id)}">Prepare prompt ${icon('arrow')}</button></article>`).join('');
-  $('#prompt-mode-tag').textContent='VISTA · review & send';
-  $('#prompt-library-notice').textContent='Choose a starter to prepare an editable request. Review it, then send it to the connected TVA project.';
+  $('#prompt-mode-tag').textContent='Live agent · fixed case';
+  $('#prompt-library-notice').textContent='Each starter prepares an editable request for 16–22 April 2019. Review it, then send it to the connected project.';
   $$('[data-use-prompt]').forEach(el=>el.addEventListener('click',()=>usePrompt(el.dataset.usePrompt)));
   $$('[data-prompt-category]').forEach(el=>el.addEventListener('click',()=>{state.promptCategory=el.dataset.promptCategory;renderPromptLibrary();}));
 }
 function usePrompt(id) {
-  if(state.busy){toast('Finish the current turn before starting another prompt.');return;}
-  const prompt=state.prompts.find(p=>p.id===id);if(!prompt)return;
-  const site=state.network?.sites.find(s=>s.id===state.focusSiteId);
-  const context=site?`\n\nSelected study location: ${site.name}${site.headwater?' (headwater reservoir)':''}. Verify its actual input coverage and model mapping before execution.${site.modelSiteId===null?' No model-site mapping is supplied for this added reservoir.':''}`:'';
+  if(state.busy){toast('Finish the current turn before preparing another prompt.');return;}
+  const prompt=state.prompts.find(p=>p.id===id);if(!prompt || typeof prompt.livePrompt!=='string')return;
   switchView('workspace');
-  $('#prompt').value=prompt.livePrompt+context;
+  $('#prompt').value=prompt.livePrompt;
   $('#prompt').focus();$('#chat-form').scrollIntoView({behavior:'smooth',block:'center'});
   toast('Prompt prepared. Review the request, then press Send.');
 }
@@ -53,19 +33,14 @@ async function refreshSkills() {
   catch(error){state.skills={count:null,skills:[],connected:false,project_found:false,detail:error.message};}
   const count=Number.isInteger(state.skills.count)?String(state.skills.count):'—';
   $('#skill-count').textContent=count;$('#skills-topbar-count').textContent=count;
-  renderSkills();renderPipeline();
+  renderSkills();
 }
 function renderSkills() {
   const data=state.skills;
   const count=Number.isInteger(data?.count)?data.count:null;
-  $('#skills-summary').innerHTML=`<div class="skill-total"><strong>${count===null?'—':count}</strong><span>skills loaded into<br><b>${esc(data?.project || state.config.project)}</b></span></div><p>${esc(data?.detail || 'Connect VISTA to read the skills loaded into this TVA project.')}<br><small>Workflow-stage cards are not included in this count. Add or load skills in VISTA, then refresh here.</small></p>`;
-  $('#skills-list').innerHTML=data?.skills?.length?data.skills.map((skill,i)=>`<article class="skill-card"><div class="skill-card-heading">${icon('skill')}<span class="tag loaded-tag">Loaded in project</span></div><h2>${esc(skill.name)}</h2><p>${esc(skill.description || 'Description unavailable from this VISTA version.')}</p><div class="skill-card-bottom"><span>${skill.hpc_jobs?.length?`${skill.hpc_jobs.length} job definition${skill.hpc_jobs.length===1?'':'s'} · ${esc(skill.hpc_jobs.join(', '))}`:'Instructions / scientific tools'}</span><button class="text-button" data-skill-index="${i}" ${skill.body?'':'disabled'}>View skill ↗</button></div></article>`).join(''):`<div class="empty-state">${count===0?'No skills are loaded into the selected TVA project yet.':'The current skill count is unavailable. Open VISTA and check the project connection.'}</div>`;
-  $$('[data-skill-index]').forEach(el=>el.addEventListener('click',()=>{const s=state.skills.skills[Number(el.dataset.skillIndex)];showDetails(s.name,`<p>${esc(s.description || '')}</p><div class="skill-instructions">${formatText(s.body || '')}</div>`);}));
-  renderStageCoverage();
-}
-function renderStageCoverage() {
-  if(!state.workflow)return;
-  $('#skill-stage-coverage').innerHTML=state.workflow.stages.map(stage=>{const loaded=stageSkills(stage);return `<div class="coverage-stage"><span class="stage-number">0${stage.number}</span><div><strong>${esc(stage.shortTitle)}</strong></div><span class="tag ${loaded.length?'loaded-tag':''}">${loaded.length?'Matching skill loaded':esc(stage.statusLabel)}</span></div>`;}).join('');
+  $('#skills-summary').innerHTML=`<div class="skill-total"><strong>${count===null?'—':count}</strong><span>skills loaded into<br><b>${esc(data?.project || state.config.project)}</b></span></div><p>${esc(data?.detail || 'Connect VISTA to inspect the selected project’s loaded skills.')}<br><small>The demo checklist below is separate from the live loaded count. Load skills in VISTA, then refresh here.</small></p>`;
+  $('#skills-list').innerHTML=data?.skills?.length?data.skills.map((skill,i)=>`<article class="skill-card"><div class="skill-card-heading">${icon('skill')}<span class="tag loaded-tag">Loaded in project</span></div><h2>${esc(skill.name)}</h2><p>${esc(skill.description || 'Description unavailable from this VISTA version.')}</p><div class="skill-card-bottom"><span>${skill.hpc_jobs?.length?`${skill.hpc_jobs.length} job definition${skill.hpc_jobs.length===1?'':'s'} · ${esc(skill.hpc_jobs.join(', '))}`:'Instructions / scientific tools'}</span><button class="text-button" data-skill-index="${i}" ${skill.body?'':'disabled'}>View skill ↗</button></div></article>`).join(''):`<div class="empty-state">${count===0?'No skills are loaded into this project yet.':'The loaded-skill count is unavailable. Open VISTA and check the project connection.'}</div>`;
+  $$('[data-skill-index]').forEach(el=>el.addEventListener('click',()=>{const skill=state.skills.skills[Number(el.dataset.skillIndex)];showDetails(skill.name,`<p>${esc(skill.description || '')}</p><div class="skill-instructions">${formatText(skill.body || '')}</div>`);}));
 }
 function networkGroups() {
   const sites=state.network?.sites || [];
@@ -76,24 +51,13 @@ function networkGroups() {
   ];
 }
 function renderSiteContext() {
-  if(!state.network)return;
-  const total=state.network.siteCount;
-  $('#coverage-label').textContent=`${state.network.headwaterCount} HEADWATER RESERVOIRS`;
-  $('#site-picks').innerHTML=`<div class="network-scope"><strong>${total}</strong><span>study locations ·<br>${state.network.headwaterCount} headwater reservoirs</span><button class="text-button" id="scope-network-button">Explore ↗</button></div>`;
-  $('#scope-network-button').addEventListener('click',()=>switchView('network'));
-  $('#focus-site').innerHTML=networkGroups().map(group=>`<optgroup label="${esc(group.title)} (${group.sites.length})">${group.sites.map(s=>`<option value="${esc(s.id)}" ${s.id===state.focusSiteId?'selected':''}>${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
-  $('#focus-site').value=state.focusSiteId;
-  const selected=state.network.sites.find(s=>s.id===state.focusSiteId);
-  $('#focus-site').classList.toggle('headwater-selected',Boolean(selected?.headwater));
+  // Location browsing is background context; it never changes the fixed demo case.
 }
-function selectNetworkSite(id,showWorkspace=false) {
-  if(state.busy){toast('Finish the current turn before changing the study context.');return;}
+function selectNetworkSite(id) {
   if(!state.network?.sites.some(s=>s.id===id))return;
   state.focusSiteId=id;
-  const study=currentStudy(),index=study?.sites.findIndex(s=>s.id===id);
-  if(Number.isInteger(index)&&index>=0)state.siteIndex=index;
-  renderSiteContext();renderMap();renderResults();renderNetworkRoster();
-  if(showWorkspace){switchView('workspace');$('#focus-site').scrollIntoView({behavior:'smooth',block:'center'});}
+  renderNetwork();
+  toast('Background location selected. The April demo case and optional dam choice stay unchanged.');
 }
 function drawNetworkMap(targetId,width=450,height=285) {
   const target=$('#'+targetId);if(!target || !state.geo || !state.network)return;

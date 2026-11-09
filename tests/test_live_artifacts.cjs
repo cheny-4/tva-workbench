@@ -13,14 +13,14 @@ test('displayed input CSV provenance downloads from uploads', () => {
   const study = context.parsePrediction(csv, 'nested folder/predictions.csv', 'uploads');
   assert.equal(study.provenance.sourceFileKind, 'uploads');
   assert.equal(study.downloads[0].url,
-    '/api/vista/projects/Genesis_Water4Energy/uploads/nested%20folder/predictions.csv');
+    '/api/vista/projects/Water4Energy-TVA-agent-loop/uploads/nested%20folder/predictions.csv');
 });
 
 test('generated prediction CSV defaults to outputs', () => {
   const study = context.parsePrediction(csv, 'predictions.csv');
   assert.equal(study.provenance.sourceFileKind, 'outputs');
   assert.equal(study.downloads[0].url,
-    '/api/vista/projects/Genesis_Water4Energy/outputs/predictions.csv');
+    '/api/vista/projects/Water4Energy-TVA-agent-loop/outputs/predictions.csv');
 });
 
 test('unsupported artifact stores are not parsed into download links', () => {

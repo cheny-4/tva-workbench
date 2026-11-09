@@ -1,22 +1,28 @@
-# v0.4.0 verification
+# v0.5.0 verification
 
-Verified November 7, 2026 on macOS with Python 3.9 and the local VISTA 0.2.4 backend.
+Verified November 8, 2026 on macOS. The interface targets Dali's16–22April2019 case, issued15April, through the local VISTA backend.
 
 ## Automated checks
 
-- **17 local adapter checks passed:** scoped proxy/file access, multipart uploads, SSE flushing, project/skill boundaries, loopback configuration, status refresh and request validation. These tests use a fake loopback VISTA backend.
-- **6 catalog checks passed:** the exact 12 headwaters, 54 unique study locations, unchanged original model-matching keys, explicitly unmapped new reservoirs, source geometry/reference images, and removal of bundled evaluation artifacts.
-- **17 JavaScript checks passed:** CSV parsing and explicit volume units, dates and gaps, review-before-send prompts, integration status, output-store provenance, catalog name matching, saved-file classification, safe paths, filtering and timestamps.
+- **40 Python checks passed:**23 adapter/project-knowledge checks,11 launcher/instance/port/browser checks and6 study-catalog checks.
+- **25 JavaScript checks passed:**fixed-case and source-kind validation, exact loaded-skill counting, separate source/index coverage, optionaldam gating, filename safety, output filtering, date/unit/CSV behavior and correct output-store links.
+- Syntax, unique DOM IDs/selector wiring, JSON parsing and whitespace checks passed.
 
 ## Browser checks
 
-- The live workspace has no recorded-mode switch, historical scenario, evaluation metrics or team/owner labels. Its default results area is empty until actual conversation outputs are available.
-- The location selector has native groups containing 12 headwater reservoirs and 42 other reservoir/gage locations. Wolf Creek's workflow plan prepared an editable request with zero chat messages/tool events; it did not submit work. Dale Hollow was found through network search and selected successfully.
-- Results Library read the real selected project's 10 existing output files. Type filters, search and the truthful no-matching-figures state worked.
-- An isolated, read-only QA backend supplied a synthetic PNG, CSV and Markdown file solely for testing. Figure preview loaded in its dialog, filtering worked, and the CSV download succeeded. The fixture servers and downloaded test file were cleaned up. QA files are not bundled or saved to the real VISTA project.
-- Laptop (1366-pixel) and narrow (390-pixel) workspace/library layouts had no horizontal document overflow. No browser console errors were observed.
-- Original ORNL/Genesis logos retain their aspect ratios and local asset sources. Live agent streaming, Stop, elicitation and session reconnection controls are retained.
+- The real VISTA backend returned404 for `Water4Energy-TVA-agent-loop`. The UI accurately showed Awaiting project, unknown required-skill/KB status and pending scientific evidence. It did not substitute the old LSTM project or fabricate results.
+- An isolated, read-only fake VISTA backend supplied8 core skills plus the optionaldam skill,6 canonical knowledge sources, a matching manifest and4 visiblyQA-labeled PNGs. The UI showed8/8 core skills, separate optional status and loaded the matching figures. Temperature preview opened and the image loaded.
+- Clicking a Critic/loop action prepared an editable request with zero chat messages/tool events. No backend turn was submitted.
+- Dam was off by default. Its request required a reservoir and explicit rule. A matching synthetic Normandy/Hold artifact appeared only when those matched. Changing the rule hid it. Wrong-week manifest metadata cleared all4 case images and the prior dam readout.
+- A rebuilding/unready KB showed0/1 indexes ready and six separately listed, not-ready source badges. Listed documents were not treated as proof of a Ready index.
+- Laptop1366-pixel and narrow390-pixel layouts had no horizontal document overflow. No browser console errors were observed. The schema link and retained secondary views were checked.
 
-No real agent inference, HEADWATER/downscaling/economics execution or HPC submission ran during this revision. The selected project's skill/resource/output metadata was read only. Existing storage is provided by VISTA; this revision adds a browser for its output files rather than a new persistence service.
+## Runnable launch and package
 
-Actual model support for Wolf Creek/Dale Hollow, live compute/runtime readiness, planned science integrations and Windows/Linux launch were not verified. The map remains a reference-point study-coverage view rather than a precise dam-outlet/routing map. Earlier recorded-study assets remain available in the prior Git tags.
+The actual macOS shell launcher was run while the user's older Workbench occupied8765. It startedv0.5.0 on an OS-selected loopback port. Reopening the same copy returned that same actual address and exited without another server. The older process remained untouched. Archive file hashes, executable launcher modes and a fresh extracted-package smoke launch are checked during packaging.
+
+QA backend files and figures were held outside the source/package, and its servers were stopped after checks. Product previews show the real missing-project state; they are not screenshots of synthetic science results.
+
+No real model training, scientific inference, ERA5 download or HPC submission ran during this revision. No VISTA project, skill or knowledge base was created or changed. Dali/Junqi's project, skill loading, indexed sources and actual realization/Trial0 artifacts are required for a scientific walkthrough. [VISTA_SETUP.md](VISTA_SETUP.md) records that setup contract.
+
+Windows/Linux launchers are retained, but desktop launch verification was performed on macOS. Metadata/file-presence checks do not independently reproduce or certify a scientific score.

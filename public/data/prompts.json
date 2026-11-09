@@ -1,73 +1,83 @@
 {
-  "version": "0.4.0",
-  "notice": "A starter prepares an editable request. Review it and send it to the connected VISTA project.",
+  "version": "0.5.0",
+  "notice": "Each starter prepares an editable request; it does not run a skill until you send it.",
   "prompts": [
     {
-      "id": "end-to-end",
-      "category": "Overview",
-      "title": "Plan the full TVA workflow",
-      "description": "Review the four science stages and their handoffs.",
-      "livePrompt": "Prepare a read-only plan for our TVA water–energy workflow: HEADWATER precipitation, air-temperature and runoff forecasts; physical reconstruction and high-resolution downscaling; LSTM water availability; and economic assessment. Describe each stage’s inputs, outputs and verified integration status. Include the optional TRITON and RiTHyMs paths only when the plant handoff requires them. Identify missing skills, files, model mappings and runtime prerequisites. For approved tasks, plan to save generated figures, tables, reports and provenance in the VISTA project outputs and display the result files. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
+      "id": "walkthrough",
+      "category": "Case walkthrough",
+      "title": "Walk the April 2019 case",
+      "description": "Trace the ledger, hypothesis review and saved scientific evidence.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Walk the demo in order: project purpose and fixed week; literature/local-file status; scored/closed/blocked ledger rows; open board and proposed protocol; Proposer/Critic/Referee evidence if recorded; the three-panel realization; frozen Trial 0 scorecard; optional dam scope last. Cite the files behind each answer. Show command strings without executing them. Do not claim a multi-agent run or test passed without actual evidence."
     },
     {
-      "id": "network",
-      "category": "TVA network",
-      "title": "Explore reservoirs and gages",
-      "description": "Distinguish the 12 headwater reservoirs from other study locations.",
-      "livePrompt": "Review the TVA study network of reservoirs and gages. Prioritize the requested headwater reservoirs: Norris, Douglas, South Holston, Watauga, Fontana, Blue Ridge, Normandy, Tims Ford, Chatuge, Nottely, Wolf Creek, Dale Hollow. Distinguish those 12 reservoirs from the other study locations. Treat Estimated Local Flow as a reference quantity, not a site type. Verify available location mappings, quantity definitions, forcing coverage and runnable model support. Wolf Creek and Dale Hollow are included study locations, but their model-site mappings and inputs are not supplied; do not claim they are ready for inference. Do not sum overlapping or allocated flows. Use read-only inspection and planning. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
+      "id": "ledger",
+      "category": "Hypothesis lab",
+      "title": "Read the experiment ledger",
+      "description": "Separate tested, blocked and still-open questions.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.ledger and lab.board to explain the April case, including closed or blocked re-proposals and the remaining open gaps. Start with what was already scored; use lab.literature only for those open gaps. Cite the ledger rows and score-file sources."
+    },
+    {
+      "id": "runoff",
+      "category": "Case evidence",
+      "title": "Explain the ERA5 runoff panel",
+      "description": "Make observation and unavailable forecast explicit.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.realize and its source files to explain why runoff is ERA5 observed surface runoff, not a HEADWATER prediction. Retrieve the existing case realization if present. Keep the HEADWATER runoff forecast slot explicitly unavailable. Do not substitute a different date or manufacture a forecast."
+    },
+    {
+      "id": "literature",
+      "category": "Hypothesis lab",
+      "title": "Inspect the local literature shelf",
+      "description": "Check local sources and the open scientific gap.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.literature and lab.download to show papers already on the shelf, their local download status, and which open ledger gap each addresses. Do not start from a blank literature brainstorm or download data."
+    },
+    {
+      "id": "design",
+      "category": "Hypothesis lab",
+      "title": "Review a proposed experiment",
+      "description": "Proposer, Critic and Referee stay grounded in the ledger.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.design with the April charge and ledger. Inspect any saved Proposer/Critic/Referee artifacts, distinguish proposed hypotheses from reviewed or approved protocols, and identify missing role evidence. The Critic must reject an already-tested blocked re-proposal without a stated delta. A person must approve any training flag; do not run an experiment."
+    },
+    {
+      "id": "commands",
+      "category": "Human review",
+      "title": "Show the existing command",
+      "description": "Read the recipe without executing it.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.show_command to display the exact existing 9×9 training and Trial 0 scoring command/config references. Explain their provenance and the human approval gate. Print commands only; do not execute them or submit a job."
+    },
+    {
+      "id": "realization",
+      "category": "Case evidence",
+      "title": "Collect the three-panel realization",
+      "description": "Temperature, precipitation and observed ERA5 runoff.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use lab.realize to read the saved predictions and ERA5 sro for the case and collect the existing temperature, precipitation and runoff figure files. Preserve the rainfall shortfall and the observation/forecast distinction. Save source JSON and figures in project outputs and display the files. If inputs or a wrapper are absent, report that instead of drawing invented results."
+    },
+    {
+      "id": "downscale",
+      "category": "Case evidence",
+      "title": "Read the frozen downscale comparison",
+      "description": "Trial 0 U-Net beside bilinear; no retrain.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Use downscale.scorecard to read the frozen Trial 0 scorecard and existing Southeast maps for a day within 16–22 April 2019, preferably the existing 19 April case. State that tp and t2m beat bilinear while msl does not when supported by the score file. Keep score scope and standardized units explicit. Do not imply this demonstrates a newly coupled HEADWATER forecast/downscale pipeline. Save and display the existing figure and score source."
     },
     {
       "id": "skills",
-      "category": "Capabilities",
-      "title": "Show the project’s loaded skills",
-      "description": "Inspect the live count, available tools and model coverage.",
-      "livePrompt": "List the skills currently loaded into this TVA project, report their total count, and explain the available scientific tools and jobs. Map verified capabilities onto HEADWATER, downscaling, LSTM water availability, optional TRITON/RiTHyMs and economic assessment. Distinguish a science-stage definition from an installed runnable skill. Use read-only inspection; identify missing prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
-    },
-    {
-      "id": "headwater",
-      "category": "Forecast",
-      "stageId": "headwater",
-      "title": "Inspect the HEADWATER handoff",
-      "description": "Check variables, forecast timing, ensemble members and units.",
-      "livePrompt": "Prepare a read-only HEADWATER handoff check for precipitation, air temperature and runoff for the headwater reservoirs. Inspect available files for grid, coordinate reference, physical units, forecast issue time, valid time and ensemble member IDs. The project discussion describes residual/probability maps; establish the physical-variable reconstruction and reference contract before downstream use. Report only properties supported by the files and identify missing prerequisites. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
-    },
-    {
-      "id": "downscaling",
-      "category": "High resolution",
-      "stageId": "downscaling",
-      "title": "Plan high-resolution downscaling",
-      "description": "Follow the regional fields toward the 1 km target.",
-      "livePrompt": "Prepare a read-only reconstruction and downscaling plan from HEADWATER forecast maps to physical precipitation, air-temperature and runoff fields. The project discussion names a 4 km intermediate grid and 1 km target. Identify the actual available implementation or skill, grids, units and time/member metadata. Explain aggregation into the forcing regions required by the LSTM. Report implementation and input gaps rather than assuming the target is runnable. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
-    },
-    {
-      "id": "lstm",
-      "category": "Water availability",
-      "stageId": "water-availability",
-      "title": "Prepare an LSTM inference plan",
-      "description": "Verify the selected location, model mapping and inputs first.",
-      "livePrompt": "Prepare a read-only inference plan for the saved TVA LSTM at the selected study location, prioritizing the requested headwater reservoirs. Identify the loaded skill, verified model-site mapping, matched forcing CSV/metadata, required preceding input weeks, static attributes, checkpoint, environment and compatible compute resource. Explain output units and the site reference quantity. Verify every requested location’s input coverage; do not assume the study list is model coverage. Wolf Creek and Dale Hollow require new model mappings and inputs before inference. Show exact proposed job settings and expected saved project-output artifacts. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
-    },
-    {
-      "id": "plant-interface",
-      "category": "Plant handoff",
-      "title": "Check the plant data interface",
-      "description": "Align water quantity, temperature, timestamps and provenance.",
-      "livePrompt": "Review the available plant handoff files using read-only tools. Check site-to-plant mapping, water quantity and its definition, units, water temperature when needed, time aggregation, forecast issue/member IDs, quality flags and provenance. Identify whether TRITON hydraulics or RiTHyMs water temperature is required and whether the corresponding capability exists. Propose a consistent handoff schema from verified data. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
-    },
-    {
-      "id": "economics",
-      "category": "Economic assessment",
-      "stageId": "economics",
-      "title": "Prepare the economic assessment",
-      "description": "Clarify generation, cost and risk inputs and assumptions.",
-      "livePrompt": "Prepare a read-only economic-assessment handoff plan for Georgia Tech using verified plant water records. Identify the plant/economic data, model/interface and assumptions needed for generation, cost and risk metrics. Separate available files from missing partner inputs. Do not infer economic impacts from an LSTM output alone. Specify the figures, result tables and provenance that an approved assessment should save in project outputs. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
+      "category": "Readiness",
+      "title": "Check the demo’s skills and sources",
+      "description": "Eight core skills and the indexed lead documents.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Inspect the selected project for the eight required skills: lab.literature, lab.download, lab.ledger, lab.board, lab.design, lab.show_command, lab.realize, downscale.scorecard. List missing skills and the readiness of the six lead knowledge sources. Keep optional dam.readout separate from the core count. Do not count UI cards or a declared plan as installed capability."
     },
     {
       "id": "results",
       "category": "Results",
-      "title": "Organize the generated results",
-      "description": "Collect figures, tables and reports in the Results Library.",
-      "livePrompt": "Review this conversation’s actual generated files and the selected VISTA project outputs. Identify available figures, prediction tables, reports and provenance. Save a concise result summary as a project output and use display_file for the resulting summary and relevant figures/tables so they appear in this workspace and Results Library. Retain original file names, scientific units and provenance, distinguish pending jobs from completed results, and identify missing artifacts. Do not manufacture a result when a file or completed run is absent. Do not submit jobs, train, install software, change settings or fabricate outputs. Show any proposed compute plan and wait for my explicit confirmation before submission."
+      "title": "Collect source-backed demo files",
+      "description": "Keep the figures, scorecards and manifest together.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Inspect actual outputs for this case. Collect the realization JSON, temperature/precipitation/ERA5-observation figures, frozen Trial 0 score JSON and its map without modifying scores. Save a tva-demo-20190416-20190422.json case manifest following the Workbench evidence contract; cite the actual file names and metadata, and use display_file for saved figures. Report any incomplete panel; do not fill it with a substitute."
+    },
+    {
+      "id": "dam",
+      "category": "Optional readout",
+      "title": "Explain the optional dam scope",
+      "description": "A rule-based sentence for one chosen reservoir.",
+      "livePrompt": "Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop. Start from the HEADWATER experiment ledger and allowlisted source files. Treat temperature and precipitation as the frozen det_v2_soil_k9 realization, runoff as ERA5 observed sro with no HEADWATER runoff forecast, and downscaling as the existing Trial 0 1° to 0.25° comparison scored 7 September 2026. Do not submit jobs, execute training commands, retrain, download ERA5, change settings, or invent figures or scores. Report missing files or skills explicitly. Explain the optional dam.readout scope without calculating or choosing an operation. The user must choose Normandy or Norris and provide an agreed plain-language fill/hold rule. Readout inputs must come from the same case realization JSON. Keep the panel optional and last; no RiverWare, release instruction or plant-MW calculation."
     }
   ]
 }

@@ -9,15 +9,15 @@
 - Linux: run `./start.sh` with Python 3.9+ installed.
 - Terminal: `python3 server.py --no-browser --port 8765`.
 
-Open VISTA separately for live mode. The default backend is `http://127.0.0.1:8001` and the project is `Genesis_Water4Energy`. Change these in the application's Connection dialog or use `--backend-url` and `--project`. Optional environment variables: `TVA_PORT`, `TVA_VISTA_URL`, `TVA_PROJECT`.
+Open VISTA separately for live mode. The default backend is `http://127.0.0.1:8001` and the project is `Water4Energy-TVA-agent-loop`. Change these in the application's Connection dialog or use `--backend-url` and `--project`. Optional environment variables: `TVA_PORT`, `TVA_VISTA_URL`, `TVA_PROJECT`.
 
-Keep the launcher terminal open while using the app. Ctrl+C stops the wrapper. If a VISTA agent turn has started, closing its webpage or stopping this wrapper does not cancel that turn; use the live Stop action or VISTA itself. Reopening the launcher opens the existing Workbench only when its health endpoint identifies it; other port conflicts produce an error.
+Keep the launcher terminal open while using the app. Ctrl+C stops the wrapper. If a VISTA agent turn has started, closing its webpage or stopping this wrapper does not cancel that turn; use the live Stop action or VISTA itself. Reopening the launcher reuses only the same folder/version/connection identified by its health endpoint. Other occupied preferred ports fall back to an OS-assigned loopback port; the printed URL is authoritative.
 
 The wrapper binds only to `127.0.0.1`. It is intended for presenting from the same laptop, not remote hosting or a shared multi-user server.
 
 ## Browser contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.4.0"}`. Lightweight instance identification.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.5.0",instance_id,connection_id}`. Lightweight instance identification.
 - `GET /api/config`: `{backend_url,project}`.
 - `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
 - `GET /api/status`: `{app,version,backend_url,project,connected,project_found,skills,resources,detail}`. Cached for 15 seconds; `?fresh=1` bypasses the wrapper cache for an explicit connection refresh. VISTA still owns its facility-status cache. `connected` means VISTA responded; `project_found` means its selected project exists. `resources` contains `{id,name,state,message,checked_at,planned}` for Odo, Frontier, Lux and planned CCSI. Facility readiness is distinct from TVA skill/runtime validation.
@@ -53,12 +53,18 @@ HTTP requests and file uploads have a 64 MiB limit. Upstream request inactivity 
 
 CCSI is a display placeholder for a future resource adapter. Adding its name to the interface does not register it in VISTA, authenticate to the node, or make existing Frontier-only scripts compatible with it. Similarly, Odo and Lux resource availability does not imply the TVA inference skill supports those clusters.
 
-The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.4.0.
+The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.5.0.
 
 ## Verification
 
-Run `python3 -m unittest discover -s tests -v`. The 17 integration checks use an in-process fake VISTA server. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. A separate read-only check confirmed two skills loaded in the local `Genesis_Water4Energy` project, including `tva-weekly-inflow-path2` with an `infer` job.
+Run `python3 -m unittest discover -s tests -v`. The 17 integration checks use an in-process fake VISTA server. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. A separate read-only check confirmed two skills loaded in the local `Water4Energy-TVA-agent-loop` project, including `tva-weekly-inflow-path2` with an `infer` job.
 
 ## Results Library
 
 The library uses the selected project's existing `GET /outputs` listing and scoped individual output-file downloads. VISTA stores output files in its project output directory; the wrapper does not create a second file store. Input uploads are excluded from this library. Safe image previews use the same file endpoint with `?preview=true`; original files remain downloadable. The library refreshes after agent work and through its refresh control.
+
+## Hypothesis-lab readiness and launch identity
+
+`GET /api/knowledge?fresh=1` reads only knowledge-base slugs attached to the selected VISTA project, then their sanitized build/document status. It does not expose raw global knowledge routes or publication contents. Index readiness does not imply the six required lead documents are covered; the browser checks source coverage separately.
+
+Health includes opaque instance/connection IDs so another extracted folder or differently configured process is not mistaken for this copy. `.local/instance.json` stores only validated port/instance metadata. An occupied preferred port uses an OS-selected free port without stopping any process. Browser-opening failures print a copyable URL. Explicit `--port` is also a preferred port; `--port 0` requests an OS-selected port.

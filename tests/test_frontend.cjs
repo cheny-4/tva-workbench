@@ -41,34 +41,33 @@ test('missing totals cannot be exported as zero volume', () => {
   assert.equal(context.parse.format(''),'—');
   assert.equal(context.parse.format(0),'0.0');
 });
-test('starter prompts prepare a request without sending it or claiming a result', () => {
-  const prompt={id:'lstm',livePrompt:'Verify the model mapping before proposing a job.'};
+test('starter prompts prepare the fixed case without sending or adding background locations', () => {
+  const prompt={id:'ledger',livePrompt:'Read the ledger for 16–22 April 2019, issued 15 April 2019.'};
   const field={value:'',focus(){this.focused=true;}};
   const form={scrollIntoView(){}};
   const controls={'#prompt':field,'#chat-form':form};
   context.document={querySelector:selector=>controls[selector]};
   context.promptFixture=prompt;
-  vm.runInContext("state.busy=false; state.prompts=[promptFixture]; state.network={sites:[{id:'WOLF_CREEK',name:'Wolf Creek',headwater:true,modelSiteId:null}]}; state.focusSiteId='WOLF_CREEK'; globalThis.sent=0; sendLive=()=>{sent++;}; switchView=view=>{globalThis.openedView=view;}; toast=()=>{}; usePrompt('lstm');",context);
+  vm.runInContext("state.busy=false; state.prompts=[promptFixture]; state.network={sites:[{id:'WOLF_CREEK',name:'Wolf Creek'}]}; state.focusSiteId='WOLF_CREEK'; globalThis.sent=0; sendLive=()=>{sent++;}; switchView=view=>{globalThis.openedView=view;}; toast=()=>{}; usePrompt('ledger');",context);
   assert.equal(context.openedView,'workspace');
   assert.equal(context.sent,0);
   assert.equal(field.focused,true);
-  assert.match(field.value,/Wolf Creek \(headwater reservoir\)/);
-  assert.match(field.value,/No model-site mapping is supplied/);
-  assert.match(field.value,/Verify the model mapping/);
+  assert.equal(field.value,prompt.livePrompt);
+  assert.doesNotMatch(field.value,/Wolf Creek/);
   const before=field.value;
-  vm.runInContext("state.busy=true; usePrompt('lstm');",context);
+  vm.runInContext("state.busy=true; usePrompt('ledger');",context);
   assert.equal(field.value,before);
 });
-test('science stages retain truthful integration status and live prompts require job review', () => {
-  const workflow=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/workflow.json')));
+test('demo catalog fixes issue/valid dates and keeps eight core skills separate from the dam', () => {
+  const demo=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/demo-case.json')));
   const prompts=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/prompts.json'))).prompts;
-  assert.deepEqual(workflow.stages.map(s=>s.id),['headwater','downscaling','water-availability','economics']);
-  assert.equal(workflow.stages.filter(s=>s.status==='planned').length,3);
-  assert.ok(workflow.stages.every(s=>!Object.hasOwn(s,'owner') && !/recorded/i.test(s.statusLabel)));
-  assert.equal(new Set(prompts.map(p=>p.id)).size,prompts.length);
-  assert.ok(prompts.every(p=>p.livePrompt.includes('Do not submit jobs') && p.livePrompt.includes('explicit confirmation') && !Object.hasOwn(p,'recordedAnswer')));
-  assert.ok(prompts.some(p=>p.id==='results' && p.livePrompt.includes('project output')));
-  const network=prompts.find(p=>p.id==='network').livePrompt;
-  assert.match(network,/Wolf Creek and Dale Hollow/);
-  assert.match(network,/not supplied/);
+  assert.deepEqual(demo.case,{start:'2019-04-16',end:'2019-04-22',issued:'2019-04-15'});
+  assert.equal(demo.project,'Water4Energy-TVA-agent-loop');
+  assert.equal(demo.requiredSkills.length,8);
+  assert.equal(demo.optionalSkill.id,'dam.readout');
+  assert.ok(demo.requiredSkills.every(skill=>skill.id!=='dam.readout'));
+  assert.equal(new Set(prompts.map(prompt=>prompt.id)).size,prompts.length);
+  assert.ok(prompts.every(prompt=>prompt.livePrompt.includes('2019') && !Object.hasOwn(prompt,'recordedAnswer')));
+  assert.ok(prompts.find(prompt=>prompt.id==='runoff').livePrompt.includes('ERA5'));
+  assert.ok(prompts.find(prompt=>prompt.id==='downscale').livePrompt.includes('bilinear'));
 });

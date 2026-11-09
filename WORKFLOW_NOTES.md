@@ -1,13 +1,11 @@
-# Workflow and prompt catalog
+# Hypothesis-lab walkthrough
 
-The four science stages follow the project scope supplied by the user: HEADWATER precipitation, temperature and runoff; high-resolution downscaling; LSTM water availability; and economic assessment. Team/owner labels are omitted from the interface.
+This version follows [Dali's 2 November2026 TVA plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md) and the HEADWATER [lab README](https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/README.md) and [runtime](https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/RUNTIME.md).
 
-The original sources are `Dali-earth-Google-ORNL-GM.pptx` slide 2 (SHA256 `2dba49e2ef2be25aaa314c4e07aa9f3418af30d654a12ddd1624999356c0c7c7`) and `TRITON_discussion.pptx` slide 1 (SHA256 `774e7a9846ccc2a9a184b4324f06c8bd8d7eb1c1d193cdc19836fcd9867d3e07`). The source presentations were inspected previously and are not bundled. They establish the intended handoffs, rather than completed integrations.
+The loop is ledger-first: read what was scored/closed/blocked; let the Proposer identify an open gap; let the Critic check novelty and evidence; let the Referee select a protocol; retain human approval before training; return scored evidence to the ledger. This interface prepares requests and displays source artifacts; a clicked card does not establish that the roles ran or that an experiment passed.
 
-`public/data/workflow.json` describes the stages, inputs, outputs, target resolution, integration status, supporting plant-impact pathways and source references. HEADWATER/downscaling/economics remain planned where no project skill is installed. Loaded skill metadata comes only from the selected VISTA project; workflow cards are not counted as installed skills.
+The scientific case is one issued week,16–22April2019. Temperature/precipitation come from existing frozen9×9 evidence; runoff is an ERA5 observation with the forecast unavailable; the Trial0 downscale comparison was already scored. Native VISTA forum/debate orchestration is a separate feature and is not assumed by these skill contracts.
 
-`public/data/prompts.json` provides editable live requests. Clicking a prompt prepares text for review and never starts computation by itself. Requests check skill coverage, inputs, quantity/unit contracts, runtime and resource prerequisites before proposing execution. New catalog locations need their actual model/forcing support established. Requests to generate artifacts include saving files to the project's output area and displaying them for inspection.
+The core skills, KB lead sources and artifact schema are documented in [VISTA_SETUP.md](VISTA_SETUP.md). Project/skill/index readiness and file metadata are read from VISTA. Missing components remain visible. Dam readout stays optional and last; choosing a background study location never enables or selects a dam policy.
 
-The LSTM's thirteen-week input window includes a target week plus twelve preceding weeks; it is not a thirteen-week forecast lead. The plant/economic handoff must establish what each water quantity means before using it as total inflow or summing locations. TRITON hydraulics, river temperature and plant-data pathways remain supporting integrations with their own readiness requirements.
-
-No model, agent inference or HPC job was run to author these catalogs.
+The earlier broad LSTM-to-economics pipeline remains project context in prior Git versions, rather than a claim of execution in this walkthrough. No training, download, scientific agent run or HPC submission was performed to author this interface.
