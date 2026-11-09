@@ -1,4 +1,4 @@
-# TVA Workbench · Hypothesis-lab demo · v0.6.0
+# TVA Workbench · Hypothesis-lab demo · v0.7.0
 
 A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. The case is fixed: **16–22 April 2019, issued 15 April 2019**. VISTA supplies the live agent, loaded skills, knowledge bases and saved files.
 
@@ -6,7 +6,7 @@ A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.6.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **TVA-Workbench-v0.7.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
 
 The launcher prints the version, folder and actual local URL, and opens a browser tab. It prefers port 8765. If another copy occupies that port, this version uses an available loopback port without stopping the other process. Opening this same copy again reuses its validated running instance. Follow the printed URL; an older tab on port 8765 may belong to another version. Control+C stops this wrapper.
 
@@ -14,7 +14,9 @@ No npm, pip or frontend build is required. The launcher uses VISTA's bundled Pyt
 
 ## Start with a conversation
 
-The opening screen gives a short Start here guide, three suggested questions and a large conversation area. Choose **Begin walkthrough** or a hint, review the editable request, then press **Send**. Hints prepare text only. **More hints** keeps the remaining questions available without a separate Prompt Library. The same hints appear in **Conversations** beside saved history.
+The **Hypothesis lab** opens with a large conversation on the left and an interactive workflow guide on the right. Start with **Read the ledger**, then explore Proposer, Critic, Referee, human review and evidence. Each step explains its purpose and shows a plain-language question. Selecting a step explores the idea; **Use this question** puts an editable request into the chat, with that question first and the fixed-case/source instructions below it. Review the request and press **Send** to call VISTA.
+
+The diagram describes the research loop; its highlighted step is a selection, not execution progress. Human review does not grant approval or start training. **Inspect results** explains the fixed evidence and offers a button to open the case figures. On narrow screens the guide stacks above the conversation. Existing hints remain in chat and **Conversations**, with additional questions under **More hints**.
 
 Case figures, the lab loop, project/source readiness, optional reservoir readout, walkthrough questions and conversation artifacts start collapsed below the chat. Open only the section needed, or use **Figures** in the chat header. Streaming, tool activity and Stop remain in the conversation area.
 
@@ -58,12 +60,13 @@ The wrapper stores only backend/project selection and validated launch-port meta
 | v0.4.0 | Full live workspace and Results Library |
 | v0.5.0 | Fixed April 2019 hypothesis-lab walkthrough |
 | v0.6.0 | Chat-first walkthrough, integrated hints and collapsible network |
+| v0.7.0 | Hypothesis lab with a conversation and interactive workflow guide |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or use GitHub's Code → Download ZIP. GitHub hosts source; the Python/VISTA app runs on the laptop.
 
 ## Development
 
-The app is vanilla HTML/CSS/JavaScript with a Python standard-library adapter. `hypothesis-demo.js` owns case/readiness/artifact validation; `project-ui.js` owns secondary views; `results-library.js` browses stored outputs. Brand assets remain local and proportional. See [BRANDING.md](BRANDING.md), [DATA_NOTES.md](DATA_NOTES.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BACKEND.md](BACKEND.md) and [VERIFICATION.md](VERIFICATION.md).
+The app is vanilla HTML/CSS/JavaScript with a Python standard-library adapter. `hypothesis-guide.js` owns the educational workflow diagram; `hypothesis-demo.js` owns case/readiness/artifact validation; `project-ui.js` owns secondary views; `results-library.js` browses stored outputs. Brand assets remain local and proportional. See [BRANDING.md](BRANDING.md), [DATA_NOTES.md](DATA_NOTES.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BACKEND.md](BACKEND.md) and [VERIFICATION.md](VERIFICATION.md).
 
 ```sh
 python3 -m unittest discover -s tests -v

@@ -94,14 +94,15 @@ function addMessage(role,text,options={}) {
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
   $('.agent-panel')?.classList.remove('has-messages');
-  $('#chat-messages').innerHTML='<div class="welcome"><div class="welcome-symbol">✳</div><h3>Let’s explore this week.</h3><p>Choose a suggested question above, or ask your own. The agent will guide you through the case and its source files.</p></div>';
+  $('#chat-messages').innerHTML='<div class="welcome"><div class="welcome-symbol">✳</div><h3>Begin with a question.</h3><p>Try “What have we already learned for this week?” Explore a step in the guide, then use its question to start the conversation.</p></div>';
 }
 function prepareDemoPrompt(text) {
   if(state.busy){toast('Finish or stop the current turn before preparing another request.');return;}
   switchView('workspace');
   $$('#chat-hints details, #conversation-hints details').forEach(detail=>{detail.open=false;});
-  $('#prompt').value=text;$('#prompt').focus();
-  $('#chat-form').scrollIntoView({behavior:'smooth',block:'center'});
+  $('#prompt').value=text;$('#prompt').focus({preventScroll:true});
+  const composer=$('#chat-form'),bounds=composer.getBoundingClientRect?.();
+  if(!bounds || bounds.top<0 || bounds.bottom>window.innerHeight)composer.scrollIntoView({behavior:'smooth',block:'nearest'});
   toast('Request prepared. Review it, then press Send.');
 }
 async function refreshKnowledge() {
@@ -126,7 +127,7 @@ function renderDemoStatus() {
     const names=new Set(required.map(skill=>skill.name));
     const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id));
     const knowledgePending=state.knowledge?.project_found && state.knowledge.all_ready===false;
-    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to VISTA. Choose a hint or ask your own question.';
+    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to VISTA. Explore the guide or ask your own question.';
     line.dataset.state='connected';
   }
   const badge=$('#case-figures-status');
@@ -139,11 +140,16 @@ async function refreshDemo() {
   renderDemoStatus();
 }
 
+function openCaseFigures() {
+  switchView('workspace');
+  const details=$('#case-figures-details');details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function switchView(view) {
   state.view=view;
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Demo walkthrough',network:'Study network',skills:'Demo skills',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
+  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Demo skills',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
   if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='resources') renderResources();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
@@ -464,7 +470,7 @@ $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
 $('#skills-refresh').addEventListener('click',async()=>{await refreshSkills();await refreshKnowledge();await refreshDemo();});
 $('#workflow-details').addEventListener('click',showWorkflowDetails);
 $('#demo-setup-button').addEventListener('click',showSettings);
-$('#view-case-figures').addEventListener('click',()=>{const details=$('#case-figures-details');details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'});});
+$('#view-case-figures').addEventListener('click',openCaseFigures);
 $('#site-search').addEventListener('input',renderNetworkRoster);
 $('#connection-button').addEventListener('click',showSettings);$('#resource-settings').addEventListener('click',showSettings);
 $('#refresh-button').addEventListener('click',()=>{refreshConnection();if(state.view==='files')renderFiles();toast('Checking the local VISTA connection.');});
@@ -481,7 +487,7 @@ $('#mode-info').addEventListener('click',showSettings);
 $('#provenance-button').addEventListener('click',showProvenance);
 $('#export-report').addEventListener('click',exportBrief);
 $('#new-chat').addEventListener('click',newConversation);$('#history-new').addEventListener('click',newConversation);
-$('#workflow-button').addEventListener('click',()=>usePrompt('walkthrough'));
+$('#workflow-button').addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id==='ledger');if(prompt)prepareDemoPrompt('What have we already learned for 16–22 April 2019?\n\n'+prompt.livePrompt);});
 
 $('#chat-form').addEventListener('submit',event=>{event.preventDefault();const prompt=$('#prompt').value.trim();if(!prompt||state.busy)return;if(state.status?.project_found)$('#prompt').value='';sendLive(prompt);});
 $('#prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('#chat-form').requestSubmit();}});
@@ -504,6 +510,7 @@ async function init() {
     const [geo,config,network,demoCase,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/demo-case.json'),api('/data/prompts.json')]);
     state.geo=geo;state.config=config;state.network=network;state.demoCase=demoCase;state.prompts=prompts.prompts;
     TVAHypothesisDemo.init({caseDefinition:demoCase,api,projectUrl,fileUrl,preparePrompt:prepareDemoPrompt,showDetails,toast});
+    TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures});
     renderPromptLibrary();renderSkills();renderSiteContext();renderMap();renderResults();showWelcome();
     await refreshConnection();
     state.sessionId=readSessionId();
