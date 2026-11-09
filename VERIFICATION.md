@@ -1,28 +1,28 @@
-# v0.7.0 verification
+# v0.8.0 verification
 
-Verified November 9, 2026 on macOS. This revision renames the opening page **Hypothesis lab**, places the conversation on the left and adds an interactive explanation of the research loop on the right. The fixed case remains **16–22 April 2019**, issued **15 April**.
+Verified November 9, 2026 on macOS. Hypothesis lab now consists only of a full-height left conversation and full-height explanatory blocks on the right. Supporting controls have moved to their relevant views. The fixed case remains **16–22 April 2019**, issued **15 April**.
 
 ## Automated checks
 
 - **40 Python checks passed:** 23 adapter/project-knowledge checks, 11 launcher/instance/port/browser checks and 6 study-catalog checks, using isolated loopback servers.
-- **36 JavaScript checks passed:** the previous 30 checks plus 6 guide checks for the six-stage mapping, question-first requests, source-grounded role focus, fixed-case/fallback guards, selection-only behavior, explicit question/figure actions and an explorable unavailable state.
-- JavaScript syntax, HTML nesting, unique IDs and whitespace checks passed. All 111 prior page IDs are retained; the new guide mount is unique.
+- **43 JavaScript checks passed:** the previous 36 plus 4 research-link integration checks and 3 guide source-link checks. These cover matching case metadata, actual listed files, safe encoded project-scoped links, unavailable/error cleanup, superseded reads, stage-specific display and escaped labels.
+- JavaScript syntax, HTML nesting and whitespace checks passed. The page has 110 unique IDs. A structural check confirmed figures/dam in Results Library, readiness/sources in Skills, questions/artifacts/export in Conversations, and only the chat/guide grid in the workspace. The duplicate loop IDs are removed.
 
 ## Browser checks
 
-- Hypothesis lab navigation, breadcrumb and heading replace Demo walkthrough. The laptop layout has a large chat on the left and an equally tall guide on the right. Default ledger explanation, question action and chat composer fit in the first screen at 1280×720 and 1366×768.
-- The six guide steps explain Ledger, Proposer, Critic, Referee, human review and saved evidence. Keyboard selection changes only the explanation and pressed state. A draft question stayed intact through selection. **Use this question** prepared a request beginning with that exact question and retained case/source instructions, with zero messages or tool activity. The desktop page did not scroll when the composer was already visible.
-- Human review explicitly describes command inspection and a separate human training gate. The guide does not grant approval, set flags or execute a workflow. Its highlight is explanatory selection, not progress.
-- On a 390-pixel screen the guide stacks above chat with no horizontal document overflow. Using a question brings the composer into view.
-- An isolated read-only fake VISTA supplied a conspicuously labeled long saved transcript, 8 core skills plus optional dam, 6 canonical sources, a manifest and 4 watermarked QA figures. The guide's results action opened the case figures; all four image files loaded. The optional dam remained off. Scientific evidence validation and its source distinctions are unchanged.
-- A read-only QA watcher simulated reopening a working saved conversation without starting a turn. Stop remained visible, the transcript scrolled internally and the guide remained explorable. Attempting to prepare another question while working preserved the draft and displayed the busy guard. All fixture mutations returned 405; no real agent or science request was sent.
-- The real local VISTA backend was reachable but `Water4Energy-TVA-agent-loop` was absent. The interface reported the missing project and pending evidence while the educational guide remained usable. Product previews show this real state, not synthetic scientific results.
-- Network grouping and conversation hints remain available. No browser console errors were observed.
+- At 1280×720 both chat and guide span from y=108 to y=708 beneath the branding bar. At 1366×900 both end at y=888. The document exactly matches the viewport height, with no page scroll or content below the workspace. A 1920×1080 check also used the available height. Transcript and guide content scroll internally as needed.
+- The right side has separate workflow and selected-step blocks. Actual saved research links appear as another block only for the corresponding selected step. Diagram selections preserve drafts; explicit question preparation retains the fixed-case request and source guards.
+- Both the chat Figures control and the guide View case figures control open Results Library and expand its case gallery. Skills & sources exposes project/required-skill/knowledge readiness, six source checks, Connection details and Demo scope. Conversations exposes the six extra questions, selected-conversation files, provenance and Export brief. Preparing a relocated question returns to the full-height lab without sending it.
+- An isolated read-only fake VISTA supplied five conspicuously QA-labeled research files, a long saved conversation, eight core skills plus optional dam, six canonical sources, a matching manifest and four watermarked figures. Correct saved links followed the selected Ledger/Critic stages. All four case figures loaded in Results Library. The optional dam was off initially; explicit Normandy selection and the exact synthetic rule showed its matching saved Hold readout.
+- Switching that fixture to a wrong week cleared all saved research links, case images and the prior dam readout. No stale source was presented as matching evidence.
+- A read-only QA watcher simulated reopening a working saved conversation. Stop and the composer stayed within the viewport, including with More hints and workflow activity expanded. The busy guard preserved the draft when a guide request was attempted. No backend turn was started; fixture mutations return 405.
+- Secondary pages release the fixed-height layout and scroll normally. Returning to Hypothesis lab restores it. A 390-pixel layout stacks guide/chat without horizontal overflow; preparing a question brings the composer into view.
+- The real local VISTA backend was reachable but the named demo project was absent. The interface reported the missing project and pending evidence. Product previews show this state; synthetic QA files are not product previews. No browser console errors were observed.
 
 ## Runnable launch and package
 
-The actual macOS shell launcher started v0.7.0 on an OS-selected loopback port while the user's older copy occupied 8765. The older process was untouched. The release ZIP is checked for integrity, every manifest hash and executable launcher modes. A freshly extracted copy is smoke-tested through its printed URL, version, project selection, case schema and new guide/layout assets; reopening must reuse that exact running instance.
+The macOS shell launcher started v0.8.0 on an OS-selected loopback port while an older Workbench occupied 8765. The older process was untouched. Release packaging verifies ZIP integrity, every manifest hash and executable launcher modes. A freshly extracted copy is smoke-tested through its printed URL, version, project selection, schema and interface assets; reopening must reuse that exact running instance.
 
-QA fixtures remain outside the shipped repository/package. Their listeners and the owned preview were stopped after checks. No real project, skill, knowledge base, model training, scientific inference, ERA5 download or HPC job was created or changed. The scientific walkthrough requires the backend dependencies in [VISTA_SETUP.md](VISTA_SETUP.md).
+QA fixtures remain outside the shipped repository/package. Their listeners and the owned preview were stopped after checks. No real VISTA project, skill, knowledge base, training, scientific inference, ERA5 download or HPC job was created or changed. The scientific walkthrough still requires the backend dependencies in [VISTA_SETUP.md](VISTA_SETUP.md).
 
 Windows/Linux launchers are retained; desktop launch verification was performed on macOS. Metadata and file-presence checks do not independently reproduce or certify a scientific score.

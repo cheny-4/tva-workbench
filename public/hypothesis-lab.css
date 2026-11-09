@@ -1,9 +1,15 @@
-/* Keep the conversation and its step-by-step guide together on a laptop. */
-.hypothesis-lab-grid{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(320px,1fr);gap:16px;height:clamp(440px,calc(100dvh - 235px),820px);min-height:0;margin:0 0 21px;align-items:stretch}
+/* Give the active lab all space beneath the branding bar. */
+.hypothesis-lab-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:16px;height:100%;min-height:0;margin:0;align-items:stretch}
 .hypothesis-lab-grid>.demo-agent-primary{width:100%;height:100%;min-height:0;max-height:none;min-width:0;margin:0;align-self:stretch}
-.hypothesis-lab-grid>.hypothesis-guide-panel{height:100%;min-height:0;min-width:0;margin:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.hypothesis-lab-grid>.hypothesis-guide-panel{display:flex;flex-direction:column;height:100%;min-height:0;min-width:0;margin:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .hypothesis-lab-grid .demo-agent-primary>.panel-heading{padding:13px 18px;min-height:55px;gap:10px}
-.hypothesis-lab-grid .demo-agent-primary>.panel-heading h2{font-size:15px;white-space:nowrap}
+.lab-chat-title{min-width:0}
+.lab-chat-title h1{font-size:22px;font-weight:550;line-height:1.2;letter-spacing:-.5px;margin:0;color:var(--genesis-navy)}
+.lab-chat-title p{display:flex;align-items:center;flex-wrap:wrap;gap:4px 9px;font-size:10px;line-height:1.6;margin:5px 0 0;color:#6b8090}
+.lab-chat-title p strong{font-weight:550;color:#456277}
+.lab-chat-title p span{font-size:9px}
+.hypothesis-lab-grid .demo-status-bar{flex-shrink:0;min-height:0;padding:7px 18px;border-bottom:1px solid #e4ebef;font-size:9px;line-height:1.7;background:#fbfcfd}
+.hypothesis-lab-grid .demo-status-bar .text-button{font-size:9px}
 .hypothesis-lab-grid .agent-header-actions{gap:8px}
 .lab-chat-intro{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:10px 18px;border-bottom:1px solid #e1eae5;background:#f5f9f6;flex-shrink:0}
 .lab-chat-intro p{margin:0;color:#577264;font-size:11px;line-height:1.7;min-width:0}
@@ -21,6 +27,14 @@
 .hypothesis-lab-grid .demo-agent-primary .composer textarea{font-size:12px;padding:12px;min-height:55px}
 .hypothesis-lab-grid .demo-agent-primary .activity-drawer{margin:0 16px}
 .hypothesis-lab-grid .demo-agent-primary #workflow-strip{padding:9px 18px}
-@media(min-width:1600px){.hypothesis-lab-grid{height:clamp(440px,calc(100dvh - 235px),900px)}}
-@media(max-width:1100px){.hypothesis-lab-grid{grid-template-columns:minmax(0,1fr);height:auto;gap:16px}.hypothesis-lab-grid>.hypothesis-guide-panel{grid-row:1;height:auto;max-height:520px;min-height:300px}.hypothesis-lab-grid>.demo-agent-primary{grid-row:2;height:clamp(500px,calc(100dvh - 160px),740px);min-height:500px;max-height:740px}.hypothesis-lab-grid .demo-agent-primary>#chat-hints{max-height:30%}}
-@media(max-width:640px){.hypothesis-lab-grid{gap:14px;margin-bottom:17px}.hypothesis-lab-grid>.hypothesis-guide-panel{min-height:280px;max-height:520px}.hypothesis-lab-grid>.demo-agent-primary{height:640px;min-height:540px;max-height:780px}.hypothesis-lab-grid .demo-agent-primary>.panel-heading{padding:13px 15px;gap:8px}.hypothesis-lab-grid .demo-agent-primary>.panel-heading h2{font-size:14px}.hypothesis-lab-grid .agent-header-actions{gap:7px}.lab-chat-intro{padding:10px 14px;gap:10px}.lab-chat-intro p{font-size:10px;line-height:1.7}.lab-chat-intro .primary-button{font-size:9px;padding:8px;gap:4px}.lab-chat-intro .primary-button svg{width:12px;height:12px}.hypothesis-lab-grid .demo-agent-primary>#chat-hints{padding:10px 14px}.hypothesis-lab-grid .demo-agent-primary .chat-messages{padding:18px 17px 12px}.hypothesis-lab-grid .demo-agent-primary .welcome h3{font-size:22px}.hypothesis-lab-grid .demo-agent-primary .composer{margin:11px 14px 14px}.hypothesis-lab-grid .demo-agent-primary .activity-drawer{margin:0 14px}.hypothesis-lab-grid .demo-agent-primary #workflow-strip{padding:9px 15px}}
+.results-evidence-sections{display:grid;gap:12px;margin-bottom:24px}
+#view-skills #demo-setup-details{margin-bottom:25px}
+.project-readiness-actions{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 15px}
+.project-readiness-actions p{font-size:11px;line-height:1.8;color:#627b8c;margin:0}
+.project-readiness-actions .text-button{font-size:10px;flex-shrink:0}
+.conversation-starting-tools{display:grid;gap:12px;margin-bottom:22px}
+.conversation-starting-tools .conversation-help-panel{margin:0}
+#view-history .demo-conversation-details{margin-top:24px;margin-bottom:25px}
+@media(min-width:1101px){body.lab-active{overflow:hidden}body.lab-active .app-shell{height:100dvh;display:flex;flex-direction:column}body.lab-active .app-shell>.topbar{flex-shrink:0}body.lab-active .app-shell>main{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;padding:16px 20px 12px}body.lab-active #view-workspace.active{display:flex;flex-direction:column;flex:1;min-height:0;height:100%}body.lab-active .hypothesis-lab-grid{height:auto;flex:1;min-height:0}}
+@media(max-width:1100px){.hypothesis-lab-grid{grid-template-columns:minmax(0,1fr);height:auto;gap:16px;margin-bottom:20px}.hypothesis-lab-grid>.hypothesis-guide-panel{grid-row:1;height:auto;max-height:none;min-height:0;overflow:visible;scrollbar-gutter:auto}.hypothesis-lab-grid>.demo-agent-primary{grid-row:2;height:clamp(540px,calc(100dvh - 80px),860px);min-height:540px;max-height:860px}.hypothesis-lab-grid .demo-agent-primary>#chat-hints{max-height:30%}}
+@media(max-width:640px){.hypothesis-lab-grid{gap:14px;margin-bottom:17px}.hypothesis-lab-grid>.demo-agent-primary{height:700px;min-height:600px;max-height:820px}.hypothesis-lab-grid .demo-agent-primary>.panel-heading{padding:13px 15px;gap:8px}.lab-chat-title h1{font-size:19px}.lab-chat-title p{font-size:9px;gap:3px 7px}.lab-chat-title p span{font-size:8px}.hypothesis-lab-grid .agent-header-actions{gap:7px}.hypothesis-lab-grid .demo-status-bar{padding:7px 14px;gap:10px;font-size:9px}.hypothesis-lab-grid .demo-status-bar .text-button{font-size:8px}.lab-chat-intro{padding:10px 14px;gap:10px}.lab-chat-intro p{font-size:10px;line-height:1.7}.lab-chat-intro .primary-button{font-size:9px;padding:8px;gap:4px}.lab-chat-intro .primary-button svg{width:12px;height:12px}.hypothesis-lab-grid .demo-agent-primary>#chat-hints{padding:10px 14px}.hypothesis-lab-grid .demo-agent-primary .chat-messages{padding:18px 17px 12px}.hypothesis-lab-grid .demo-agent-primary .welcome h3{font-size:22px}.hypothesis-lab-grid .demo-agent-primary .composer{margin:11px 14px 14px}.hypothesis-lab-grid .demo-agent-primary .activity-drawer{margin:0 14px}.hypothesis-lab-grid .demo-agent-primary #workflow-strip{padding:9px 15px}.project-readiness-actions{align-items:flex-start;gap:12px}.project-readiness-actions p{font-size:10px}.project-readiness-actions .text-button{font-size:9px}}

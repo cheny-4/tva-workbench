@@ -3,6 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
 const demo=require('../public/hypothesis-demo.js');
 const definition=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/data/demo-case.json'),'utf8'));
 const fixed={start:'2019-04-16',end:'2019-04-22',issued:'2019-04-15'};
@@ -87,4 +88,89 @@ test('the dam readout stays unavailable until explicitly enabled with matching r
   const invalid=fixture();
   invalid.panels.temperature.model='unknown';invalid.panels.precipitation.model='unknown';invalid.panels.runoff.kind='forecast';
   assert.equal(demo.validateDamReadout(readout,selection,demo.validateManifest(invalid,files)).available,false);
+});
+
+function refreshHarness(provider) {
+  const context=vm.createContext({module:{exports:{}},document:{querySelector:()=>null}});
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/hypothesis-demo.js'),'utf8'),context);
+  const instance=context.module.exports;
+  const outputBase='/api/vista/projects/'+definition.project+'/outputs';
+  instance.init({caseDefinition:definition,projectUrl:suffix=>'/api/vista/projects/'+definition.project+suffix,api:provider});
+  return {instance,outputBase,refresh:(next={})=>instance.refresh({project:definition.project,status:{project_found:true},...next})};
+}
+function researchFixture() {
+  const manifest=fixture();
+  manifest.research={ledger_file:'records/ledger April.json',proposal_file:'review/proposal.md',critic_file:'review/critic.md',referee_file:'review/referee.md',protocol_file:'review/human protocol.md'};
+  return {manifest,listing:[...files,{name:definition.manifest,size:100},...Object.values(manifest.research).map(name=>({name,size:100}))]};
+}
+const plain=value=>JSON.parse(JSON.stringify(value));
+
+test('refresh returns actual research references as encoded links scoped to the current output store',async()=>{
+  const {manifest,listing}=researchFixture();
+  manifest.research.unrecognized_file='not-a-research-step.md';
+  manifest.research.url='https://example.com/untrusted';
+  listing.push({name:'not-a-research-step.md',size:100});
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?listing:manifest);
+  const result=await harness.refresh();
+  assert.equal(result.matched,true);
+  assert.deepEqual(plain(result.researchLinks),[
+    {step:'ledger',name:'records/ledger April.json',url:harness.outputBase+'/records/ledger%20April.json'},
+    {step:'proposer',name:'review/proposal.md',url:harness.outputBase+'/review/proposal.md'},
+    {step:'critic',name:'review/critic.md',url:harness.outputBase+'/review/critic.md'},
+    {step:'referee',name:'review/referee.md',url:harness.outputBase+'/review/referee.md'},
+    {step:'human',name:'review/human protocol.md',url:harness.outputBase+'/review/human%20protocol.md'},
+  ]);
+});
+
+test('research references require existing safe names and a matching non-example manifest',async()=>{
+  let data=researchFixture();
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?data.listing:data.manifest);
+  for(const name of ['../ledger.json','/ledger.json','https://example.com/ledger.json','a%2fledger.json','a\\ledger.json','a?ledger.json','a#ledger.json','a\u0000.json']) {
+    data=researchFixture();data.manifest.research={ledger_file:name};data.listing.push({name,size:100});
+    assert.deepEqual(plain((await harness.refresh()).researchLinks),[],name);
+  }
+  data=researchFixture();data.manifest.research={ledger_file:'absent.json'};
+  assert.deepEqual(plain((await harness.refresh()).researchLinks),[]);
+  for(const change of [{schema_version:2},{case:{...fixed,start:'2019-04-17'}},{example_only:true}]) {
+    data=researchFixture();Object.assign(data.manifest,change);
+    const result=await harness.refresh();
+    assert.equal(result.matched,false);
+    assert.deepEqual(plain(result.researchLinks),[]);
+  }
+});
+
+test('unavailable project, missing manifest and read failure explicitly clear prior research links',async()=>{
+  const data=researchFixture();let mode='valid';
+  const harness=refreshHarness(async url=>{
+    if(mode==='failed')throw new Error('QA fixture unavailable');
+    if(url.endsWith('/outputs'))return mode==='missing'?files:data.listing;
+    return data.manifest;
+  });
+  for(const unavailable of [
+    ()=>harness.refresh({project:'Other project'}),
+    ()=>harness.refresh({status:{project_found:false}}),
+    ()=>{mode='missing';return harness.refresh();},
+    ()=>{mode='failed';return harness.refresh();},
+  ]) {
+    mode='valid';assert.equal((await harness.refresh()).researchLinks.length,5);
+    const result=await unavailable();
+    assert.equal(result.matched,false);
+    assert.deepEqual(plain(result.researchLinks),[]);
+  }
+});
+
+test('a superseded output read cannot replace a newer set of research links',async()=>{
+  const data=researchFixture();let release,reads=0;
+  const harness=refreshHarness(async url=>{
+    if(url.endsWith('/outputs')) {
+      if(++reads===1)return new Promise(resolve=>{release=resolve;});
+      return data.listing;
+    }
+    return data.manifest;
+  });
+  const previous=harness.refresh();
+  const current=await harness.refresh();
+  assert.equal(current.researchLinks.length,5);
+  release(data.listing);
+  assert.equal(await previous,null);
 });

@@ -1,4 +1,4 @@
-# TVA Workbench · Hypothesis-lab demo · v0.7.0
+# TVA Workbench · Hypothesis-lab demo · v0.8.0
 
 A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. The case is fixed: **16–22 April 2019, issued 15 April 2019**. VISTA supplies the live agent, loaded skills, knowledge bases and saved files.
 
@@ -6,7 +6,7 @@ A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.7.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **TVA-Workbench-v0.8.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
 
 The launcher prints the version, folder and actual local URL, and opens a browser tab. It prefers port 8765. If another copy occupies that port, this version uses an available loopback port without stopping the other process. Opening this same copy again reuses its validated running instance. Follow the printed URL; an older tab on port 8765 may belong to another version. Control+C stops this wrapper.
 
@@ -18,7 +18,18 @@ The **Hypothesis lab** opens with a large conversation on the left and an intera
 
 The diagram describes the research loop; its highlighted step is a selection, not execution progress. Human review does not grant approval or start training. **Inspect results** explains the fixed evidence and offers a button to open the case figures. On narrow screens the guide stacks above the conversation. Existing hints remain in chat and **Conversations**, with additional questions under **More hints**.
 
-Case figures, the lab loop, project/source readiness, optional reservoir readout, walkthrough questions and conversation artifacts start collapsed below the chat. Open only the section needed, or use **Figures** in the chat header. Streaming, tool activity and Stop remain in the conversation area.
+The Hypothesis lab fills the laptop viewport: the conversation occupies the full left column, with the explanation and selected question in full-height blocks on the right. No supporting cards or footer follow beneath it. Streaming, tool activity and Stop stay in the conversation area.
+
+Supporting information has one clear home:
+
+| Information | Where to find it |
+| --- | --- |
+| Research loop and saved research-source links | Interactive guide on the right |
+| Case figures and optional reservoir readout | Results Library; **Figures** in chat and **View case figures** in the guide open the case gallery |
+| Project connection, required skills, knowledge indexing and source coverage | **Skills & sources**; connection controls still open the existing settings dialog |
+| Extra case questions, selected-conversation files, provenance and Export brief | **Conversations** |
+
+The former bottom loop repeats the guide and is removed. Actual research-source links from the matching manifest remain attached to the corresponding guide step. Invalid or unavailable evidence clears those links.
 
 In **TVA network**, the 12 headwaters start expanded and the other 42 locations start collapsed. Expand either group as needed. Searching reveals matching locations automatically; clearing the search restores your expansion choices.
 
@@ -61,6 +72,7 @@ The wrapper stores only backend/project selection and validated launch-port meta
 | v0.5.0 | Fixed April 2019 hypothesis-lab walkthrough |
 | v0.6.0 | Chat-first walkthrough, integrated hints and collapsible network |
 | v0.7.0 | Hypothesis lab with a conversation and interactive workflow guide |
+| v0.8.0 | Full-height lab with supporting information in its relevant views |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or use GitHub's Code → Download ZIP. GitHub hosts source; the Python/VISTA app runs on the laptop.
 

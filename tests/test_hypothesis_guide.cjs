@@ -18,7 +18,7 @@ function button(dataset={}) {
   };
 }
 function fixture() {
-  const root={nodes:[],html:'',prepared:null,figures:null,announcement:{textContent:''}};
+  const root={nodes:[],html:'',prepared:null,figures:null,announcement:{textContent:''},sources:{innerHTML:'',hidden:true}};
   const detail={html:'',set innerHTML(value){
     this.html=value;root.prepared=button();
     if(/data-guide-prepare disabled/.test(value))root.prepared.attributes.disabled=true;
@@ -26,12 +26,14 @@ function fixture() {
   }};
   Object.defineProperty(root,'innerHTML',{set(value){
     this.html=value;
+    this.sources.innerHTML='';this.sources.hidden=true;
     this.nodes=Array.from(value.matchAll(/data-guide-step="([^"]+)"/g),match=>button({guideStep:match[1]}));
   }});
   root.querySelectorAll=selector=>selector==='[data-guide-step]'?root.nodes:[];
   root.querySelector=selector=>({
     '[data-guide-detail]':detail,'[data-guide-prepare]':root.prepared,
     '[data-guide-figures]':root.figures,'[data-guide-announcement]':root.announcement,
+    '[data-guide-sources]':root.sources,
   }[selector]);
   const context=vm.createContext({
     module:{exports:{}},document:{querySelector:selector=>selector==='#hypothesis-guide'?root:null},
@@ -137,4 +139,79 @@ test('the guide remains explorable when case preparation is unavailable',()=>{
   guide.init({caseDefinition,prompts});
   assert.equal(root.prepared.attributes.disabled,true);
   assert.match(detail.html,/composer is unavailable/);
+});
+
+test('saved research links accept only exact safe file paths in the fixed project output scope',()=>{
+  const {guide}=fixture();
+  const prefix='/api/vista/projects/Water4Energy-TVA-agent-loop/outputs/';
+  const valid={step:'ledger',name:'research/April ledger.json',url:prefix+'research/April%20ledger.json'};
+  const entries=[valid,{...valid},
+    {...valid,url:'https://example.org'+valid.url},
+    {...valid,url:'/api/vista/projects/Another-project/outputs/research/April%20ledger.json'},
+    {...valid,url:valid.url+'?preview=true'},
+    {...valid,url:prefix+'unrelated.json'},
+    {...valid,step:'evidence'},
+    {step:'critic',name:'../critic.json',url:prefix+'../critic.json'},
+    {step:'critic',name:'research//critic.json',url:prefix+'research//critic.json'},
+    {step:'critic',name:'%2e%2e/critic.json',url:prefix+'%252e%252e/critic.json'},
+    {step:'critic',name:'bad\\critic.json',url:prefix+'bad%5Ccritic.json'},
+    {step:'critic',name:'bad?critic.json',url:prefix+'bad%3Fcritic.json'},
+    {step:'critic',name:'bad\u0000critic.json',url:prefix+'bad%00critic.json'},null,
+  ];
+  const accepted=guide.validatedResearchSources(entries,caseDefinition);
+  assert.equal(accepted.length,1);
+  assert.equal(accepted[0].name,valid.name);
+  assert.equal(accepted[0].url,valid.url);
+  assert.equal(guide.validatedResearchSources(entries,{...caseDefinition,project:'Another-project'}).length,0);
+  assert.equal(guide.validatedResearchSources(entries,null).length,0);
+});
+
+test('actual saved files follow the selected stage and survive exploration until cleared',()=>{
+  const {guide,root}=fixture();
+  const prefix='/api/vista/projects/Water4Energy-TVA-agent-loop/outputs/';
+  let prepared=0;
+  guide.init({caseDefinition,prompts,preparePrompt:()=>prepared++});
+  assert.equal(root.sources.hidden,true);
+  const entries=[
+    {step:'ledger',name:'research/ledger.json',url:prefix+'research/ledger.json'},
+    {step:'proposer',name:'research/proposal.json',url:prefix+'research/proposal.json'},
+  ];
+  assert.equal(guide.setResearchSources(entries),2);
+  assert.equal(root.sources.hidden,false);
+  assert.match(root.sources.innerHTML,/research\/ledger\.json/);
+  assert.match(root.sources.innerHTML,/<a class="hypothesis-guide-source-link"[^>]+ download>/);
+  root.nodes.find(node=>node.dataset.guideStep==='proposer').click();
+  assert.match(root.sources.innerHTML,/research\/proposal\.json/);
+  assert.doesNotMatch(root.sources.innerHTML,/ledger\.json/);
+  root.nodes.find(node=>node.dataset.guideStep==='critic').click();
+  assert.equal(root.sources.hidden,true);
+  assert.equal(root.sources.innerHTML,'');
+  root.nodes[0].click();
+  assert.match(root.sources.innerHTML,/research\/ledger\.json/);
+  assert.equal(prepared,0);
+  guide.setResearchSources([]);
+  assert.equal(root.sources.hidden,true);
+  assert.equal(root.sources.innerHTML,'');
+  guide.setResearchSources(entries);
+  guide.init({caseDefinition,prompts,preparePrompt:()=>prepared++});
+  assert.equal(root.sources.hidden,true);
+  assert.equal(root.sources.innerHTML,'');
+});
+
+test('saved source names are escaped and invalid cases cannot retain links',()=>{
+  const {guide,root}=fixture();
+  const name='research/<ledger>.json';
+  const entry={step:'ledger',name,url:'/api/vista/projects/Water4Energy-TVA-agent-loop/outputs/research/%3Cledger%3E.json'};
+  const mutableCase={...caseDefinition,case:{...caseDefinition.case}};
+  guide.init({caseDefinition:mutableCase,prompts});
+  assert.equal(guide.setResearchSources([entry]),1);
+  assert.match(root.sources.innerHTML,/research\/&lt;ledger&gt;\.json/);
+  assert.doesNotMatch(root.sources.innerHTML,/<ledger>/);
+  mutableCase.case.end='2019-04-23';
+  root.nodes[0].click();
+  assert.equal(root.sources.hidden,true);
+  assert.equal(root.sources.innerHTML,'');
+  guide.init({caseDefinition:{...caseDefinition,case:{...caseDefinition.case,end:'2019-04-23'}},prompts});
+  assert.equal(guide.setResearchSources([entry]),0);
+  assert.equal(root.sources.hidden,true);
 });

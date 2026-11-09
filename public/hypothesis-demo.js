@@ -97,26 +97,20 @@
     if(!validPath(name) || typeof base!=='string' || !/^\/api\/vista\/projects\/[^/]+\/outputs$/.test(base))throw new Error('Invalid scoped output reference.');
     return base+'/'+name.split('/').map(encodeURIComponent).join('/');
   }
+  function researchLinks(manifestation, base) {
+    if(!manifestation?.matched)return [];
+    const steps={ledger_file:'ledger',proposal_file:'proposer',critic_file:'critic',referee_file:'referee',protocol_file:'human'};
+    return Object.entries(steps).flatMap(([key,step])=>{
+      // Only validated research references may become links. The manifest never
+      // supplies a URL; every reference stays in this refresh's output store.
+      const name=manifestation.research[key];
+      return name?[{step,name,url:outputURL(name,base)}]:[];
+    });
+  }
   function casePrompt(task) {
     return `For Water4Energy-TVA-agent-loop, inspect the fixed case 16–22 April 2019 issued 15 April. ${task} Read actual files and cite sources. Do not submit jobs, execute training commands, change settings, or invent scores or figures. If a skill or artifact is missing, report it.`;
   }
   function prepare(task, title) {options.preparePrompt(casePrompt(task),title);}
-  const LOOP=[
-    {title:'Ledger first',description:'Read what is scored, closed, blocked and still open.',file:'ledger_file',task:'Use lab.ledger, lab.board, lab.literature and lab.download to identify existing experiments and local sources. Start from the ledger, then consult literature only for open gaps.'},
-    {title:'Proposer',description:'Suggest a protocol for an open gap.',file:'proposal_file',task:'Use lab.design and the April charge to inspect or prepare a ledger-grounded proposal. State its delta from already-tested runs and cite source records.'},
-    {title:'Critic',description:'Challenge novelty, evidence and unsupported claims.',file:'critic_file',task:'Inspect saved Critic evidence if available. Check whether the proposal repeats a blocks_reproposal experiment without a meaningful delta. Identify missing evidence instead of claiming a critique ran.'},
-    {title:'Referee',description:'Explain the reviewed protocol and remaining uncertainty.',file:'referee_file',task:'Inspect the saved Referee brief, if present, and explain the selected protocol, unresolved tests and actual review status. Do not claim a new multi-agent run or an approval without its file.'},
-    {title:'Human gate',description:'Show the command; a person authorizes training.',file:'protocol_file',task:'Use lab.show_command to display the existing 9×9 and Trial 0 recipe/config references. Show the human training-flag gate. Print commands without executing them.'},
-    {title:'Return to evidence',description:'Inspect saved realization and frozen scorecard.',task:'Use lab.realize and downscale.scorecard to collect existing case files. Temperature and precipitation use det_v2_soil_k9; runoff is observed ERA5 sro and its forecast is unavailable. Read the existing Trial 0 1° to 0.25° comparison; do not retrain.'}
-  ];
-  function renderLoop() {
-    if(!$('#lab-loop'))return;
-    $('#lab-loop').innerHTML=LOOP.map((step,i)=>{
-      const file=evidence?.research?.[step.file];
-      return `<article class="demo-loop-step"><span class="demo-step-number">0${i+1}</span><h3>${escapeHTML(step.title)}</h3><p>${escapeHTML(step.description)}</p>${file?`<a class="demo-source-link" href="${escapeHTML(outputURL(file))}" download>Source file ↧</a>`:''}<button class="text-button" data-lab-step="${i}" aria-label="Prepare ${escapeHTML(step.title)} request">Prepare request ↗</button></article>`;
-    }).join('');
-    $('#lab-loop').querySelectorAll('[data-lab-step]').forEach(button=>button.addEventListener('click',()=>{const step=LOOP[Number(button.dataset.labStep)];prepare(step.task,step.title);}));
-  }
   function renderReadiness() {
     const skills=skillReadiness(context?.skills,definition.project);
     const knowledge=context?.knowledge,coverage=knowledgeCoverage(knowledge,definition.sources,definition.project);
@@ -174,21 +168,21 @@
   }
   function reset() {
     ++revision;evidence=null;damState.source=null;damState.sourceName=null;
-    if(definition){renderLoop();renderEvidence();renderDamResult();}
+    if(definition){renderEvidence();renderDamResult();}
   }
   function init(configuration) {
     options=configuration;definition=configuration.caseDefinition;
     if(!definition || !matchesCase(definition.case) || definition.project!=='Water4Energy-TVA-agent-loop')throw new Error('The fixed TVA demo definition is invalid.');
-    renderLoop();renderEvidence();renderQuestions();buildDam();renderReadiness();
+    renderEvidence();renderQuestions();buildDam();renderReadiness();
   }
   async function refresh(next) {
     if(!options)return null;
     const id=++revision,outputBase=options.projectUrl('/outputs');
     context={...next,outputBase};evidence=null;damState.source=null;damState.sourceName=null;
-    renderReadiness();renderLoop();renderDamResult();
+    renderReadiness();renderDamResult();
     if(next.project!==definition.project || !next.status?.project_found) {
       renderEvidence(next.project!==definition.project?'Select Water4Energy-TVA-agent-loop in Connection settings to inspect this demo’s case files.':'Connect the named VISTA project to load its case evidence.');
-      return {matched:false,reason:'project-unavailable'};
+      return {matched:false,reason:'project-unavailable',researchLinks:[]};
     }
     renderEvidence('Reading the selected project’s saved case files…');
     try {
@@ -196,7 +190,7 @@
       if(id!==revision)return null;
       if(!Array.isArray(files))throw new Error('The project output listing is unavailable.');
       const manifestFile=files.find(file=>file && file.name===MANIFEST_NAME);
-      if(!manifestFile) {renderEvidence(`The project does not yet contain ${MANIFEST_NAME}. Prepare a file-collection request to connect existing case artifacts.`);return {matched:false,reason:'manifest-missing'};}
+      if(!manifestFile) {renderEvidence(`The project does not yet contain ${MANIFEST_NAME}. Prepare a file-collection request to connect existing case artifacts.`);return {matched:false,reason:'manifest-missing',researchLinks:[]};}
       if(Number.isFinite(manifestFile.size) && manifestFile.size>262144)throw new Error('The case manifest exceeds the 256 KB metadata limit.');
       const manifest=await options.api(outputURL(MANIFEST_NAME,outputBase));
       if(id!==revision)return null;
@@ -208,12 +202,12 @@
           try {const source=await options.api(outputURL(damFile,outputBase));if(id!==revision)return null;damState.source=source;damState.sourceName=damFile;}catch {if(id!==revision)return null;}
         }
       }
-      renderLoop();renderEvidence();renderDamResult();
-      return {matched:evidence.matched,available:Object.values(evidence.panels).filter(panel=>panel.available).length};
+      renderEvidence();renderDamResult();
+      return {matched:evidence.matched,available:Object.values(evidence.panels).filter(panel=>panel.available).length,researchLinks:researchLinks(evidence,outputBase)};
     } catch(error) {
       if(id!==revision)return null;
-      evidence=null;damState.source=null;damState.sourceName=null;renderLoop();renderDamResult();renderEvidence(error?.message || 'Case files are unavailable. Refresh after checking VISTA.');
-      return {matched:false,reason:'read-failed'};
+      evidence=null;damState.source=null;damState.sourceName=null;renderDamResult();renderEvidence(error?.message || 'Case files are unavailable. Refresh after checking VISTA.');
+      return {matched:false,reason:'read-failed',researchLinks:[]};
     }
   }
   const api={init,refresh,reset,validPath,matchesCase,dateInCase,validateManifest,skillReadiness,knowledgeCoverage,validateDamReadout,sourceMatches,manifestInstructions};

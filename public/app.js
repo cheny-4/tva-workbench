@@ -136,20 +136,24 @@ function renderDemoStatus() {
 async function refreshDemo() {
   if(!state.demoCase || !window.TVAHypothesisDemo)return;
   const result=await TVAHypothesisDemo.refresh({status:state.status,skills:state.skills,knowledge:state.knowledge,project:state.config.project,backend:state.config.backend_url});
-  if(result)state.demoEvidence=result;
+  if(result){
+    state.demoEvidence=result;
+    TVAHypothesisGuide.setResearchSources(result.researchLinks || []);
+  }
   renderDemoStatus();
 }
 
 function openCaseFigures() {
-  switchView('workspace');
+  switchView('files');
   const details=$('#case-figures-details');details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function switchView(view) {
   state.view=view;
+  document.body.classList.toggle('lab-active',view==='workspace');
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Demo skills',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
+  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
   if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='resources') renderResources();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
@@ -199,7 +203,7 @@ function currentStudy() { return state.liveStudy; }
 function renderResults() {
   $('#results-panel').classList.remove('has-live-study');
   $('#results-panel').classList.toggle('has-live-artifacts',!!state.liveFiles.length);
-  $('#results-description').textContent='Files displayed in this conversation. The case panels above require matching April 2019 source metadata.';
+  $('#results-description').textContent='Files displayed in the selected conversation. Case figures are available in Results Library with separate April 2019 source checks.';
   $('#result-mode-label').textContent=state.liveFiles.length?`${state.liveFiles.length} displayed file${state.liveFiles.length===1?'':'s'}`:'Conversation files';
   $('#chart-site-tabs').innerHTML='';$('#result-site').innerHTML='';
   $('#result-site').closest('.chart-site-picker').hidden=true;
