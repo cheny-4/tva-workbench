@@ -107,6 +107,17 @@
       return name?[{step,name,url:outputURL(name,base)}]:[];
     });
   }
+  function caseFigures(manifestation, base) {
+    if(!manifestation?.matched)return [];
+    return definition.panels.flatMap(panel=>{
+      const item=manifestation.panels[panel.id];
+      if(!item?.available)return [];
+      const record=item.panel;
+      return [{id:panel.id,title:panel.title,subtitle:panel.subtitle,kind:record.kind,
+        figure:record.figure,figureUrl:outputURL(record.figure,base)+'?preview=true',
+        sourceFile:record.source_file,sourceUrl:outputURL(record.source_file,base),source:record.source}];
+    });
+  }
   function casePrompt(task) {
     return `For Water4Energy-TVA-agent-loop, inspect the fixed case 16–22 April 2019 issued 15 April. ${task} Read actual files and cite sources. Do not submit jobs, execute training commands, change settings, or invent scores or figures. If a skill or artifact is missing, report it.`;
   }
@@ -182,7 +193,7 @@
     renderReadiness();renderDamResult();
     if(next.project!==definition.project || !next.status?.project_found) {
       renderEvidence(next.project!==definition.project?'Select Water4Energy-TVA-agent-loop in Connection settings to inspect this demo’s case files.':'Connect the named VISTA project to load its case evidence.');
-      return {matched:false,reason:'project-unavailable',researchLinks:[]};
+      return {matched:false,reason:'project-unavailable',researchLinks:[],caseFigures:[]};
     }
     renderEvidence('Reading the selected project’s saved case files…');
     try {
@@ -190,7 +201,7 @@
       if(id!==revision)return null;
       if(!Array.isArray(files))throw new Error('The project output listing is unavailable.');
       const manifestFile=files.find(file=>file && file.name===MANIFEST_NAME);
-      if(!manifestFile) {renderEvidence(`The project does not yet contain ${MANIFEST_NAME}. Prepare a file-collection request to connect existing case artifacts.`);return {matched:false,reason:'manifest-missing',researchLinks:[]};}
+      if(!manifestFile) {renderEvidence(`The project does not yet contain ${MANIFEST_NAME}. Prepare a file-collection request to connect existing case artifacts.`);return {matched:false,reason:'manifest-missing',researchLinks:[],caseFigures:[]};}
       if(Number.isFinite(manifestFile.size) && manifestFile.size>262144)throw new Error('The case manifest exceeds the 256 KB metadata limit.');
       const manifest=await options.api(outputURL(MANIFEST_NAME,outputBase));
       if(id!==revision)return null;
@@ -203,11 +214,11 @@
         }
       }
       renderEvidence();renderDamResult();
-      return {matched:evidence.matched,available:Object.values(evidence.panels).filter(panel=>panel.available).length,researchLinks:researchLinks(evidence,outputBase)};
+      return {matched:evidence.matched,available:Object.values(evidence.panels).filter(panel=>panel.available).length,researchLinks:researchLinks(evidence,outputBase),caseFigures:caseFigures(evidence,outputBase)};
     } catch(error) {
       if(id!==revision)return null;
       evidence=null;damState.source=null;damState.sourceName=null;renderDamResult();renderEvidence(error?.message || 'Case files are unavailable. Refresh after checking VISTA.');
-      return {matched:false,reason:'read-failed',researchLinks:[]};
+      return {matched:false,reason:'read-failed',researchLinks:[],caseFigures:[]};
     }
   }
   const api={init,refresh,reset,validPath,matchesCase,dateInCase,validateManifest,skillReadiness,knowledgeCoverage,validateDamReadout,sourceMatches,manifestInstructions};

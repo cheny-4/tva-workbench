@@ -18,7 +18,13 @@ function button(dataset={}) {
   };
 }
 function fixture() {
-  const root={nodes:[],html:'',prepared:null,figures:null,announcement:{textContent:''},sources:{innerHTML:'',hidden:true}};
+  const root={nodes:[],html:'',prepared:null,figures:null,announcement:{textContent:''},sources:{innerHTML:'',hidden:true},classes:new Set(),overview:{open:true},mode:{textContent:''},status:{textContent:''},resume:button(),figureCount:button(),expanded:{innerHTML:'',hidden:true}};
+  root.classList={toggle:(name,on)=>on?root.classes.add(name):root.classes.delete(name)};
+  const gallery={html:'',writes:0,hidden:true,buttons:[],focused:0,scrolled:0,
+    set innerHTML(value){this.html=value;this.writes++;root.expanded={innerHTML:'',hidden:true};this.buttons=Array.from(value.matchAll(/data-guide-open-figure="(\d+)" data-case-figure="(true|false)"/g),match=>button({guideOpenFigure:match[1],caseFigure:match[2]}));},
+    querySelectorAll(selector){return selector==='[data-guide-open-figure]'?this.buttons:[];},
+    focus(){this.focused++;},scrollIntoView(){this.scrolled++;},
+  };
   const detail={html:'',set innerHTML(value){
     this.html=value;root.prepared=button();
     if(/data-guide-prepare disabled/.test(value))root.prepared.attributes.disabled=true;
@@ -34,14 +40,24 @@ function fixture() {
     '[data-guide-detail]':detail,'[data-guide-prepare]':root.prepared,
     '[data-guide-figures]':root.figures,'[data-guide-announcement]':root.announcement,
     '[data-guide-sources]':root.sources,
+    '[data-guide-overview]':root.overview,'[data-guide-mode]':root.mode,'[data-guide-status]':root.status,
+    '[data-guide-resume]':root.resume,'[data-guide-figure-count]':root.figureCount,
+    '[data-guide-gallery]':gallery,'[data-guide-expanded]':root.expanded,
   }[selector]);
   const context=vm.createContext({
     module:{exports:{}},document:{querySelector:selector=>selector==='#hypothesis-guide'?root:null},
     fetch:()=>assert.fail('the workflow guide must not access a backend'),
   });
   vm.runInContext(source,context);
-  return {guide:context.module.exports,root,detail};
+  return {guide:context.module.exports,root,detail,gallery};
 }
+
+const outputPrefix='/api/vista/projects/Water4Energy-TVA-agent-loop/outputs/';
+function caseFigure(id='temperature',name='temperature.png') {
+  return {id,title:id,subtitle:'Saved April case',kind:id==='runoff'?'observation':id==='downscale'?'frozen_comparison':'frozen_prediction',figure:name,figureUrl:outputPrefix+name+'?preview=true',sourceFile:'case-source.json',sourceUrl:outputPrefix+'case-source.json',source:'Saved source JSON'};
+}
+function conversationFigure(name='displayed.png') {return {name,url:outputPrefix+name+'?preview=true',downloadUrl:outputPrefix+name};}
+function selectedStep(root){return root.nodes.find(node=>node.attributes['aria-pressed']==='true')?.dataset.guideStep;}
 
 test('the six explanatory stages map ledger, role review, human gate and saved evidence in order',()=>{
   const {guide}=fixture();
@@ -96,7 +112,7 @@ test('selecting diagram buttons explains each step without preparing or executin
   assert.equal(root.nodes[0].attributes['aria-pressed'],'true');
   assert.match(root.html,/selection does not run agents/);
   assert.match(root.html,/Findings return to the ledger/);
-  assert.doesNotMatch(root.html,/role="progressbar"|completed|data-step-done/);
+  assert.doesNotMatch(root.html,/role="progressbar"|class="[^"]*\bdone\b|data-step-done/);
   for(const [index,node] of root.nodes.entries()) {
     node.click();
     const step=guide.steps[index];
@@ -214,4 +230,186 @@ test('saved source names are escaped and invalid cases cannot retain links',()=>
   guide.init({caseDefinition:{...caseDefinition,case:{...caseDefinition.case,end:'2019-04-23'}},prompts});
   assert.equal(guide.setResearchSources([entry]),0);
   assert.equal(root.sources.hidden,true);
+});
+
+test('only actual structured skill and validated file events identify a workflow stage',()=>{
+  const {guide}=fixture();
+  const sources=guide.validatedResearchSources([{step:'critic',name:'QA-critic.md',url:outputPrefix+'QA-critic.md'},{step:'referee',name:'QA-referee.md',url:outputPrefix+'QA-referee.md'}],caseDefinition);
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'lab.ledger'}}),'ledger');
+  assert.equal(guide.stageForEvent('function_tool_result',{part:{tool_name:'lab.realize'}}),'evidence');
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'lab.design',args:{role:'critic'}}}),'proposer');
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'execute_skill',args:'{"skill_name":"lab.show_command"}'}}),'human');
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'read_file',args:{path:'QA-critic.md'}}},sources),'critic');
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'read_file',args:'{"path":"QA-referee.md"}'}},sources),'referee');
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'read_file',args:{path:'elsewhere/QA-critic.md'}}},sources),null);
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'read_file',args:{path:'QA-critic.md'}}},[]),null);
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'unknown_tool',args:{message:'Use lab.realize, Critic and Referee are done.'}}}),null);
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'execute_skill',args:'partial {"skill":"lab.realize"'}}),null);
+  assert.equal(guide.stageForEvent('function_tool_call',{part:{tool_name:'lab.realize',args:{project:'Another-project'}}}),null);
+  assert.equal(guide.stageForEvent('log',{message:'lab.design and Critic completed'}),null);
+  assert.equal(guide.stageForEvent('part_delta',{delta:{content_delta:'lab.realize'}}),null);
+  assert.equal(guide.stageForEvent('custom',{tool_name:'lab.realize'}),null);
+});
+
+test('following waits for actual tool activity and manual exploration resumes at the last actual stage',()=>{
+  const {guide,root}=fixture();let prepared=0;
+  guide.init({caseDefinition,prompts,preparePrompt:()=>prepared++});
+  guide.beginTurn('Use lab.realize and finish the Referee review.');
+  assert.equal(selectedStep(root),'ledger');
+  assert.equal(root.status.textContent,'Waiting for tool activity');
+  guide.handleEvent('run_started',{});
+  assert.equal(root.status.textContent,'Agent working');
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.design'}});
+  assert.equal(selectedStep(root),'proposer');
+  root.nodes.find(node=>node.dataset.guideStep==='critic').click();
+  assert.equal(root.mode.textContent,'Exploring a step');
+  assert.equal(root.resume.hidden,false);
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
+  assert.equal(selectedStep(root),'critic');
+  assert.equal(root.overview.open,true);
+  root.resume.click();
+  assert.equal(selectedStep(root),'evidence');
+  assert.equal(root.overview.open,false);
+  assert.equal(root.resume.hidden,true);
+  assert.equal(root.mode.textContent,'Following conversation');
+  guide.handleEvent('log',{message:'Critic done; all six stages complete.'});
+  assert.equal(selectedStep(root),'evidence');
+  guide.handleEvent('mcp_tool_approval',{});
+  assert.equal(root.status.textContent,'Waiting for input');
+  assert.equal(selectedStep(root),'evidence');
+  guide.finishTurn({state:'failed',label:'Turn completed'});
+  assert.equal(root.status.textContent,'Turn failed');
+  assert.equal(selectedStep(root),'evidence');
+  guide.handleEvent('run_finished',{state:'done'});
+  assert.equal(root.status.textContent,'Turn completed');
+  assert.equal(prepared,0);
+});
+
+test('a source discovered after its actual read can identify a role without treating it as completed',()=>{
+  const {guide,root}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.handleEvent('function_tool_call',{part:{tool_name:'read_file',args:{path:'QA-referee.md'}}});
+  assert.equal(selectedStep(root),'ledger');
+  guide.setResearchSources([{step:'referee',name:'QA-referee.md',url:outputPrefix+'QA-referee.md'}]);
+  assert.equal(selectedStep(root),'referee');
+  assert.equal(root.status.textContent,'Tool activity');
+  assert.ok(root.nodes.every(node=>!node.classes.has('done')));
+});
+
+test('a tool return without arguments retains its real call for a later validated research source',()=>{
+  const {guide,root}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.handleEvent('function_tool_call',{part:{tool_name:'read_file',tool_call_id:'critic-read',args:'{"path":"QA-critic.md"}'}});
+  guide.handleEvent('function_tool_result',{part:{tool_name:'read_file',tool_call_id:'critic-read',content:'Saved file contents'}});
+  assert.equal(selectedStep(root),'ledger');
+  guide.setResearchSources([{step:'critic',name:'QA-critic.md',url:outputPrefix+'QA-critic.md'}]);
+  assert.equal(selectedStep(root),'critic');
+  assert.equal(root.status.textContent,'Tool activity');
+  guide.resetConversation();
+  guide.setResearchSources([]);
+  guide.handleEvent('function_tool_result',{part:{tool_name:'read_file',tool_call_id:'critic-read',content:'Old result'}});
+  guide.setResearchSources([{step:'critic',name:'QA-critic.md',url:outputPrefix+'QA-critic.md'}]);
+  assert.equal(selectedStep(root),'ledger');
+});
+
+test('galleries accept only passive raster outputs in the fixed project and correct case panel kinds',()=>{
+  const {guide}=fixture();
+  assert.equal(guide.validatedCaseFigures([caseFigure()],caseDefinition).length,1);
+  const invalidCases=[
+    {...caseFigure(),figure:'active.svg',figureUrl:outputPrefix+'active.svg?preview=true'},
+    {...caseFigure(),figureUrl:'https://example.org/temperature.png'},
+    {...caseFigure(),figureUrl:'/api/vista/projects/Other/outputs/temperature.png'},
+    {...caseFigure(),sourceUrl:outputPrefix+'other.json'},
+    {...caseFigure('runoff'),kind:'frozen_prediction'},
+    {...caseFigure(),id:'unrecognized'},
+    {...caseFigure(),sourceFile:'source.html',sourceUrl:outputPrefix+'source.html'},
+  ];
+  assert.equal(guide.validatedCaseFigures(invalidCases,caseDefinition).length,0);
+  assert.equal(guide.validatedCaseFigures([caseFigure()],{...caseDefinition,case:{...caseDefinition.case,start:'2020-04-16'}}).length,0);
+  const valid=conversationFigure();
+  const invalidConversation=[
+    {...valid,name:'active.svg',url:outputPrefix+'active.svg',downloadUrl:outputPrefix+'active.svg'},
+    {...valid,url:valid.url+'&other=true'},
+    {...valid,downloadUrl:valid.url},
+    {...valid,url:'/api/vista/projects/Other/outputs/displayed.png'},
+    {...valid,name:'../displayed.png',url:outputPrefix+'../displayed.png'},
+  ];
+  assert.equal(guide.validatedConversationFigures(invalidConversation,caseDefinition).length,0);
+  assert.equal(guide.validatedConversationFigures([valid,{...valid}],caseDefinition).length,1);
+});
+
+test('case figures win duplicate filenames and conversation-only images remain explicitly unverified',()=>{
+  const {guide,root,gallery}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.setCaseFigures([caseFigure()]);
+  guide.setConversationFigures([conversationFigure('temperature.png'),conversationFigure('other.png')]);
+  assert.equal(gallery.buttons.length,2);
+  assert.match(gallery.html,/Case figures/);
+  assert.match(gallery.html,/April metadata checked/);
+  assert.match(gallery.html,/Conversation figures/);
+  assert.match(gallery.html,/case association is unverified/);
+  assert.equal(root.figureCount.textContent,'2 figures');
+  guide.setCaseFigures([]);
+  assert.equal(gallery.buttons.length,2);
+  assert.doesNotMatch(gallery.html,/April metadata checked/);
+});
+
+test('stream text and unchanged file refreshes preserve gallery DOM and do not steal scroll',()=>{
+  const {guide,root,gallery}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.setCaseFigures([caseFigure()]);
+  const writes=gallery.writes;
+  for(let i=0;i<20;i++)guide.handleEvent('part_delta',{delta:{content_delta:'A figure or role name appears in the response.'}});
+  guide.setCaseFigures([caseFigure()]);
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
+  assert.equal(gallery.writes,writes);
+  assert.equal(gallery.focused,0);
+  assert.equal(gallery.scrolled,0);
+  assert.equal(root.overview.open,false);
+  root.overview.open=true;
+  root.nodes[0].click();
+  guide.setConversationFigures([conversationFigure()]);
+  assert.equal(root.overview.open,true);
+  assert.equal(root.figureCount.hidden,false);
+  assert.equal(gallery.focused,0);
+});
+
+test('explicit Figures opens a local empty state and thumbnails enlarge only by user action',()=>{
+  const {guide,root,gallery}=fixture();const previews=[];
+  guide.init({caseDefinition,prompts,showDetails:(title,html)=>previews.push({title,html})});
+  guide.showFigures();
+  assert.equal(gallery.hidden,false);
+  assert.match(gallery.html,/Figures appear here when/);
+  assert.equal(gallery.focused,1);
+  assert.equal(gallery.scrolled,1);
+  guide.setCaseFigures([{...caseFigure(),source:'Source <script> is text'}]);
+  assert.equal(previews.length,0);
+  gallery.buttons[0].click();
+  assert.equal(previews.length,1);
+  assert.match(previews[0].html,/Source &lt;script&gt; is text/);
+  assert.match(previews[0].html,/Source JSON/);
+  guide.init({caseDefinition,prompts});
+  guide.setConversationFigures([conversationFigure()]);
+  gallery.buttons[0].click();
+  assert.equal(root.expanded.hidden,false);
+  assert.match(root.expanded.innerHTML,/case association is unverified/);
+});
+
+test('a new conversation clears its images and following state while retaining checked project sources',()=>{
+  const {guide,root,gallery}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.setResearchSources([{step:'ledger',name:'ledger.json',url:outputPrefix+'ledger.json'}]);
+  guide.setCaseFigures([caseFigure()]);
+  guide.setConversationFigures([conversationFigure()]);
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
+  root.nodes[2].click();
+  guide.resetConversation();
+  assert.equal(selectedStep(root),'ledger');
+  assert.equal(root.mode.textContent,'Following conversation');
+  assert.equal(root.status.textContent,'Waiting for conversation');
+  assert.equal(root.overview.open,true);
+  assert.equal(gallery.buttons.length,1);
+  assert.match(gallery.html,/April metadata checked/);
+  assert.doesNotMatch(gallery.html,/Conversation figures/);
+  assert.match(root.sources.innerHTML,/ledger\.json/);
 });

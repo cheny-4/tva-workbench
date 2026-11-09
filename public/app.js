@@ -52,6 +52,8 @@ function setBusy(value,label) {
   $('#new-chat').disabled=value; $('#history-new').disabled=value;
   $('#agent-state').textContent=label || (value ? 'Working…' : state.status?.project_found ? 'VISTA agent' : 'Connect VISTA');
   $('#agent-state').classList.toggle('working',value);
+  window.TVAComposerResize?.refresh();
+  scheduleLivePoll();
 }
 function setStage(index,complete=false) {
   $$('#workflow-strip [data-step]').forEach((el,i)=>{
@@ -139,13 +141,14 @@ async function refreshDemo() {
   if(result){
     state.demoEvidence=result;
     TVAHypothesisGuide.setResearchSources(result.researchLinks || []);
+    TVAHypothesisGuide.setCaseFigures(result.caseFigures || []);
   }
   renderDemoStatus();
 }
 
 function openCaseFigures() {
-  switchView('files');
-  const details=$('#case-figures-details');details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'});
+  switchView('workspace');
+  TVAHypothesisGuide.showFigures();
 }
 
 function switchView(view) {
@@ -153,10 +156,11 @@ function switchView(view) {
   document.body.classList.toggle('lab-active',view==='workspace');
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
-  if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='resources') renderResources();
+  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversations',files:'Results Library',literature:'Literature library'}[view];
+  if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='literature') window.TVALiteratureLibrary?.render();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
+  if(view==='workspace')window.TVAComposerResize?.refresh();
 }
 
 async function refreshConnection() {
@@ -171,9 +175,10 @@ async function refreshConnection() {
     $('#connection-pill').classList.toggle('connected',ok);
     $('#connection-pill').innerHTML=`<i></i>${!compatible?'Open the current launcher':ok?'VISTA connected':state.status.connected?'Check project name':'VISTA offline'}`;
     $('#connection-pill').title=compatible?state.status.detail:`This tab is served by Workbench ${state.status.version || 'unknown'}. Open the v${state.demoCase.version} launcher and use its printed local address.`;
-    renderResources();await refreshSkills();await refreshKnowledge();await renderFiles();await refreshDemo();setBusy(state.busy);
+    if(!ok){clearLiveConversation(true);state.liveFiles=[];renderResults();}
+    renderResources();await refreshSkills();await refreshKnowledge();await renderFiles();await refreshDemo();setBusy(state.busy);if(ok && state.sessionId)queueLiveArtifacts();
     if($('#settings-dialog').open) $('#settings-status').textContent=state.status.detail;
-  } catch(error) {if(revision!==state.connectionRevision)return;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;TVAHypothesisDemo.reset();await refreshDemo();$('#connection-pill').classList.remove('connected');$('#connection-pill').innerHTML='<i></i> Connection unavailable';}
+  } catch(error) {if(revision!==state.connectionRevision)return;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;clearLiveConversation(true);TVAHypothesisDemo.reset();await refreshDemo();$('#connection-pill').classList.remove('connected');$('#connection-pill').innerHTML='<i></i> Connection unavailable';}
 }
 function resourceState(resource) {
   if(resource.planned) return ['planned','Planned'];
@@ -185,14 +190,14 @@ function resourceState(resource) {
 }
 function renderResources() {
   const resources=state.status?.resources || ['odo','frontier','lux','ccsi'].map((id,i)=>({id,name:['Odo','Frontier','Lux','CCSI GPU node'][i],state:'unknown',planned:id==='ccsi',message:id==='ccsi'?'Planned resource. Connection and a matching VISTA adapter will be added later.':'Open VISTA to check resource status.'}));
-  $('#sidebar-resources').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<div class="resource-mini ${r.id==='ccsi'?'ccsi':''}" title="${esc(r.message)}"><span class="resource-glyph">${icon('server')}</span><div><strong>${esc(r.name)}</strong><small>${esc(label)}</small></div><i class="status-dot ${cls}"></i></div>`;}).join('');
-  $('#resource-cards').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<article class="resource-card ${r.planned?'planned':''}"><div class="resource-card-header">${icon('server')}<span class="tag"><i class="status-dot ${cls}"></i>${esc(label)}</span></div><h2>${esc(r.name)}</h2><div class="facility">${r.planned?'FUTURE ADAPTER':'COMPUTE CONNECTION IN VISTA'}</div><p>${esc(r.message)}</p><div class="tag">${r.planned?'Adapter to be added':'Optional compute · file-based demo first'}</div></article>`;}).join('');
+  if($('#sidebar-resources'))$('#sidebar-resources').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<div class="resource-mini ${r.id==='ccsi'?'ccsi':''}" title="${esc(r.message)}"><span class="resource-glyph">${icon('server')}</span><div><strong>${esc(r.name)}</strong><small>${esc(label)}</small></div><i class="status-dot ${cls}"></i></div>`;}).join('');
+  if($('#resource-cards'))$('#resource-cards').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<article class="resource-card ${r.planned?'planned':''}"><div class="resource-card-header">${icon('server')}<span class="tag"><i class="status-dot ${cls}"></i>${esc(label)}</span></div><h2>${esc(r.name)}</h2><div class="facility">${r.planned?'FUTURE ADAPTER':'COMPUTE CONNECTION IN VISTA'}</div><p>${esc(r.message)}</p><div class="tag">${r.planned?'Adapter to be added':'Optional compute · file-based demo first'}</div></article>`;}).join('');
 }
 function showSettings() {
   $('#backend-url').value=state.config.backend_url || 'http://127.0.0.1:8001';
   $('#project-name').value=state.config.project;
   $('#settings-status').textContent=state.status?.detail || 'Open VISTA, then save and check this connection.';
-  $('#settings-dialog').showModal();
+  renderResources();$('#settings-dialog').showModal();
 }
 
 function renderMap() {
@@ -229,16 +234,18 @@ async function sendLive(prompt) {
   if(state.demoCase && state.status?.version && state.status.version!==state.demoCase.version){addMessage('system',`This tab is served by Workbench ${state.status.version}. Open the v${state.demoCase.version} launcher and use its printed local address before starting this demo.`,{error:true});return;}
   if(!state.status?.project_found){addMessage('system','Open VISTA and connect the correct TVA project in Connection settings before sending a live message.',{error:true});showSettings();return;}
   if(state.busy)return;
+  TVAHypothesisGuide.beginTurn();
   addMessage('user',prompt);setBusy(true,'Contacting VISTA');setStage(0);state.lastSeq=0;
   try {
     await ensureSession(prompt);
     await watchStream(projectUrl('/agent/run'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_prompt:prompt,stream:true,chat_session_id:state.sessionId})});
   } catch(error) {
     addMessage('system',`${error.message} If VISTA accepted the turn, it may still be running. Reopen this conversation to check or reconnect.`,{error:true});
-    addActivity('Connection interrupted',error.message);setBusy(false,'Connection interrupted');
+    addActivity('Connection interrupted',error.message);setBusy(false,'Connection interrupted');TVAHypothesisGuide.finishTurn('interrupted');
   }
 }
 async function watchStream(url,options={}) {
+  const streamContext=liveContext();
   state.stream=new AbortController();let finished=false,bodyNode=null,parts=new Map(),lastIndex=null;
   const response=await fetch(url,{...options,signal:state.stream.signal});
   if(response.status===204){state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);await renderFiles();return;}
@@ -261,6 +268,9 @@ async function watchStream(url,options={}) {
     if(!data.length)return;
     let event;try{event=JSON.parse(data.join('\n'));}catch{return;}
     type=event.event_kind || type;
+    if(!isLiveContext(streamContext))return;
+    TVAHypothesisGuide.handleEvent(type,event);
+    if(['function_tool_result','run_finished'].includes(type))queueLiveArtifacts();
     if(type==='run_started'){addActivity('VISTA turn started','Backend-owned execution; conversation saved by VISTA.');setBusy(true,'Agent working');setStage(0);}
     else if(type==='part_start' && event.part?.part_kind==='text') {lastIndex=event.index;parts.set(event.index,event.part.content || '');outputText();}
     else if(type==='part_delta' && event.delta?.part_delta_kind==='text') {const index=event.index ?? lastIndex;parts.set(index,(parts.get(index)||'')+(event.delta.content_delta||''));outputText();}
@@ -268,6 +278,7 @@ async function watchStream(url,options={}) {
     else if(type==='function_tool_call') {
       const tool=event.part?.tool_name || event.tool_name || 'Scientific tool';
       addActivity(`Tool call · ${tool}`,'Actual VISTA tool event.','tool',event.part);
+      queueLiveArtifacts();
       setStage(1);
       if(/outputs|display|plot/i.test(tool))setStage(2);
     }
@@ -320,28 +331,32 @@ function messagesFromHistory(session) {
   return transcript;
 }
 async function loadSession(id,reconnect=false) {
+  const scope=liveContext();
   try {
     const session=await api(projectUrl(`/chat-session?chat_session_id=${encodeURIComponent(id)}`));
+    if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;
     state.sessionId=id;rememberSession();
     const messages=messagesFromHistory(session);
     if(messages.length){$('#chat-messages').replaceChildren();messages.forEach(m=>addMessage(m.role,m.text));}
     else showWelcome();
-    if(reconnect){resetActivity();for(const entry of session.run_events || []){
+    if(reconnect){resetActivity();TVAHypothesisGuide.resetConversation();for(const entry of session.run_events || []){
       const data=entry.data || {};
+      TVAHypothesisGuide.handleEvent(data.event_kind || entry.event,data);
       if(entry.event==='log')addActivity(data.area || 'VISTA',data.message || '');
       else if(entry.event==='function_tool_call'||entry.event==='function_tool_result')addActivity(`${entry.event==='function_tool_call'?'Tool call':'Tool returned'} · ${data.part?.tool_name || 'Scientific tool'}`,'Saved VISTA activity.','tool',data.part);
       else if(entry.event==='run_finished')addActivity(`Agent turn ${data.state || 'ended'}`,'Saved VISTA turn state; inspect outputs for job evidence.');
     }}
     await loadLiveArtifacts();
+    if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;
     if(reconnect && ['working','needs_you'].includes(session.run_status)) {
       setBusy(true,'Reconnecting');state.lastSeq=0;
-      watchStream(projectUrl(`/chat-sessions/${id}/run/events?after=0`)).catch(error=>{addMessage('system',error.message,{error:true});setBusy(false,'Disconnected');});
+      watchStream(projectUrl(`/chat-sessions/${id}/run/events?after=0`)).catch(error=>{addMessage('system',error.message,{error:true});setBusy(false,'Disconnected');TVAHypothesisGuide.finishTurn('disconnected');});
     }
-  } catch(error){state.sessionId=null;rememberSession();addMessage('system',`Could not open that VISTA conversation: ${error.message}`,{error:true});}
+  } catch(error){if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;clearLiveConversation();state.sessionId=null;rememberSession();addMessage('system',`Could not open that VISTA conversation: ${error.message}`,{error:true});}
 }
 async function newConversation() {
   if(state.busy)return;
-  state.sessionId=null;rememberSession();state.history=[];state.liveFiles=[];state.liveStudy=null;
+  clearLiveConversation();state.sessionId=null;rememberSession();state.history=[];state.liveFiles=[];state.liveStudy=null;
   resetActivity();showWelcome();renderResults();switchView('workspace');toast('A new conversation will be created when you send your first message.');
 }
 async function renderHistory() {
@@ -350,7 +365,7 @@ async function renderHistory() {
   try {
     const sessions=await api(projectUrl('/chat-sessions'));
     $('#live-history').innerHTML=sessions.length?sessions.sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).map(s=>`<button class="history-card" data-session="${esc(s.id)}">${icon('file')}<div><h3>${esc(s.title || 'TVA conversation')}</h3><p>${esc(new Date(s.updated_at).toLocaleString())}</p></div><span class="tag">VISTA</span>${icon('arrow')}</button>`).join(''):'<div class="empty-state">No conversations yet. Send a message to begin.</div>';
-    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}state.liveFiles=[];state.liveStudy=null;state.history=[];resetActivity();state.sessionId=el.dataset.session;state.lastSeq=0;await loadSession(state.sessionId,true);switchView('workspace');}));
+    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}clearLiveConversation();state.liveFiles=[];state.liveStudy=null;state.history=[];resetActivity();state.sessionId=el.dataset.session;state.lastSeq=0;await loadSession(state.sessionId,true);switchView('workspace');}));
   }catch(error){$('#live-history').innerHTML=`<div class="empty-state">${esc(error.message)}</div>`;}
 }
 function fileRow(name,detail,url,label='Download') {return `<div class="file-row">${icon('file')}<div><strong>${esc(name)}</strong><small>${esc(detail)}</small></div><a href="${esc(url)}" download>${label}${icon('down')}</a></div>`;}
@@ -368,14 +383,48 @@ async function uploadFiles(files) {
     if(state.view==='files')renderFiles();
   }catch(error){toast(`Upload failed: ${error.message}`);}
 }
-async function loadLiveArtifacts() {
-  if(!state.sessionId){state.liveFiles=[];state.liveStudy=null;renderResults();await refreshDemo();return;}
-  try {
-    const files=await api(projectUrl(`/chat-sessions/${state.sessionId}/displayed-files`));
-    state.liveFiles=Array.isArray(files)?files:[];
-  }catch{state.liveFiles=[];}
-  state.liveStudy=null;
-  renderResults();await refreshDemo();
+let liveRefresher=null,livePollTimer=null;
+function liveContext(){return {project:state.config.project,backend:state.config.backend_url,session:state.sessionId};}
+function isLiveContext(scope){return scope.project===state.config.project && scope.backend===state.config.backend_url && scope.session===state.sessionId;}
+function clearLiveConversation(clearCase=false){
+  liveRefresher?.invalidate();
+  if(livePollTimer){clearTimeout(livePollTimer);livePollTimer=null;}
+  window.TVAHypothesisGuide?.resetConversation();
+  if(clearCase){window.TVAHypothesisGuide?.setResearchSources([]);window.TVAHypothesisGuide?.setCaseFigures([]);}
+}
+function artifactRefresher(){
+  if(!liveRefresher)liveRefresher=TVALiveLabSync.createRefresher({
+    isCurrent:isLiveContext,
+    read:async scope=>{
+      const base='/api/vista/projects/'+encodeURIComponent(scope.project);
+      const [files,outputs]=await Promise.all([api(base+'/chat-sessions/'+encodeURIComponent(scope.session)+'/displayed-files'),api(base+'/outputs')]);
+      if(isLiveContext(scope))await refreshDemo();
+      return {files:Array.isArray(files)?files:[],outputs:Array.isArray(outputs)?outputs:[]};
+    },
+    apply:(result,scope)=>{
+      state.liveFiles=result.files;state.liveStudy=null;renderResults();
+      TVAHypothesisGuide.setConversationFigures(TVALiveLabSync.displayedFigures(result.files,result.outputs,scope.project));
+    },
+    onError:()=>{state.liveFiles=[];state.liveStudy=null;renderResults();TVAHypothesisGuide.setConversationFigures([]);}
+  });
+  return liveRefresher;
+}
+function queueLiveArtifacts(){
+  if(!state.sessionId || !state.status?.project_found)return;
+  void artifactRefresher().request(liveContext());
+}
+async function loadLiveArtifacts(){
+  if(!state.sessionId){state.liveFiles=[];state.liveStudy=null;renderResults();TVAHypothesisGuide.setConversationFigures([]);await refreshDemo();return;}
+  await artifactRefresher().request(liveContext());
+}
+function scheduleLivePoll(){
+  if(livePollTimer)clearTimeout(livePollTimer);
+  if(!state.busy || !state.sessionId)return;
+  livePollTimer=setTimeout(async()=>{
+    livePollTimer=null;
+    if(state.busy && state.sessionId)await loadLiveArtifacts();
+    scheduleLivePoll();
+  },4000);
 }
 // Explicit-unit CSV parsing remains available to artifact clients. Fixed-case panels
 // use the case manifest renderer rather than interpreting arbitrary CSVs as this demo.
@@ -476,14 +525,14 @@ $('#workflow-details').addEventListener('click',showWorkflowDetails);
 $('#demo-setup-button').addEventListener('click',showSettings);
 $('#view-case-figures').addEventListener('click',openCaseFigures);
 $('#site-search').addEventListener('input',renderNetworkRoster);
-$('#connection-button').addEventListener('click',showSettings);$('#resource-settings').addEventListener('click',showSettings);
+$('#connection-button').addEventListener('click',showSettings);
 $('#refresh-button').addEventListener('click',()=>{refreshConnection();if(state.view==='files')renderFiles();toast('Checking the local VISTA connection.');});
 $('#resource-refresh').addEventListener('click',refreshConnection);
 $$('[data-close-dialog]').forEach(el=>el.addEventListener('click',()=>el.closest('dialog').close()));
 $('#settings-form').addEventListener('submit',async event=>{
   event.preventDefault();if(state.busy){$('#settings-status').textContent='Finish or stop the current turn before changing connections.';return;}
   const button=event.submitter;button.disabled=true;
-  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
+  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;clearLiveConversation(true);TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
   catch(error){$('#settings-status').textContent=error.message;}finally{button.disabled=false;}
 });
 $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log');log.hidden=!log.hidden;$('#activity-toggle').setAttribute('aria-expanded',String(!log.hidden));});
@@ -514,7 +563,9 @@ async function init() {
     const [geo,config,network,demoCase,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/demo-case.json'),api('/data/prompts.json')]);
     state.geo=geo;state.config=config;state.network=network;state.demoCase=demoCase;state.prompts=prompts.prompts;
     TVAHypothesisDemo.init({caseDefinition:demoCase,api,projectUrl,fileUrl,preparePrompt:prepareDemoPrompt,showDetails,toast});
-    TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures});
+    TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures,showDetails});
+    TVAComposerResize.init();
+    TVALiteratureLibrary.init({api,preparePrompt:prepareDemoPrompt,showDetails,toast});
     renderPromptLibrary();renderSkills();renderSiteContext();renderMap();renderResults();showWelcome();
     await refreshConnection();
     state.sessionId=readSessionId();

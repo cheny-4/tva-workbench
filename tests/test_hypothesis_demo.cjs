@@ -136,6 +136,7 @@ test('research references require existing safe names and a matching non-example
     const result=await harness.refresh();
     assert.equal(result.matched,false);
     assert.deepEqual(plain(result.researchLinks),[]);
+    assert.deepEqual(plain(result.caseFigures),[]);
   }
 });
 
@@ -152,10 +153,13 @@ test('unavailable project, missing manifest and read failure explicitly clear pr
     ()=>{mode='missing';return harness.refresh();},
     ()=>{mode='failed';return harness.refresh();},
   ]) {
-    mode='valid';assert.equal((await harness.refresh()).researchLinks.length,5);
+    mode='valid';const prior=await harness.refresh();
+    assert.equal(prior.researchLinks.length,5);
+    assert.equal(prior.caseFigures.length,4);
     const result=await unavailable();
     assert.equal(result.matched,false);
     assert.deepEqual(plain(result.researchLinks),[]);
+    assert.deepEqual(plain(result.caseFigures),[]);
   }
 });
 
@@ -171,6 +175,68 @@ test('a superseded output read cannot replace a newer set of research links',asy
   const previous=harness.refresh();
   const current=await harness.refresh();
   assert.equal(current.researchLinks.length,5);
+  assert.equal(current.caseFigures.length,4);
   release(data.listing);
   assert.equal(await previous,null);
+});
+
+test('case figures carry canonical labels and actual scoped raster and JSON references',async()=>{
+  const {manifest,listing}=researchFixture();
+  const record=manifest.panels.temperature;
+  Object.assign(record,{figure:'figures/temperature April.png',source_file:'data/realization April.json',title:'Untrusted replacement title'});
+  listing.push({name:record.figure,size:100},{name:record.source_file,size:100});
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?listing:manifest);
+  const result=await harness.refresh();
+  assert.deepEqual(plain(result.caseFigures).map(item=>[item.id,item.kind]),[
+    ['temperature','frozen_prediction'],['precipitation','frozen_prediction'],['runoff','observation'],['downscale','frozen_comparison'],
+  ]);
+  const panel=definition.panels.find(item=>item.id==='temperature');
+  assert.deepEqual(plain(result.caseFigures[0]),{
+    id:'temperature',title:panel.title,subtitle:panel.subtitle,kind:'frozen_prediction',
+    figure:record.figure,figureUrl:harness.outputBase+'/figures/temperature%20April.png?preview=true',
+    sourceFile:record.source_file,sourceUrl:harness.outputBase+'/data/realization%20April.json',source:record.source,
+  });
+});
+
+test('unsupported scientific kinds never enter the case gallery even when image files exist',async()=>{
+  const {manifest,listing}=researchFixture();
+  manifest.panels.temperature.kind='observation';
+  manifest.panels.precipitation.model='new-model';
+  manifest.panels.runoff.forecast_available=true;
+  manifest.panels.downscale.trial='Trial 1';
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?listing:manifest);
+  const result=await harness.refresh();
+  assert.equal(result.matched,true);
+  assert.equal(result.available,0);
+  assert.deepEqual(plain(result.caseFigures),[]);
+});
+
+test('case gallery excludes unsafe, missing and active-format references while retaining valid panels',async()=>{
+  let data=researchFixture();
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?data.listing:data.manifest);
+  for(const change of [
+    {figure:'../temperature.png'},
+    {figure:'https://example.com/temperature.png'},
+    {figure:'not-listed.png'},
+    {figure:'active.svg'},
+    {source_file:'missing.json'},
+    {source_file:'not-json.md'},
+  ]) {
+    data=researchFixture();Object.assign(data.manifest.panels.temperature,change);
+    if(change.figure==='active.svg')data.listing.push({name:'active.svg',size:100});
+    if(change.source_file==='not-json.md')data.listing.push({name:'not-json.md',size:100});
+    const result=await harness.refresh();
+    assert.deepEqual(plain(result.caseFigures).map(item=>item.id),['precipitation','runoff','downscale'],JSON.stringify(change));
+  }
+  data=researchFixture();data.listing=data.listing.filter(file=>file.name!=='temperature.png');
+  assert.equal((await harness.refresh()).caseFigures.some(item=>item.id==='temperature'),false);
+});
+
+test('orphan output images cannot become case figures without validated panel associations',async()=>{
+  const {manifest,listing}=researchFixture();
+  manifest.panels={};listing.push({name:'orphan.png',size:100});
+  const harness=refreshHarness(async url=>url.endsWith('/outputs')?listing:manifest);
+  const result=await harness.refresh();
+  assert.equal(result.matched,true);
+  assert.deepEqual(plain(result.caseFigures),[]);
 });

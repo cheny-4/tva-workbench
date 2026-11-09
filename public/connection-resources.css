@@ -1,0 +1,33 @@
+/* Connection fields and read-only compute status share one local dialog. */
+#sidebar-resources[hidden]{display:none}
+#settings-dialog{width:min(850px,85vw);max-width:85vw;max-height:85dvh;padding:26px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#settings-dialog .dialog-heading{margin-bottom:20px;align-items:flex-start}
+#settings-dialog .dialog-heading h2{font-size:25px;line-height:1.3;margin:7px 0 0}
+#settings-dialog .dialog-heading .eyebrow{font-size:8px}
+#settings-dialog h3{font-size:15px;font-weight:600;line-height:1.5;letter-spacing:-.15px;color:var(--genesis-navy);margin:0}
+.connection-fields-section{padding:19px 20px 18px;background:#f6faf7;border:1px solid #dbe7df;border-radius:10px}
+#settings-dialog .connection-fields-section>p{font-size:11px;line-height:1.8;margin:6px 0 16px;color:#587483}
+.connection-fields-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px}
+.connection-fields-grid>div{min-width:0}
+#settings-dialog .connection-fields-grid label{font-size:11px;margin:0 0 8px}
+#settings-dialog .connection-fields-grid input{padding:11px;font-size:12px;background:#fff}
+#settings-dialog .connection-fields-grid small{font-size:10px;line-height:1.7;margin:7px 0 0}
+#settings-dialog .connection-fields-section>.connection-scope-note{font-size:10px;line-height:1.7;margin:14px 0 0;color:#6a8290}
+#settings-dialog #settings-status:empty{display:none}
+.connection-save-actions{display:flex;justify-content:flex-end;margin-top:16px}
+.connection-save-actions .primary-button{font-size:11px;padding:10px 14px}
+.settings-compute-section{margin-top:24px;border-top:1px solid #dce6ec;padding-top:21px}
+.settings-compute-heading{display:flex;align-items:center;justify-content:space-between;gap:17px;margin-bottom:14px}
+#settings-dialog .settings-compute-heading p{font-size:11px;line-height:1.7;margin:5px 0 0;color:#627c8c}
+.settings-compute-heading>.secondary-button{flex-shrink:0;font-size:10px;padding:9px 11px}
+#settings-dialog .resource-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#settings-dialog .resource-card{min-width:0;padding:16px 17px;border-radius:9px}
+#settings-dialog .resource-card-header svg{width:21px;height:21px}
+#settings-dialog .resource-card h2{font-size:19px;line-height:1.4;margin:11px 0 4px;letter-spacing:-.25px}
+#settings-dialog .resource-card .facility{font-size:8px;line-height:1.6}
+#settings-dialog .resource-card p{font-size:11px;line-height:1.7;min-height:0;margin:8px 0 12px}
+#settings-dialog .resource-card .tag{font-size:9px}
+#settings-dialog .settings-compute-note{font-size:10px;line-height:1.8;color:#6b8191;margin:13px 0 0}
+#settings-dialog .dialog-footer{margin-top:20px;padding-top:16px;border-top:1px solid #e1e9ee}
+@media(max-width:700px){#settings-dialog{padding:20px}.connection-fields-section{padding:17px 16px}.connection-fields-grid{grid-template-columns:minmax(0,1fr);gap:17px}#settings-dialog .dialog-heading h2{font-size:23px}#settings-dialog .resource-cards{grid-template-columns:minmax(0,1fr)}.settings-compute-heading{align-items:flex-start;gap:12px}.settings-compute-heading>.secondary-button{font-size:9px;padding:8px 9px}#settings-dialog .settings-compute-heading p{font-size:10px}}
+@media(max-width:420px){#settings-dialog{padding:17px}#settings-dialog .dialog-heading h2{font-size:21px}.connection-fields-section{padding:15px 13px}#settings-dialog h3{font-size:14px}.settings-compute-heading{flex-wrap:wrap}.settings-compute-heading>.secondary-button{margin-left:auto}.connection-save-actions .primary-button{font-size:10px;padding:10px 12px}}
