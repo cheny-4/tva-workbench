@@ -7,25 +7,34 @@ function renderStageCoverage() {}
 function showWorkflowDetails() {
   showDetails('The April 2019 hypothesis-lab demo',`<p>This is one VISTA project, <strong>Water4Energy-TVA-agent-loop</strong>, for the week <strong>16–22 April 2019</strong>, issued 15 April.</p><h3>The walkthrough</h3><p>Read the experiment ledger before proposing a new hypothesis. The Proposer, Critic and Referee use existing scored evidence to identify an open gap and describe a protocol. A person still authorizes any training.</p><h3>The evidence on screen</h3><p>Temperature and precipitation use the saved climate-week plus residual 9×9 results. Runoff is labeled ERA5 observation; the HEADWATER forecast slot is unavailable. The downscale panel compares frozen Trial 0 U-Net and bilinear results at 1° → 0.25°.</p><h3>Optional final panel</h3><p>A dam readout is shown only when enabled, with Normandy or Norris and an agreed plain-language rule. The interface does not infer an operating rule or run RiverWare.</p><p><a href="https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md" target="_blank" rel="noopener noreferrer">Read the source demonstration plan ↗</a></p>`);
 }
-function renderPromptLibrary() {
-  const featured=['walkthrough','ledger','runoff'];
-  const starters=featured.map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean);
-  $('#starter-prompts').innerHTML=starters.map((p,i)=>`<button class="starter-prompt" data-use-prompt="${esc(p.id)}"><span class="starter-index">0${i+1}</span><span><strong>${esc(p.title)}</strong><small>${esc(p.description)}</small></span>${icon('arrow')}</button>`).join('');
-  const categories=['All',...new Set(state.prompts.map(p=>p.category))];
-  $('#prompt-filter').innerHTML=categories.map(c=>`<button class="${c===state.promptCategory?'active':''}" data-prompt-category="${esc(c)}">${esc(c)}</button>`).join('');
-  $('#prompt-library').innerHTML=state.prompts.filter(p=>state.promptCategory==='All'||p.category===state.promptCategory).map(p=>`<article class="prompt-library-card"><span class="eyebrow">${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.description)}</p><button class="text-button" data-use-prompt="${esc(p.id)}">Prepare prompt ${icon('arrow')}</button></article>`).join('');
-  $('#prompt-mode-tag').textContent='Live agent · fixed case';
-  $('#prompt-library-notice').textContent='Each starter prepares an editable request for 16–22 April 2019. Review it, then send it to the connected project.';
-  $$('[data-use-prompt]').forEach(el=>el.addEventListener('click',()=>usePrompt(el.dataset.usePrompt)));
-  $$('[data-prompt-category]').forEach(el=>el.addEventListener('click',()=>{state.promptCategory=el.dataset.promptCategory;renderPromptLibrary();}));
+const FEATURED_HINTS = ['walkthrough','ledger','runoff'];
+const HINT_LABELS = {walkthrough:'Start walkthrough',ledger:'Read ledger',runoff:'Explain runoff'};
+
+function hintGroups(prompts) {
+  const usable=(Array.isArray(prompts)?prompts:[]).filter(prompt=>prompt && typeof prompt.id==='string' && typeof prompt.livePrompt==='string');
+  return {
+    featured:FEATURED_HINTS.map(id=>usable.find(prompt=>prompt.id===id)).filter(Boolean),
+    more:usable.filter(prompt=>!FEATURED_HINTS.includes(prompt.id))
+  };
 }
+function renderPromptHints() {
+  const groups=hintGroups(state.prompts);
+  for(const id of ['chat-hints','conversation-hints']) {
+    const container=$('#'+id);if(!container)continue;
+    container.classList.add('context-hints');
+    container.innerHTML=groups.featured.length || groups.more.length ? `<div class="context-hints-row" role="group" aria-label="Suggested questions"><span class="context-hints-label">Try:</span>${groups.featured.map(prompt=>`<button type="button" class="context-hint-chip" data-use-prompt="${esc(prompt.id)}" title="${esc(prompt.description || prompt.title || '')}">${esc(HINT_LABELS[prompt.id] || prompt.title || prompt.id)}</button>`).join('')}</div>${groups.more.length?`<details class="context-hints-more"><summary>More hints <span aria-hidden="true">⌄</span></summary><div class="context-hint-list" role="group" aria-label="More suggested questions">${groups.more.map(prompt=>`<button type="button" class="context-hint-option" data-use-prompt="${esc(prompt.id)}"><span>${esc(prompt.title || prompt.id)}</span><small>${esc(prompt.category || '')}</small><span class="context-hint-arrow" aria-hidden="true">↗</span></button>`).join('')}</div></details>`:''}` : '<p class="context-hints-empty">Suggestions will appear when the case loads.</p>';
+    container.querySelectorAll('[data-use-prompt]').forEach(button=>button.addEventListener('click',()=>{
+      const disclosure=button.closest('.context-hints-more');if(disclosure)disclosure.open=false;
+      usePrompt(button.dataset.usePrompt);
+    }));
+  }
+}
+// Retained name for the existing app initialization; no separate library view.
+function renderPromptLibrary() {renderPromptHints();}
 function usePrompt(id) {
-  if(state.busy){toast('Finish the current turn before preparing another prompt.');return;}
-  const prompt=state.prompts.find(p=>p.id===id);if(!prompt || typeof prompt.livePrompt!=='string')return;
-  switchView('workspace');
-  $('#prompt').value=prompt.livePrompt;
-  $('#prompt').focus();$('#chat-form').scrollIntoView({behavior:'smooth',block:'center'});
-  toast('Prompt prepared. Review the request, then press Send.');
+  if(state.busy){toast('Finish the current turn before preparing another question.');return;}
+  const prompt=state.prompts.find(item=>item.id===id);if(!prompt || typeof prompt.livePrompt!=='string')return;
+  prepareDemoPrompt(prompt.livePrompt);
 }
 async function refreshSkills() {
   const project=state.config.project,backend=state.config.backend_url;
@@ -90,17 +99,30 @@ function renderNetwork() {
   $('#network-overview').innerHTML=`<div><strong>${n.siteCount}</strong><span>Study locations</span></div><div><strong>${n.headwaterCount}</strong><span>Headwater reservoirs</span></div><div><strong>${n.siteCount-n.headwaterCount}</strong><span>Other reservoirs and gages</span></div>`;
   drawNetworkMap('network-map',1000,410);renderNetworkRoster();
 }
+const networkExpandedGroups={headwaters:true,other:false};
+function networkRosterGroups(query='',expanded=networkExpandedGroups) {
+  const search=String(query).trim().toLowerCase();
+  return networkGroups().map(group=>{
+    const sites=group.sites.filter(site=>(site.name+' '+(site.headwater?'headwater reservoir':'other reservoir gage location')).toLowerCase().includes(search));
+    const open=search?sites.length>0:(Object.hasOwn(expanded,group.id)?Boolean(expanded[group.id]):group.id==='headwaters');
+    return {...group,sites,total:group.sites.length,open,searching:Boolean(search)};
+  }).filter(group=>group.sites.length>0);
+}
+function networkSiteCard(site) {
+  return `<button class="network-site-card ${site.headwater?'network-headwater':''} ${site.id===state.focusSiteId?'selected':''}" data-roster-site="${esc(site.id)}"><span class="${site.headwater?'headwater-badge':'location-kind'}">${site.headwater?'Headwater':'Network location'}</span><strong>${esc(site.name)}</strong><small>${site.headwater?'Headwater reservoir':'Reservoir / gage study location'}</small><span class="site-open-arrow" aria-hidden="true">↗</span></button>`;
+}
 function renderNetworkRoster() {
   if(!state.network)return;
-  const query=$('#site-search').value.trim().toLowerCase();
-  let matched=0;
-  $('#network-roster').innerHTML=networkGroups().map(group=>{
-    const sites=group.sites.filter(s=>(s.name+' '+(s.headwater?'headwater reservoir':'other reservoir gage location')).toLowerCase().includes(query));
-    matched+=sites.length;
-    return sites.length?`<h3 class="network-group-heading">${esc(group.title)} <span>${sites.length}</span></h3>${sites.map(s=>`<button class="network-site-card ${s.headwater?'network-headwater':''} ${s.id===state.focusSiteId?'selected':''}" data-roster-site="${esc(s.id)}"><span class="${s.headwater?'headwater-badge':'location-kind'}">${s.headwater?'Headwater':'Network location'}</span><strong>${esc(s.name)}</strong><small>${s.headwater?'Headwater reservoir':'Reservoir / gage study location'}</small><span class="site-open-arrow">↗</span></button>`).join('')}`:'';
-  }).join('');
-  if(!matched)$('#network-roster').innerHTML='<div class="empty-state">No matching location. Try a reservoir or gage name.</div>';
-  $$('[data-roster-site]').forEach(el=>el.addEventListener('click',()=>selectNetworkSite(el.dataset.rosterSite,true)));
+  const query=$('#site-search').value.trim();
+  const groups=networkRosterGroups(query);
+  const roster=$('#network-roster');
+  roster.innerHTML=groups.length?groups.map(group=>`<details class="network-roster-group" data-network-group="${esc(group.id)}"${group.open?' open':''}><summary><strong>${esc(group.title)}</strong><span class="network-group-count">${group.searching?`${group.sites.length} of ${group.total}`:group.total}</span><span class="network-group-action" aria-hidden="true"><span class="network-when-closed">Expand</span><span class="network-when-open">Collapse</span></span><span class="network-group-chevron" aria-hidden="true">⌄</span></summary><div class="network-group-sites">${group.sites.map(networkSiteCard).join('')}</div></details>`).join(''):'<div class="empty-state">No matching location. Try a reservoir or gage name.</div>';
+  roster.querySelectorAll('[data-network-group]').forEach(disclosure=>disclosure.addEventListener('toggle',()=>{
+    // Searching reveals matches temporarily. A clear search returns to the user's
+    // normal expanded/collapsed groups rather than retaining the search state.
+    if(!query)networkExpandedGroups[disclosure.dataset.networkGroup]=disclosure.open;
+  }));
+  roster.querySelectorAll('[data-roster-site]').forEach(button=>button.addEventListener('click',()=>selectNetworkSite(button.dataset.rosterSite)));
 }
 function showOriginalNetwork() {
   if(!state.network)return;

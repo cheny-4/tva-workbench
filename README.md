@@ -1,4 +1,4 @@
-# TVA Workbench · Hypothesis-lab demo · v0.5.0
+# TVA Workbench · Hypothesis-lab demo · v0.6.0
 
 A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. The case is fixed: **16–22 April 2019, issued 15 April 2019**. VISTA supplies the live agent, loaded skills, knowledge bases and saved files.
 
@@ -6,11 +6,19 @@ A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.5.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **TVA-Workbench-v0.6.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
 
 The launcher prints the version, folder and actual local URL, and opens a browser tab. It prefers port 8765. If another copy occupies that port, this version uses an available loopback port without stopping the other process. Opening this same copy again reuses its validated running instance. Follow the printed URL; an older tab on port 8765 may belong to another version. Control+C stops this wrapper.
 
 No npm, pip or frontend build is required. The launcher uses VISTA's bundled Python if available, otherwise Python 3.9+. The interface can open before VISTA is configured; readiness and missing artifacts remain explicit.
+
+## Start with a conversation
+
+The opening screen gives a short Start here guide, three suggested questions and a large conversation area. Choose **Begin walkthrough** or a hint, review the editable request, then press **Send**. Hints prepare text only. **More hints** keeps the remaining questions available without a separate Prompt Library. The same hints appear in **Conversations** beside saved history.
+
+Case figures, the lab loop, project/source readiness, optional reservoir readout, walkthrough questions and conversation artifacts start collapsed below the chat. Open only the section needed, or use **Figures** in the chat header. Streaming, tool activity and Stop remain in the conversation area.
+
+In **TVA network**, the 12 headwaters start expanded and the other 42 locations start collapsed. Expand either group as needed. Searching reveals matching locations automatically; clearing the search restores your expansion choices.
 
 ## What the walkthrough shows
 
@@ -49,6 +57,7 @@ The wrapper stores only backend/project selection and validated launch-port meta
 | v0.3.0 | Simplified presentation |
 | v0.4.0 | Full live workspace and Results Library |
 | v0.5.0 | Fixed April 2019 hypothesis-lab walkthrough |
+| v0.6.0 | Chat-first walkthrough, integrated hints and collapsible network |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or use GitHub's Code → Download ZIP. GitHub hosts source; the Python/VISTA app runs on the laptop.
 

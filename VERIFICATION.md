@@ -1,28 +1,27 @@
-# v0.5.0 verification
+# v0.6.0 verification
 
-Verified November 8, 2026 on macOS. The interface targets Dali's16–22April2019 case, issued15April, through the local VISTA backend.
+Verified November 8–9, 2026 on macOS. This revision changes the presentation of Dali's fixed **16–22 April 2019** case, issued **15 April**. The backend routes, scientific evidence validation and optional dam rule contract remain unchanged.
 
 ## Automated checks
 
-- **40 Python checks passed:**23 adapter/project-knowledge checks,11 launcher/instance/port/browser checks and6 study-catalog checks.
-- **25 JavaScript checks passed:**fixed-case and source-kind validation, exact loaded-skill counting, separate source/index coverage, optionaldam gating, filename safety, output filtering, date/unit/CSV behavior and correct output-store links.
-- Syntax, unique DOM IDs/selector wiring, JSON parsing and whitespace checks passed.
+- **40 Python checks passed:** 23 adapter/project-knowledge checks, 11 launcher/instance/port/browser checks and 6 study-catalog checks. Tests used isolated loopback servers; the restricted sandbox first prevented socket binding, then the authorized loopback-enabled run passed.
+- **30 JavaScript checks passed:** the previous 25 checks plus 5 focused checks for network expansion, selection rerenders, temporary search expansion/restoration, compact hint coverage and prepare-only requests with a busy guard.
+- JavaScript syntax, HTML nesting/unique IDs and whitespace checks passed.
 
 ## Browser checks
 
-- The real VISTA backend returned404 for `Water4Energy-TVA-agent-loop`. The UI accurately showed Awaiting project, unknown required-skill/KB status and pending scientific evidence. It did not substitute the old LSTM project or fabricate results.
-- An isolated, read-only fake VISTA backend supplied8 core skills plus the optionaldam skill,6 canonical knowledge sources, a matching manifest and4 visiblyQA-labeled PNGs. The UI showed8/8 core skills, separate optional status and loaded the matching figures. Temperature preview opened and the image loaded.
-- Clicking a Critic/loop action prepared an editable request with zero chat messages/tool events. No backend turn was submitted.
-- Dam was off by default. Its request required a reservoir and explicit rule. A matching synthetic Normandy/Hold artifact appeared only when those matched. Changing the rule hid it. Wrong-week manifest metadata cleared all4 case images and the prior dam readout.
-- A rebuilding/unready KB showed0/1 indexes ready and six separately listed, not-ready source badges. Listed documents were not treated as proof of a Ready index.
-- Laptop1366-pixel and narrow390-pixel layouts had no horizontal document overflow. No browser console errors were observed. The schema link and retained secondary views were checked.
+- The main page opens with a short guide, three hints and a full-width chat. Figures, the loop, setup/sources, optional dam, walkthrough questions and conversation artifacts all start collapsed. The separate Prompt Library page/navigation is removed.
+- Hints in both the chat and Conversations prepare editable text without creating messages, tool events or a backend turn. Additional hints open on demand and close after a choice.
+- Headwaters start expanded (12); other locations start collapsed (42). Native keyboard expansion works. Searching Savannah revealed its group and filtered count; clearing the search restored the prior expansion choice. Map/location selections remain background context.
+- The composer fits within laptop viewports of 1366×768 and 1280×720. Expanded hints scroll within a bounded area; expanded activity overlays above its button so the composer stays available. The 390-pixel layout had no horizontal document overflow.
+- An isolated read-only fake VISTA supplied a clearly labeled long saved conversation, 8 core skills plus optional dam, 6 canonical source records, a matching manifest and 4 watermarked QA figures. The transcript scrolls internally; the explicit Figures button opens the figure section without opening other details. All four image files loaded. Setup still distinguishes 8/8 core skills, optional status, index readiness and source coverage.
+- The dam remained off by default. Enabling it, choosing Normandy and supplying the exact synthetic rule revealed its matching saved readout. Wrong-week evidence showed zero case images and an explicit metadata mismatch. No real agent request was sent.
+- No browser console errors were observed. Product previews show the real backend's missing-project state, not synthetic scientific evidence.
 
 ## Runnable launch and package
 
-The actual macOS shell launcher was run while the user's older Workbench occupied8765. It startedv0.5.0 on an OS-selected loopback port. Reopening the same copy returned that same actual address and exited without another server. The older process remained untouched. Archive file hashes, executable launcher modes and a fresh extracted-package smoke launch are checked during packaging.
+The actual macOS shell launcher started v0.6.0 on an OS-selected loopback port while the user's older copy occupied 8765. The other process was left running. The release package is checked for ZIP integrity, all manifest hashes and executable launcher modes. A fresh extracted copy is smoke-tested through its printed URL, version, project selection, case schema and UI assets; reopening it must reuse that exact running instance.
 
-QA backend files and figures were held outside the source/package, and its servers were stopped after checks. Product previews show the real missing-project state; they are not screenshots of synthetic science results.
+All QA fixtures stay outside the shipped repository/package. Their listeners and the owned preview are stopped after checks. No project, skill, knowledge base, model training, scientific inference, ERA5 download or HPC job was created or changed. The real local `Water4Energy-TVA-agent-loop` project was absent; the interface reports that state and does not substitute another project. The scientific walkthrough still requires the dependencies in [VISTA_SETUP.md](VISTA_SETUP.md).
 
-No real model training, scientific inference, ERA5 download or HPC submission ran during this revision. No VISTA project, skill or knowledge base was created or changed. Dali/Junqi's project, skill loading, indexed sources and actual realization/Trial0 artifacts are required for a scientific walkthrough. [VISTA_SETUP.md](VISTA_SETUP.md) records that setup contract.
-
-Windows/Linux launchers are retained, but desktop launch verification was performed on macOS. Metadata/file-presence checks do not independently reproduce or certify a scientific score.
+Windows/Linux launchers are retained; desktop launch verification was performed on macOS. Metadata and file-presence checks do not independently reproduce or certify a scientific score.

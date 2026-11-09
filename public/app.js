@@ -8,7 +8,7 @@ const state = {
   status: null, geo: null, siteIndex: 0,
   busy: false, sessionId: null, history: [], events: [], lastSeq: 0,
   stream: null, pending: null, liveFiles: [], liveStudy: null,
-  connectionRevision: 0, network: null, demoCase: null, knowledge: null, prompts: [], skills: null, focusSiteId: 'ELF13', selectedStage: null, promptCategory: 'All',
+  demoEvidence: null, connectionRevision: 0, network: null, demoCase: null, knowledge: null, prompts: [], skills: null, focusSiteId: 'ELF13', selectedStage: null, promptCategory: 'All',
 };
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
@@ -45,6 +45,7 @@ function download(name, text, type='text/plain') {
 }
 function setBusy(value,label) {
   state.busy=value;
+  $('.agent-panel')?.classList.toggle('is-working',value);
   $('#send-button').hidden=value;
   $('#stop-button').hidden=!value;
   $('#send-button').disabled=value; $('#workflow-button').disabled=value;
@@ -60,6 +61,7 @@ function setStage(index,complete=false) {
 }
 function addActivity(title,detail='',kind='info',raw=null) {
   const item={time:new Date().toLocaleTimeString('en-US',{hour12:false}),title,detail,kind};
+  $('.agent-panel')?.classList.add('has-activity');
   state.events.push(item); if(state.events.length>250) state.events.shift();
   const row=document.createElement('div'); row.className='activity-event';
   row.innerHTML=`<time>${esc(item.time)}</time><div><strong>${esc(title)}</strong>${detail?`<div>${esc(detail)}</div>`:''}${raw?`<details><summary>Event detail</summary><pre>${esc(JSON.stringify(raw,null,2).slice(0,12000))}</pre></details>`:''}</div>`;
@@ -69,6 +71,7 @@ function addActivity(title,detail='',kind='info',raw=null) {
   $('#activity-log').scrollTop=$('#activity-log').scrollHeight;
 }
 function resetActivity() {
+  $('.agent-panel')?.classList.remove('has-activity');
   state.events=[]; state.lastSeq=0; $('#activity-log').replaceChildren();
   $('#activity-count').textContent='0'; $('#activity-last').textContent='Events and tool calls appear here'; setStage(-1);
 }
@@ -82,6 +85,7 @@ function formatText(text) {
 }
 function addMessage(role,text,options={}) {
   $('#chat-messages .welcome')?.remove();
+  $('.agent-panel')?.classList.add('has-messages');
   const el=document.createElement('div'); el.className=`message ${role}${options.error?' error':''}`;
   const label=role==='agent' ? '<div class="message-label"><b>✳ TVA AGENT</b><span>VIA VISTA</span></div>' : '';
   el.innerHTML=`${label}<div class="message-body">${formatText(text)}</div>`;
@@ -89,13 +93,13 @@ function addMessage(role,text,options={}) {
 }
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
-  const featured=['walkthrough','ledger','runoff'].map(id=>state.prompts.find(p=>p.id===id)).filter(Boolean);
-  $('#chat-messages').innerHTML=`<div class="welcome"><div class="welcome-symbol">✳</div><h3>Start with the evidence.</h3><p>Walk the hypothesis-lab loop for 16–22 April 2019. The live agent reads the ledger and saved files; scientific results are not invented here.</p><div class="prompt-cards">${featured.map((p,i)=>`<button class="prompt-card" data-welcome-prompt="${esc(p.id)}"><span>0${i+1}</span>${esc(p.title)}${icon('arrow')}</button>`).join('')}</div></div>`;
-  $$('[data-welcome-prompt]').forEach(el=>el.addEventListener('click',()=>usePrompt(el.dataset.welcomePrompt)));
+  $('.agent-panel')?.classList.remove('has-messages');
+  $('#chat-messages').innerHTML='<div class="welcome"><div class="welcome-symbol">✳</div><h3>Let’s explore this week.</h3><p>Choose a suggested question above, or ask your own. The agent will guide you through the case and its source files.</p></div>';
 }
 function prepareDemoPrompt(text) {
   if(state.busy){toast('Finish or stop the current turn before preparing another request.');return;}
   switchView('workspace');
+  $$('#chat-hints details, #conversation-hints details').forEach(detail=>{detail.open=false;});
   $('#prompt').value=text;$('#prompt').focus();
   $('#chat-form').scrollIntoView({behavior:'smooth',block:'center'});
   toast('Request prepared. Review it, then press Send.');
@@ -108,18 +112,40 @@ async function refreshKnowledge() {
     state.knowledge=knowledge;
   }catch(error){state.knowledge={project,count:null,ready_count:null,all_ready:null,knowledge_bases:[],detail:error.message};}
 }
+function renderDemoStatus() {
+  const line=$('#demo-status-line');if(!line)return;
+  const status=state.status;
+  line.dataset.state='pending';
+  if(!status){line.textContent='Checking the VISTA connection…';line.dataset.state='checking';}
+  else if(state.demoCase && status.version!==state.demoCase.version){line.textContent='An older Workbench is serving this tab. Open the current launcher and use its printed address.';}
+  else if(!status.connected){line.textContent='Open VISTA to send questions. You can explore the suggested hints while it connects.';}
+  else if(!status.project_found){line.textContent='VISTA is open; the demo project still needs setup before you can send questions.';}
+  else {
+    const required=state.skills?.skills || [];
+    const known=state.skills?.project_found && Number.isInteger(state.skills.count);
+    const names=new Set(required.map(skill=>skill.name));
+    const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id));
+    const knowledgePending=state.knowledge?.project_found && state.knowledge.all_ready===false;
+    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to VISTA. Choose a hint or ask your own question.';
+    line.dataset.state='connected';
+  }
+  const badge=$('#case-figures-status');
+  if(badge)badge.textContent=state.demoEvidence?.matched?`${state.demoEvidence.available} of 4 figures`:'Awaiting source files';
+}
 async function refreshDemo() {
   if(!state.demoCase || !window.TVAHypothesisDemo)return;
-  await TVAHypothesisDemo.refresh({status:state.status,skills:state.skills,knowledge:state.knowledge,project:state.config.project,backend:state.config.backend_url});
+  const result=await TVAHypothesisDemo.refresh({status:state.status,skills:state.skills,knowledge:state.knowledge,project:state.config.project,backend:state.config.backend_url});
+  if(result)state.demoEvidence=result;
+  renderDemoStatus();
 }
 
 function switchView(view) {
   state.view=view;
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Demo skills',prompts:'Prompt library',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
-  if(view==='history') renderHistory(); if(view==='files') renderFiles(); if(view==='resources') renderResources();
-  if(view==='network')renderNetwork();if(view==='skills')renderSkills();if(view==='prompts')renderPromptLibrary();
+  $('#view-breadcrumb').textContent={workspace:'Demo walkthrough',network:'Study network',skills:'Demo skills',history:'Conversations',files:'Results Library',resources:'Compute resources'}[view];
+  if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='resources') renderResources();
+  if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -137,7 +163,7 @@ async function refreshConnection() {
     $('#connection-pill').title=compatible?state.status.detail:`This tab is served by Workbench ${state.status.version || 'unknown'}. Open the v${state.demoCase.version} launcher and use its printed local address.`;
     renderResources();await refreshSkills();await refreshKnowledge();await renderFiles();await refreshDemo();setBusy(state.busy);
     if($('#settings-dialog').open) $('#settings-status').textContent=state.status.detail;
-  } catch(error) {if(revision!==state.connectionRevision)return;state.status=null;state.skills=null;state.knowledge=null;TVAHypothesisDemo.reset();await refreshDemo();$('#connection-pill').classList.remove('connected');$('#connection-pill').innerHTML='<i></i> Connection unavailable';}
+  } catch(error) {if(revision!==state.connectionRevision)return;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;TVAHypothesisDemo.reset();await refreshDemo();$('#connection-pill').classList.remove('connected');$('#connection-pill').innerHTML='<i></i> Connection unavailable';}
 }
 function resourceState(resource) {
   if(resource.planned) return ['planned','Planned'];
@@ -436,8 +462,9 @@ $$('.nav-item').forEach(el=>el.addEventListener('click',()=>switchView(el.datase
 $('.brand').addEventListener('click',event=>{event.preventDefault();switchView('workspace');});
 $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
 $('#skills-refresh').addEventListener('click',async()=>{await refreshSkills();await refreshKnowledge();await refreshDemo();});
-$('#open-prompt-library').addEventListener('click',()=>switchView('prompts'));
 $('#workflow-details').addEventListener('click',showWorkflowDetails);
+$('#demo-setup-button').addEventListener('click',showSettings);
+$('#view-case-figures').addEventListener('click',()=>{const details=$('#case-figures-details');details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'});});
 $('#site-search').addEventListener('input',renderNetworkRoster);
 $('#connection-button').addEventListener('click',showSettings);$('#resource-settings').addEventListener('click',showSettings);
 $('#refresh-button').addEventListener('click',()=>{refreshConnection();if(state.view==='files')renderFiles();toast('Checking the local VISTA connection.');});
@@ -446,7 +473,7 @@ $$('[data-close-dialog]').forEach(el=>el.addEventListener('click',()=>el.closest
 $('#settings-form').addEventListener('submit',async event=>{
   event.preventDefault();if(state.busy){$('#settings-status').textContent='Finish or stop the current turn before changing connections.';return;}
   const button=event.submitter;button.disabled=true;
-  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
+  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
   catch(error){$('#settings-status').textContent=error.message;}finally{button.disabled=false;}
 });
 $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log');log.hidden=!log.hidden;$('#activity-toggle').setAttribute('aria-expanded',String(!log.hidden));});
@@ -472,7 +499,7 @@ $('#elicitation-decline').addEventListener('click',()=>resolveElicitation('decli
 $('#elicitation-dialog').addEventListener('cancel',event=>{event.preventDefault();toast('Accept or decline this VISTA request so the workflow can continue.');});
 
 async function init() {
-  renderResources();showWelcome();renderResults();
+  renderResources();showWelcome();renderResults();renderDemoStatus();
   try {
     const [geo,config,network,demoCase,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/demo-case.json'),api('/data/prompts.json')]);
     state.geo=geo;state.config=config;state.network=network;state.demoCase=demoCase;state.prompts=prompts.prompts;
