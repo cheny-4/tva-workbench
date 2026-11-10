@@ -32,7 +32,7 @@ function fixture() {
     root.figures=value.includes('data-guide-figures')?button():null;
   }};
   Object.defineProperty(root,'innerHTML',{set(value){
-    this.html=value;
+    this.html=value;this.overview.open=/data-guide-overview open>/.test(value);
     this.sources.innerHTML='';this.sources.hidden=true;
     this.nodes=Array.from(value.matchAll(/data-guide-step="([^"]+)"/g),match=>button({guideStep:match[1]}));
   }});
@@ -459,4 +459,16 @@ test('the interactive workflow stays open for exploration and yields space to ac
   assert.equal(root.overview.open,true);
   guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
   assert.equal(root.overview.open,false);
+});
+
+
+test('the case workspace can keep its workflow reference collapsed across conversation resets',()=>{
+  const {guide,root}=fixture();
+  guide.init({caseDefinition,prompts,overviewOpen:false});
+  assert.equal(root.overview.open,false);
+  root.overview.open=true;
+  guide.resetConversation();
+  assert.equal(root.overview.open,false);
+  guide.init({caseDefinition,prompts});
+  assert.equal(root.overview.open,true);
 });

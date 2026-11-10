@@ -1,29 +1,26 @@
-# v0.11.0 verification
+# v0.12.0 verification
 
-Verified November 9, 2026 on macOS. The previous ORNL/Genesis theme and interactive workflow are restored. Libraries are compact, and saved conversations move to the lab History control. The case, VISTA scope and science contracts are unchanged.
+Verified November 9, 2026 on macOS. Hypothesis lab is now the method/case introduction; TVA network adds decision context; TVA Case Lab contains guided chat and the existing evidence workspace. Science and backend contracts are unchanged.
 
 ## Automated checks
 
-- **40 Python checks passed:** adapter/project knowledge, launcher identity and study catalog using isolated mock servers.
-- **83 JavaScript checks passed:** retained case/source validation, following/selection, scoped reads, session races, composer bounds, literature normalization/search and artifact behavior. New checks cover workflow expansion/collapse and result-list rendering without automatic image loading; Preview still opens the safe local raster and downloads remain available.
-- HTML nesting, unique IDs, script/style references, JavaScript syntax and whitespace were checked.
+- **40 Python checks passed:** adapter/project knowledge, loopback launch/instance identity and study catalog with isolated mock servers.
+- **87 JavaScript checks passed:** retained source/case validation, scoped/coalesced reads, session races, figure following/selection, composer bounds, compact libraries and literature contracts. New checks cover guarded case questions, independent intro exploration, explicit preparation versus navigation, allowed destinations and a collapsed Case Lab workflow reference across conversation resets.
+- HTML nesting, unique IDs, local script/style references, JavaScript syntax and whitespace were checked. The live rendered page had no duplicate IDs, including the distinct introduction and reference-diagram SVG markers.
 
 ## Browser checks
 
-- The sidebar is the previous navy (#13263f), with ORNL green controls and original ORNL/Genesis logos. Main navigation is Hypothesis lab, Literature library, Results Library, TVA network, Skills & sources.
-- The interactive six-node workflow starts expanded in the single right evidence workspace. Selecting Critic explains that topic and prepares its question only through the explicit Ask button. Following and checked/unverified figure handling remain in place; actual evidence events can collapse the workflow, which can be reopened.
-- History in the lab header opens saved conversations. A saved QA conversation returned to the lab with its transcript and interactive workflow intact. Back to lab also returns to the current conversation; no conversation was deleted or sent to an agent.
-- Typical literature entries measured about 67–90px at 1366×900, with citation and links sharing a row. Searching munoz 2021 found ERA5-Land. Details revealed the pinned repository path and file size. The two repair entries kept their source-reported notes visible without expansion.
-- Sixteen synthetic saved outputs rendered as roughly 55px file rows at 1366×900, with zero preloaded images inside the list. Search found a temperature PNG; Preview opened an enlarged modal with the original download. Fixture files were conspicuously QA-only, and no real agent or compute operation was run. QA proof images remain outside the package.
-- At 1280×720 the left chat and right evidence each filled the available height; the composer maximum preserved a 100px transcript and visible Send. At 390×844 both compact libraries had no horizontal page overflow and their controls remained available.
-- Network, skills, Results Library, Literature and Connection settings were inspected after navigation changes. No browser console errors were observed. Real local VISTA responded but the named demo project remained missing; release previews show that actual state. Saved settings were not changed during QA.
+- Initial navigation opens Hypothesis lab with the interactive method and fixed April case described together. Selecting Critic explains its case relevance. Try this question navigates to TVA Case Lab, prepares the guarded Critic request and does not submit a message. The live topic remains independent of an intro selection.
+- TVA network is second, followed by TVA Case Lab, Results Library, Literature library and Skills & sources. Next/Continue controls connect the pages. Prepare the first case question opens the Case Lab ledger request without starting a turn or changing the scientific case. Brand returns to the introduction.
+- Case Lab retains full-height left chat and right evidence. Three welcome questions and the persistent six-question disclosure are available. The runoff question prepares the guarded ERA5 explanation, closes the disclosure and leaves the transcript unchanged. Questions remain available after a saved conversation replaces the welcome.
+- Opening an isolated saved QA conversation restored four transcript messages; its checked temperature image enlarged with original/source links. Existing images remained conspicuously synthetic QA fixtures outside the release. No real agent, model, training or compute request was submitted.
+- At 1366×900, an expanded question disclosure plus maximum composer height preserved about 100px of transcript and visible Send. At 1280×720 the maximum composer still preserved about 100px of transcript with Send inside the viewport. At 390×844 both introduction and Case Lab had no horizontal page overflow.
+- Network, skills, Results Library, Literature, History, Back to TVA Case Lab and Connection settings were inspected. No browser console errors were observed. The real backend responded but the named TVA project was absent; previews show the actual state. The introduction remains usable without that live project.
 
-## Literature snapshot
+## Sources and package
 
-The existing audited snapshot is unchanged: 42 records across four pinned repositories, consisting of 24 repository PDFs, two repair entries, 15 references and one review note. HEADWATER f79283770e84585753f16c1efafda956c0cfd229 tracks 22 shelf PDFs, including two repair flags. Only metadata and links are bundled; PDF presence does not establish article validity or VISTA indexing. Reload catalog rereads the package snapshot.
+General decision context links to official TVA river-management/water-level guidance checked on 9 November 2026. Case scope and the Norris cold-water concern follow Dali's previously supplied demo plan and briefing. WORKFLOW_NOTES.md records those sources. The existing 42-record literature snapshot is unchanged; paper bytes are not bundled.
 
-## Runnable package
+The archive checks ZIP integrity, all manifest hashes and launcher modes. A fresh extracted copy is launched through its actual macOS shell launcher, checked for version/project/new assets and reopened to confirm exact-instance reuse. An older listener on port 8765 remains untouched. Owned QA listeners were stopped after checks.
 
-The launcher starts v0.11.0 on an available loopback port while an older 8765 copy remains untouched. The archive verifies ZIP integrity, every manifest hash and executable launcher modes. A fresh extracted copy is launched through its actual macOS shell launcher, checked for version/project/assets and reopened to verify exact-instance reuse.
-
-Owned QA listeners were stopped. No real project, skill, knowledge base, training, inference, ERA5 download or HPC job was created or changed. VISTA_SETUP.md still lists the scientific demo dependencies. Windows/Linux launchers are included; desktop verification was on macOS.
+Saved VISTA connection settings are preserved on installed updates. No real project, skill, knowledge base, training, inference, ERA5 download or HPC job was created or changed. Windows/Linux launchers remain included; desktop launch verification was on macOS.

@@ -4,7 +4,7 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const state = {
-  mode: 'live', view: 'workspace', config: {project: 'Water4Energy-TVA-agent-loop'},
+  mode: 'live', view: 'introduction', config: {project: 'Water4Energy-TVA-agent-loop'},
   status: null, geo: null, siteIndex: 0,
   busy: false, sessionId: null, history: [], events: [], lastSeq: 0,
   stream: null, pending: null, liveFiles: [], liveStudy: null,
@@ -49,7 +49,7 @@ function setBusy(value,label) {
   $('#send-button').hidden=value;
   $('#stop-button').hidden=!value;
   $('#send-button').disabled=value;
-  $$('[data-start-prompt]').forEach(button=>button.disabled=value);
+  $$('[data-case-question]').forEach(button=>button.disabled=value);
   $('#new-chat').disabled=value; $('#history-new').disabled=value;
   $('#agent-state').textContent=label || (value ? 'Working…' : state.status?.project_found ? 'VISTA agent' : 'Connect VISTA');
   $('#agent-state').classList.toggle('working',value);
@@ -97,16 +97,17 @@ function addMessage(role,text,options={}) {
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
   $('.agent-panel')?.classList.remove('has-messages');
-  $('#chat-messages').innerHTML='<div class="welcome"><h3>Review the April 2019 case</h3><p>Start with the experiment record or the existing downscaling comparison.</p><div class="welcome-questions"><button type="button" data-start-prompt="ledger">Read the April ledger <span aria-hidden="true">↗</span></button><button type="button" data-start-prompt="downscale">Compare Trial 0 with bilinear <span aria-hidden="true">↗</span></button></div><p class="welcome-note">Choose a question, review it, then Send.</p></div>';
+  $('#chat-messages').innerHTML=window.TVACaseJourney?.welcomeHTML() || '<div class="welcome"><h3>Review the April case</h3><p>Start with the saved ledger and cite its evidence.</p></div>';
 }
 function prepareDemoPrompt(text) {
   if(state.busy){toast('Finish or stop the current turn before preparing another request.');return;}
   switchView('workspace');
-  $$('#chat-hints details, #conversation-hints details').forEach(detail=>{detail.open=false;});
+  $$('#chat-hints details, #conversation-hints details, #case-question-controls details').forEach(detail=>{detail.open=false;});
   $('#prompt').value=text;$('#prompt').focus({preventScroll:true});
   const composer=$('#chat-form'),bounds=composer.getBoundingClientRect?.();
   if(!bounds || bounds.top<0 || bounds.bottom>window.innerHeight)composer.scrollIntoView({behavior:'smooth',block:'nearest'});
-  toast('Request prepared. Review it, then press Send.');
+  globalThis.TVAComposerResize?.refresh();
+  toast('Request prepared in TVA Case Lab. Review it, then press Send.');
 }
 async function refreshKnowledge() {
   const project=state.config.project,backend=state.config.backend_url;
@@ -157,10 +158,11 @@ function switchView(view) {
   document.body.classList.toggle('lab-active',view==='workspace');
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===(view==='history'?'workspace':view)));
-  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversation history',files:'Results Library',literature:'Literature library'}[view];
+  $('#view-breadcrumb').textContent={workspace:'TVA Case Lab',network:'Study network',skills:'Skills & sources',introduction:'Hypothesis lab',history:'Conversation history',files:'Results Library',literature:'Literature library'}[view];
   if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='literature') window.TVALiteratureLibrary?.render();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
+  window.TVACaseJourney?.setView(view);
   if(view==='workspace')window.TVAComposerResize?.refresh();
 }
 
@@ -519,7 +521,7 @@ async function exportBrief() {
 
 // Bind once. All execution actions originate in explicit user interaction.
 $$('.nav-item').forEach(el=>el.addEventListener('click',()=>switchView(el.dataset.view)));
-$('.brand').addEventListener('click',event=>{event.preventDefault();switchView('workspace');});
+$('.brand').addEventListener('click',event=>{event.preventDefault();switchView('introduction');});
 $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
 $('#skills-refresh').addEventListener('click',async()=>{await refreshSkills();await refreshKnowledge();await refreshDemo();});
 $('#workflow-details').addEventListener('click',showWorkflowDetails);
@@ -543,12 +545,7 @@ $('#export-report').addEventListener('click',exportBrief);
 $('#lab-history').addEventListener('click',()=>switchView('history'));
 $('#history-back').addEventListener('click',()=>switchView('workspace'));
 $('#new-chat').addEventListener('click',newConversation);$('#history-new').addEventListener('click',newConversation);
-$('#chat-messages').addEventListener('click',event=>{
-  const button=event.target.closest('[data-start-prompt]');if(!button || state.busy)return;
-  const id=button.dataset.startPrompt,prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
-  const question=id==='ledger'?'What have we already learned for 16–22 April 2019?':'How does the frozen Trial 0 run compare with bilinear for this April case?';
-  prepareDemoPrompt(question+'\n\n'+prompt.livePrompt);
-});
+
 
 $('#chat-form').addEventListener('submit',event=>{event.preventDefault();const prompt=$('#prompt').value.trim();if(!prompt||state.busy)return;if(state.status?.project_found)$('#prompt').value='';sendLive(prompt);});
 $('#prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('#chat-form').requestSubmit();}});
@@ -571,7 +568,8 @@ async function init() {
     const [geo,config,network,demoCase,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/demo-case.json'),api('/data/prompts.json')]);
     state.geo=geo;state.config=config;state.network=network;state.demoCase=demoCase;state.prompts=prompts.prompts;
     TVAHypothesisDemo.init({caseDefinition:demoCase,api,projectUrl,fileUrl,preparePrompt:prepareDemoPrompt,showDetails,toast});
-    TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures,showDetails});
+    TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures,showDetails,overviewOpen:false});
+    TVACaseJourney.init({caseDefinition:demoCase,prompts:state.prompts,guide:TVAHypothesisGuide,preparePrompt:prepareDemoPrompt,navigate:switchView});
     TVAComposerResize.init();
     TVALiteratureLibrary.init({api,preparePrompt:prepareDemoPrompt,showDetails,toast});
     renderPromptLibrary();renderSkills();renderSiteContext();renderMap();renderResults();showWelcome();
