@@ -48,7 +48,8 @@ function setBusy(value,label) {
   $('.agent-panel')?.classList.toggle('is-working',value);
   $('#send-button').hidden=value;
   $('#stop-button').hidden=!value;
-  $('#send-button').disabled=value; $('#workflow-button').disabled=value;
+  $('#send-button').disabled=value;
+  $$('[data-start-prompt]').forEach(button=>button.disabled=value);
   $('#new-chat').disabled=value; $('#history-new').disabled=value;
   $('#agent-state').textContent=label || (value ? 'Working…' : state.status?.project_found ? 'VISTA agent' : 'Connect VISTA');
   $('#agent-state').classList.toggle('working',value);
@@ -89,14 +90,14 @@ function addMessage(role,text,options={}) {
   $('#chat-messages .welcome')?.remove();
   $('.agent-panel')?.classList.add('has-messages');
   const el=document.createElement('div'); el.className=`message ${role}${options.error?' error':''}`;
-  const label=role==='agent' ? '<div class="message-label"><b>✳ TVA AGENT</b><span>VIA VISTA</span></div>' : '';
+  const label=role==='agent' ? '<div class="message-label"><b>TVA agent</b><span>VISTA</span></div>' : '';
   el.innerHTML=`${label}<div class="message-body">${formatText(text)}</div>`;
   $('#chat-messages').append(el); scrollChat(); return el.querySelector('.message-body');
 }
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
   $('.agent-panel')?.classList.remove('has-messages');
-  $('#chat-messages').innerHTML='<div class="welcome"><div class="welcome-symbol">✳</div><h3>Begin with a question.</h3><p>Try “What have we already learned for this week?” Explore a step in the guide, then use its question to start the conversation.</p></div>';
+  $('#chat-messages').innerHTML='<div class="welcome"><h3>Review the April 2019 case</h3><p>Start with the experiment record or the existing downscaling comparison.</p><div class="welcome-questions"><button type="button" data-start-prompt="ledger">Read the April ledger <span aria-hidden="true">↗</span></button><button type="button" data-start-prompt="downscale">Compare Trial 0 with bilinear <span aria-hidden="true">↗</span></button></div><p class="welcome-note">Choose a question, review it, then Send.</p></div>';
 }
 function prepareDemoPrompt(text) {
   if(state.busy){toast('Finish or stop the current turn before preparing another request.');return;}
@@ -121,7 +122,7 @@ function renderDemoStatus() {
   line.dataset.state='pending';
   if(!status){line.textContent='Checking the VISTA connection…';line.dataset.state='checking';}
   else if(state.demoCase && status.version!==state.demoCase.version){line.textContent='An older Workbench is serving this tab. Open the current launcher and use its printed address.';}
-  else if(!status.connected){line.textContent='Open VISTA to send questions. You can explore the suggested hints while it connects.';}
+  else if(!status.connected){line.textContent='Open VISTA to send questions. You can review the starting questions while it connects.';}
   else if(!status.project_found){line.textContent='VISTA is open; the demo project still needs setup before you can send questions.';}
   else {
     const required=state.skills?.skills || [];
@@ -129,7 +130,7 @@ function renderDemoStatus() {
     const names=new Set(required.map(skill=>skill.name));
     const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id));
     const knowledgePending=state.knowledge?.project_found && state.knowledge.all_ready===false;
-    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to VISTA. Explore the guide or ask your own question.';
+    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to the April case project.';
     line.dataset.state='connected';
   }
   const badge=$('#case-figures-status');
@@ -540,7 +541,12 @@ $('#mode-info').addEventListener('click',showSettings);
 $('#provenance-button').addEventListener('click',showProvenance);
 $('#export-report').addEventListener('click',exportBrief);
 $('#new-chat').addEventListener('click',newConversation);$('#history-new').addEventListener('click',newConversation);
-$('#workflow-button').addEventListener('click',()=>{const prompt=state.prompts.find(item=>item.id==='ledger');if(prompt)prepareDemoPrompt('What have we already learned for 16–22 April 2019?\n\n'+prompt.livePrompt);});
+$('#chat-messages').addEventListener('click',event=>{
+  const button=event.target.closest('[data-start-prompt]');if(!button || state.busy)return;
+  const id=button.dataset.startPrompt,prompt=state.prompts.find(item=>item.id===id);if(!prompt)return;
+  const question=id==='ledger'?'What have we already learned for 16–22 April 2019?':'How does the frozen Trial 0 run compare with bilinear for this April case?';
+  prepareDemoPrompt(question+'\n\n'+prompt.livePrompt);
+});
 
 $('#chat-form').addEventListener('submit',event=>{event.preventDefault();const prompt=$('#prompt').value.trim();if(!prompt||state.busy)return;if(state.status?.project_found)$('#prompt').value='';sendLive(prompt);});
 $('#prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('#chat-form').requestSubmit();}});

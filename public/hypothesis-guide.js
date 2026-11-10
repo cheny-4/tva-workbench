@@ -43,7 +43,7 @@
   ].map(step=>Object.freeze(step)));
   const escapeHTML=value=>String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   let options=null,root=null,selectedId='ledger',researchSources=[],caseFigures=[],conversationFigures=[];
-  let following=true,lastActualStage=null,turnStatus='Waiting for conversation',lastToolEvent=null,galleryRequested=false,gallerySignature=null;
+  let following=true,lastActualStage=null,turnStatus='Waiting for conversation',lastToolEvent=null,galleryRequested=false,gallerySignature=null,activeFigureKey=null;
   const toolCalls=new Map();
 
   function matchesCase(definition) {
@@ -139,16 +139,14 @@
     if(!root)return;
     const status=root.querySelector('[data-guide-status]'),mode=root.querySelector('[data-guide-mode]'),resume=root.querySelector('[data-guide-resume]');
     if(status && status.textContent!==turnStatus)status.textContent=turnStatus;
-    if(mode)mode.textContent=following?'Following conversation':'Exploring a step';
+    if(mode)mode.textContent=following?'Following conversation':'Manual review';
     if(resume)resume.hidden=following;
     root.classList.toggle('following-conversation',following);
   }
-  function compactOverview() {const overview=root?.querySelector('[data-guide-overview]');if(overview)overview.open=false;}
   function followActualStage(stage) {
     if(!stage)return;
     lastActualStage=stage;
     if(following && selectedId!==stage){selectedId=stage;renderDetail(true);}
-    if(following && stage==='evidence')compactOverview();
   }
   function beginTurn() {
     following=true;
@@ -193,7 +191,6 @@
   function resumeFollowing() {
     following=true;
     if(lastActualStage && selectedId!==lastActualStage){selectedId=lastActualStage;renderDetail(true);}
-    if(lastActualStage==='evidence')compactOverview();
     renderFollowing();
   }
   function galleryEntries() {
@@ -211,42 +208,55 @@
     if(typeof options.showDetails==='function')options.showDetails(checked?figure.title:figure.name,html);
     else {const expanded=root.querySelector('[data-guide-expanded]');if(expanded){expanded.innerHTML=html;expanded.hidden=false;}}
   }
+  function figureKey(figure,checked){return (checked?'case:':'conversation:')+(checked?figure.figure:figure.name);}
+  function selectFigure(index,checked){
+    const groups=galleryEntries(),figure=(checked?groups.cases:groups.conversation)[index];if(!figure)return false;
+    activeFigureKey=figureKey(figure,checked);following=false;renderFollowing();renderGallery();
+    root.querySelector('[data-evidence-current]')?.focus?.({preventScroll:true});return true;
+  }
   function renderGallery(force=false) {
     if(!root)return;
     const container=root.querySelector('[data-guide-gallery]');if(!container)return;
-    const groups=galleryEntries(),count=groups.cases.length+groups.conversation.length;
+    const groups=galleryEntries(),items=[...groups.cases.map((figure,index)=>({figure,index,checked:true})),...groups.conversation.map((figure,index)=>({figure,index,checked:false}))],count=items.length;
     root.classList.toggle('has-guide-figures',count>0);
     const countButton=root.querySelector('[data-guide-figure-count]');
     if(countButton){countButton.hidden=!count;countButton.textContent=count+' figure'+(count===1?'':'s');}
-    const signature=JSON.stringify({groups,requested:galleryRequested});
+    if(!items.some(item=>figureKey(item.figure,item.checked)===activeFigureKey))activeFigureKey=count?figureKey(items[0].figure,items[0].checked):null;
+    const signature=JSON.stringify({groups,activeFigureKey,requested:galleryRequested});
     if(!force && signature===gallerySignature)return;
-    gallerySignature=signature;container.hidden=!count && !galleryRequested;
-    const cards=(figures,checked)=>figures.map((figure,index)=>{
-      const name=checked?figure.figure:figure.name,title=checked?figure.title:name,url=checked?figure.figureUrl:figure.url;
-      return `<article class="hypothesis-guide-figure-card"><button type="button" data-guide-open-figure="${index}" data-case-figure="${checked?'true':'false'}" aria-label="Enlarge ${escapeHTML(title)}"><img src="${escapeHTML(url)}" alt="${escapeHTML(title)}" loading="lazy"><span>${escapeHTML(title)}${checked?`<small>${escapeHTML(figure.subtitle)}</small>`:''}</span></button><div class="hypothesis-guide-figure-downloads"><a href="${escapeHTML(figure.downloadUrl)}" download>Figure ↧</a>${checked?`<a href="${escapeHTML(figure.sourceUrl)}" download>Source JSON ↧</a>`:''}</div></article>`;
+    gallerySignature=signature;container.hidden=false;
+    if(!count){container.innerHTML='<div class="evidence-empty"><h3>Awaiting saved figures</h3><p>Figures load from the selected VISTA project. Experiment records and source files appear below when available.</p></div><div data-guide-expanded hidden></div>';return;}
+    const selected=items.find(item=>figureKey(item.figure,item.checked)===activeFigureKey),{figure,index,checked}=selected;
+    const name=checked?figure.figure:figure.name,title=checked?figure.title:name,url=checked?figure.figureUrl:figure.url;
+    const subtitle=checked?figure.subtitle:'Displayed in this conversation. April case association is unverified.';
+    const filmstrip=items.map(item=>{
+      const f=item.figure,key=figureKey(f,item.checked),active=key===activeFigureKey,label=item.checked?f.title:f.name,img=item.checked?f.figureUrl:f.url;
+      return `<button type="button" class="evidence-thumbnail" data-guide-open-figure="${item.index}" data-case-figure="${item.checked?'true':'false'}"${active?' data-evidence-current':''} aria-pressed="${active}" aria-label="Show ${escapeHTML(label)}"><img src="${escapeHTML(img)}" alt="" loading="lazy"><span>${escapeHTML(label)}</span></button>`;
     }).join('');
-    container.innerHTML=`<div class="hypothesis-guide-gallery-heading"><h3>Figures</h3><span>${count?count+' available':'Awaiting files'}</span></div>${groups.cases.length?`<section class="hypothesis-guide-figure-group"><h4>Case figures <span>April metadata checked</span></h4><p>Saved outputs matched to 16–22 April 2019.</p><div class="hypothesis-guide-figure-grid">${cards(groups.cases,true)}</div></section>`:''}${groups.conversation.length?`<section class="hypothesis-guide-figure-group"><h4>Conversation figures <span>Case not verified</span></h4><p>Images displayed in this conversation; case association is unverified.</p><div class="hypothesis-guide-figure-grid">${cards(groups.conversation,false)}</div></section>`:''}${count?'':'<p class="hypothesis-guide-gallery-empty">Figures appear here when a saved case figure or a displayed conversation image is available.</p>'}<div class="hypothesis-guide-expanded" data-guide-expanded hidden></div>`;
-    container.querySelectorAll('[data-guide-open-figure]').forEach(button=>button.addEventListener('click',()=>openFigure(Number(button.dataset.guideOpenFigure),button.dataset.caseFigure==='true')));
+    container.innerHTML=`<div class="evidence-figure-heading"><h3>${escapeHTML(title)}</h3><button type="button" class="text-button" data-evidence-enlarge aria-label="Enlarge ${escapeHTML(title)}">Enlarge ↗</button></div><p class="evidence-figure-context">${checked?'Case figures · April metadata checked':'Conversation figures · Case not verified'}</p><p class="evidence-figure-subtitle">${escapeHTML(subtitle)}</p><figure class="evidence-main-figure"><button type="button" data-evidence-enlarge-image aria-label="Enlarge ${escapeHTML(title)} image"><img src="${escapeHTML(url)}" alt="${escapeHTML(title)}"></button></figure><div class="evidence-provenance"><code>${escapeHTML(name)}</code><div><a href="${escapeHTML(figure.downloadUrl)}" download>Download figure ↧</a>${checked?`<a href="${escapeHTML(figure.sourceUrl)}" download>Source JSON ↧</a>`:''}</div></div><div class="evidence-filmstrip" role="group" aria-label="Available figures">${filmstrip}</div><div class="hypothesis-guide-expanded" data-guide-expanded hidden></div>`;
+    container.querySelectorAll('[data-guide-open-figure]').forEach(button=>button.addEventListener('click',()=>selectFigure(Number(button.dataset.guideOpenFigure),button.dataset.caseFigure==='true')));
+    container.querySelector('[data-evidence-enlarge]')?.addEventListener('click',()=>openFigure(index,checked));
+    container.querySelector('[data-evidence-enlarge-image]')?.addEventListener('click',()=>openFigure(index,checked));
   }
   function setCaseFigures(entries) {
     caseFigures=validatedCaseFigures(entries,options?.caseDefinition);renderGallery();
-    if(following && lastActualStage==='evidence' && caseFigures.length)compactOverview();
     return caseFigures.length;
   }
   function setConversationFigures(entries) {
     const before=new Set(conversationFigures.map(figure=>figure.name+'\n'+figure.url));
-    conversationFigures=validatedConversationFigures(entries,options?.caseDefinition);renderGallery();
-    if(following && conversationFigures.some(figure=>!before.has(figure.name+'\n'+figure.url)))compactOverview();
+    conversationFigures=validatedConversationFigures(entries,options?.caseDefinition);
+    const added=conversationFigures.filter(figure=>!before.has(figure.name+'\n'+figure.url) && !caseFigures.some(item=>item.figure===figure.name));
+    if(following && added.length)activeFigureKey=figureKey(added[added.length-1],false);
+    renderGallery();
     return conversationFigures.length;
   }
   function showFigures() {
-    galleryRequested=true;compactOverview();renderGallery();
+    galleryRequested=true;renderGallery();
     const container=root?.querySelector('[data-guide-gallery]');
     container?.focus?.({preventScroll:true});container?.scrollIntoView?.({behavior:'smooth',block:'nearest'});
   }
   function resetConversation() {
-    conversationFigures=[];following=true;lastActualStage=null;lastToolEvent=null;toolCalls.clear();selectedId='ledger';turnStatus='Waiting for conversation';galleryRequested=false;
-    const overview=root?.querySelector('[data-guide-overview]');if(overview)overview.open=true;
+    conversationFigures=[];following=true;lastActualStage=null;lastToolEvent=null;toolCalls.clear();selectedId='ledger';turnStatus='Waiting for conversation';galleryRequested=false;activeFigureKey=null;
     if(root){renderDetail();renderFollowing();renderGallery();}
   }
   function renderDetail(announce=false) {
@@ -257,7 +267,7 @@
       button.setAttribute('aria-pressed',String(selected));
       button.classList.toggle('selected',selected);
     });
-    root.querySelector('[data-guide-detail]').innerHTML=`<div class="hypothesis-guide-detail-heading"><h3 id="hypothesis-guide-detail-title">${escapeHTML(step.title)}</h3><span>${escapeHTML(step.role)}</span></div><p class="hypothesis-guide-explanation">${escapeHTML(step.description)}</p><p class="hypothesis-guide-expected"><span>Look for</span> ${escapeHTML(step.expected)}</p><div class="hypothesis-guide-question"><span class="hypothesis-guide-question-label">A question to try</span><p>${escapeHTML(step.question)}</p><div class="hypothesis-guide-actions"><button type="button" data-guide-prepare${canPrepare?'':' disabled'}>Use this question <span aria-hidden="true">↗</span></button>${step.id==='evidence'?'<button type="button" class="hypothesis-guide-figures" data-guide-figures>View figures here</button>':''}</div></div>${canPrepare?'':`<p class="hypothesis-guide-unavailable">${matchesCase(options.caseDefinition)?'The conversation composer is unavailable.':'Questions are available for the fixed 16–22 April 2019 demo case.'}</p>`}`;
+    root.querySelector('[data-guide-detail]').innerHTML=`<div class="evidence-topic"><h3 id="hypothesis-guide-detail-title">${escapeHTML(step.title)}</h3><details class="evidence-topic-help"${following?'':' open'}><summary>About this step</summary><p>${escapeHTML(step.description)}</p><p class="evidence-expected">${escapeHTML(step.expected)}</p><p class="evidence-topic-question">${escapeHTML(step.question)}</p><button type="button" class="text-button" data-guide-prepare${canPrepare?'':' disabled'}>Ask about this step ↗</button>${step.id==='evidence'?'<button type="button" class="text-button" data-guide-figures>View figures</button>':''}<p class="evidence-topic-scope">A topic identifies a source being inspected, not a completed review or approval.</p></details></div>${canPrepare?'':`<p class="hypothesis-guide-unavailable">${matchesCase(options.caseDefinition)?'The conversation composer is unavailable.':'Questions are available for the fixed 16–22 April 2019 demo case.'}</p>`}`;
     root.querySelector('[data-guide-prepare]').addEventListener('click',()=>{
       const request=requestFor(selectedId,options);
       if(request && typeof options.preparePrompt==='function')options.preparePrompt(request,step.title);
@@ -274,14 +284,15 @@
   function init(settings={}) {
     root=global.document?.querySelector('#hypothesis-guide');
     if(!root)return false;
-    options=settings;selectedId='ledger';researchSources=[];caseFigures=[];conversationFigures=[];following=true;lastActualStage=null;lastToolEvent=null;toolCalls.clear();turnStatus='Waiting for conversation';galleryRequested=false;gallerySignature=null;
-    root.innerHTML=`<section class="hypothesis-guide-follow"><div><span data-guide-mode>Following conversation</span><strong data-guide-status role="status" aria-live="polite">Waiting for conversation</strong></div><button type="button" data-guide-resume hidden>Resume following</button><button type="button" data-guide-figure-count aria-controls="hypothesis-guide-gallery" hidden></button><p>Tool activity identifies a topic; it does not confirm a completed review.</p></section><details class="hypothesis-guide-overview" data-guide-overview open><summary><span>Hypothesis lab workflow</span><span aria-hidden="true">⌄</span></summary><header class="hypothesis-guide-heading"><p>Turn a question into a testable, reviewed idea.</p></header><div class="hypothesis-guide-map"><svg class="hypothesis-guide-connectors" viewBox="0 0 336 174" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs><marker id="hypothesis-guide-arrow" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L6 3L0 6Z"/></marker></defs><g marker-end="url(#hypothesis-guide-arrow)"><path d="M148 26H186"/><path d="M252 46V60"/><path d="M188 80H150"/><path d="M84 100V114"/><path d="M148 134H186"/><path class="hypothesis-guide-return" d="M252 154V166H7V26H18"/></g></svg><div class="hypothesis-guide-nodes" role="group" aria-label="Explore the six steps of hypothesis lab">${STEPS.map((step,index)=>`<button type="button" class="hypothesis-guide-node hypothesis-guide-node-${escapeHTML(step.id)}" data-guide-step="${escapeHTML(step.id)}" aria-pressed="${index===0?'true':'false'}" aria-controls="hypothesis-guide-detail" aria-label="${escapeHTML(step.title+' — '+step.role)}"><span class="hypothesis-guide-node-number" aria-hidden="true">${index+1}</span><span class="hypothesis-guide-node-copy"><strong>${escapeHTML(step.label)}</strong><small>${escapeHTML(step.role)}</small></span></button>`).join('')}</div><span class="hypothesis-guide-return-label">Findings return to the ledger</span></div><p class="hypothesis-guide-caption">Explore the workflow · selection does not run agents</p></details><section id="hypothesis-guide-detail" class="hypothesis-guide-detail" data-guide-detail aria-labelledby="hypothesis-guide-detail-title"></section><section id="hypothesis-guide-gallery" class="hypothesis-guide-gallery" data-guide-gallery aria-label="Figures in this workspace" tabindex="-1" hidden></section><section class="hypothesis-guide-sources" data-guide-sources aria-label="Saved files for the selected step" hidden></section><p class="sr-only" data-guide-announcement role="status" aria-live="polite" aria-atomic="true"></p>`;
+    options=settings;selectedId='ledger';researchSources=[];caseFigures=[];conversationFigures=[];following=true;lastActualStage=null;lastToolEvent=null;toolCalls.clear();turnStatus='Waiting for conversation';galleryRequested=false;activeFigureKey=null;gallerySignature=null;
+    const labels={ledger:'Ledger',proposer:'Proposer',critic:'Critic',referee:'Referee',human:'Human',evidence:'Results'};
+    root.innerHTML=`<header class="evidence-workspace-header"><div><h2>Evidence</h2><p>16–22 April 2019</p></div><button type="button" class="text-button evidence-figure-count" data-guide-figure-count aria-controls="hypothesis-guide-gallery" hidden></button></header><div class="evidence-follow"><span data-guide-mode>Following conversation</span><span data-guide-status role="status" aria-live="polite">Waiting for conversation</span><button type="button" class="text-button" data-guide-resume hidden>Resume following</button></div><nav class="evidence-stages" aria-label="Research stages">${STEPS.map((step,index)=>`<button type="button" data-guide-step="${escapeHTML(step.id)}" aria-pressed="${index===0?'true':'false'}" aria-controls="hypothesis-guide-detail" aria-label="${escapeHTML(step.title+' — '+step.role)}">${labels[step.id]}</button>`).join('')}</nav><section id="hypothesis-guide-detail" data-guide-detail aria-labelledby="hypothesis-guide-detail-title"></section><section id="hypothesis-guide-gallery" data-guide-gallery aria-label="Evidence figures" tabindex="-1"></section><section class="evidence-sources" data-guide-sources aria-label="Saved files for the selected step" hidden></section><p class="sr-only" data-guide-announcement role="status" aria-live="polite" aria-atomic="true"></p>`;
     root.querySelectorAll('[data-guide-step]').forEach(button=>button.addEventListener('click',()=>selectStep(button.dataset.guideStep)));
     root.querySelector('[data-guide-resume]').addEventListener('click',resumeFollowing);
     root.querySelector('[data-guide-figure-count]').addEventListener('click',showFigures);
     renderDetail();renderFollowing();renderGallery();return true;
   }
-  const api={init,setResearchSources,setCaseFigures,setConversationFigures,beginTurn,handleEvent,finishTurn,resetConversation,showFigures,steps:STEPS,requestFor,matchesCase,validatedResearchSources,validatedCaseFigures,validatedConversationFigures,stageForEvent};
+  const api={init,setResearchSources,setCaseFigures,setConversationFigures,beginTurn,handleEvent,finishTurn,resetConversation,showFigures,selectFigure,steps:STEPS,requestFor,matchesCase,validatedResearchSources,validatedCaseFigures,validatedConversationFigures,stageForEvent};
   global.TVAHypothesisGuide=api;
   if(typeof module!=='undefined' && module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

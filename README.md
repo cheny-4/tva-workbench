@@ -1,4 +1,4 @@
-# TVA Workbench · Hypothesis-lab demo · v0.9.0
+# TVA Workbench · Hypothesis-lab demo · v0.10.0
 
 A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. The case is fixed: **16–22 April 2019, issued 15 April 2019**. VISTA supplies the live agent, loaded skills, knowledge bases and saved files.
 
@@ -6,7 +6,7 @@ A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.9.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **TVA-Workbench-v0.10.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
 
 The launcher prints the version, folder and actual local URL, and opens a browser tab. It prefers port 8765. If another copy occupies that port, this version uses an available loopback port without stopping the other process. Opening this same copy again reuses its validated running instance. Follow the printed URL; an older tab on port 8765 may belong to another version. Control+C stops this wrapper.
 
@@ -14,27 +14,29 @@ No npm, pip or frontend build is required. The launcher uses VISTA's bundled Pyt
 
 ## Start with a conversation
 
-The **Hypothesis lab** opens with a large conversation on the left and an interactive workflow guide on the right. Start with **Read the ledger**, then explore Proposer, Critic, Referee, human review and evidence. Each step explains its purpose and shows a plain-language question. Selecting a step explores the idea; **Use this question** puts an editable request into the chat, with that question first and the fixed-case/source instructions below it. Review the request and press **Send** to call VISTA.
+The **Hypothesis lab** opens with full-height chat on the left and one **Evidence** workspace on the right. One welcome offers two starting questions: **Read the April ledger** and **Compare Trial 0 with bilinear**. Either prepares an editable question with the fixed-case/source instructions below it. Review the request and press **Send** to call VISTA. Extra hints live in **Conversations**.
 
-The right side follows actual structured VISTA skill/tool activity as the conversation progresses. Reading a known saved Critic or Referee file can identify that topic; free-text mentions cannot. A topic highlight is not proof that a review completed. Selecting a step pauses following; **Resume following** returns to the latest observed topic. A new explicit Send resumes following. Human review never grants approval or starts training.
+The evidence workspace has a compact stage row: Ledger, Proposer, Critic, Referee, Human and Results. The topic follows actual structured VISTA skill/tool activity. A known saved Critic or Referee file can identify that topic; free-text mentions cannot. A topic highlight is not proof that a review completed. Select a stage to pause following and open its explanation; **Ask about this step** prepares a question. **About this step** keeps explanations available on demand. **Resume following** returns to the latest observed topic. A new explicit Send resumes following. Human review never grants approval or starts training.
 
-Figures appear directly on the right. Case figures retain their April metadata checks and observation/frozen-result labels. Other current images explicitly displayed by the selected conversation appear in a separate **Case not verified** group. Click a thumbnail for an enlarged preview and original/source download links. **Figures** stays on this page. Artifact reads are scoped to the selected conversation, coalesced after tool activity, and refreshed every four seconds only while a turn is active. Switching conversations clears their displayed images.
+One large figure occupies the main evidence area. Select another using the thumbnail strip; **Enlarge** opens its full preview. The actual filename, original download and, for checked case figures, source JSON sit beside the figure. New current-conversation images become the focus while following. Manual selection stays put through refreshes and new arrivals. Case figures retain their April metadata checks and observation/frozen-result labels. Other current images explicitly displayed by the selected conversation are labeled **Case not verified**. These labels are always visible for the selected figure.
 
-Drag **Adjust message box** upward or downward to resize the typing area. Up/Down arrows also adjust it; Home/End select the limits; Enter or double-click resets. The local numeric preference is restored on this laptop, with limits that preserve transcript and Send/Stop space. On narrow screens the guide stacks above chat. Existing hints remain in chat and **Conversations**.
+Artifact reads are scoped to the selected conversation, coalesced after tool activity, and refreshed every four seconds only while a turn is active. Switching conversations clears their displayed images while retaining checked project case figures. The Results Library remains available for all saved outputs.
 
-The Hypothesis lab fills the laptop viewport: the conversation occupies the full left column, with the explanation and selected question in full-height blocks on the right. No supporting cards or footer follow beneath it. Streaming, tool activity and Stop stay in the conversation area.
+Drag **Adjust message box** upward or downward to resize the typing area. Up/Down arrows also adjust it; Home/End select the limits; Enter or double-click resets. The local numeric preference is restored on this laptop, with limits that preserve transcript and Send/Stop space. The chat and evidence scroll independently on laptops. On narrow screens, evidence stacks below chat.
+
+The lighter navigation, restrained ORNL green accents, larger text and fewer enclosing cards keep attention on the conversation and evidence. ORNL and Genesis Mission logos remain in the header. The Literature library uses a reading list with searchable references instead of a grid of cards.
 
 Supporting information has one clear home:
 
 | Information | Where to find it |
 | --- | --- |
-| Research loop and saved research-source links | Interactive guide on the right |
+| Research loop and saved research-source links | Evidence workspace on the right |
 | Current and checked case figures | Inline on the right; Results Library remains available for all stored outputs |
 | Optional reservoir readout | Results Library; off by default |
 | Project connection, required skills, knowledge indexing and source coverage | **Skills & sources**; connection controls still open the existing settings dialog |
 | Extra case questions, selected-conversation files, provenance and Export brief | **Conversations** |
 
-The former bottom loop repeats the guide and is removed. Actual research-source links from the matching manifest remain attached to the corresponding guide step. Invalid or unavailable evidence clears those links.
+The former bottom loop repeats the guide and is removed. Actual research-source links from the matching manifest remain attached to the corresponding research stage. Invalid or unavailable evidence clears those links.
 
 In **TVA network**, the 12 headwaters start expanded and the other 42 locations start collapsed. Expand either group as needed. Searching reveals matching locations automatically; clearing the search restores your expansion choices.
 
@@ -85,12 +87,13 @@ The wrapper stores only backend/project selection and validated launch-port meta
 | v0.7.0 | Hypothesis lab with a conversation and interactive workflow guide |
 | v0.8.0 | Full-height lab with supporting information in its relevant views |
 | v0.9.0 | Conversation-following guide, inline figures, adjustable input, compute settings and literature |
+| v0.10.0 | Quiet two-column research desk, single welcome and focused evidence viewer |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or use GitHub's Code → Download ZIP. GitHub hosts source; the Python/VISTA app runs on the laptop.
 
 ## Development
 
-The app is vanilla HTML/CSS/JavaScript with a Python standard-library adapter. `hypothesis-guide.js` owns the following guide and inline galleries; `live-lab-sync.js` scopes/coalesces artifact reads; `composer-resize.js` sizes the input; `literature-library.js` renders the audited metadata snapshot; `hypothesis-demo.js` owns case/readiness/artifact validation; `project-ui.js` owns secondary views; `results-library.js` browses stored outputs. Brand assets remain local and proportional. See [BRANDING.md](BRANDING.md), [DATA_NOTES.md](DATA_NOTES.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BACKEND.md](BACKEND.md) and [VERIFICATION.md](VERIFICATION.md).
+The app is vanilla HTML/CSS/JavaScript with a Python standard-library adapter. `research-workspace.css` supplies the current visual treatment; `hypothesis-guide.js` owns following and the focused evidence viewer; `live-lab-sync.js` scopes/coalesces artifact reads; `composer-resize.js` sizes the input; `literature-library.js` renders the audited metadata snapshot; `hypothesis-demo.js` owns case/readiness/artifact validation; `project-ui.js` owns secondary views; `results-library.js` browses stored outputs. Brand assets remain local and proportional. See [BRANDING.md](BRANDING.md), [DATA_NOTES.md](DATA_NOTES.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BACKEND.md](BACKEND.md) and [VERIFICATION.md](VERIFICATION.md).
 
 ```sh
 python3 -m unittest discover -s tests -v

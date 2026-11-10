@@ -23,7 +23,7 @@ from urllib.parse import parse_qs, quote, unquote, urlsplit
 import webbrowser
 
 APP_ROOT = Path(__file__).resolve().parent
-VERSION = "0.9.0"
+VERSION = "0.10.0"
 MAX_BODY = 64 * 1024 * 1024
 DEFAULT_CONFIG = {"backend_url": "http://127.0.0.1:8001", "project": "Water4Energy-TVA-agent-loop"}
 PROJECT_PATTERN = re.compile(r"[A-Za-z0-9_ .-]{2,80}\Z")

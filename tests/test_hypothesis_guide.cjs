@@ -21,8 +21,9 @@ function fixture() {
   const root={nodes:[],html:'',prepared:null,figures:null,announcement:{textContent:''},sources:{innerHTML:'',hidden:true},classes:new Set(),overview:{open:true},mode:{textContent:''},status:{textContent:''},resume:button(),figureCount:button(),expanded:{innerHTML:'',hidden:true}};
   root.classList={toggle:(name,on)=>on?root.classes.add(name):root.classes.delete(name)};
   const gallery={html:'',writes:0,hidden:true,buttons:[],focused:0,scrolled:0,
-    set innerHTML(value){this.html=value;this.writes++;root.expanded={innerHTML:'',hidden:true};this.buttons=Array.from(value.matchAll(/data-guide-open-figure="(\d+)" data-case-figure="(true|false)"/g),match=>button({guideOpenFigure:match[1],caseFigure:match[2]}));},
+    set innerHTML(value){this.html=value;this.writes++;this.enlarge=button();root.expanded={innerHTML:'',hidden:true};this.buttons=Array.from(value.matchAll(/data-guide-open-figure="(\d+)" data-case-figure="(true|false)"/g),match=>button({guideOpenFigure:match[1],caseFigure:match[2]}));},
     querySelectorAll(selector){return selector==='[data-guide-open-figure]'?this.buttons:[];},
+    querySelector(selector){return ['[data-evidence-enlarge]','[data-evidence-enlarge-image]'].includes(selector)?this.enlarge:null;},
     focus(){this.focused++;},scrollIntoView(){this.scrolled++;},
   };
   const detail={html:'',set innerHTML(value){
@@ -104,14 +105,15 @@ test('case mismatch cannot prepare work, and an unrelated catalog falls back to 
   assert.match(request,/Read and cite saved source files/);
 });
 
-test('selecting diagram buttons explains each step without preparing or executing anything',()=>{
+test('selecting stage buttons explains each step without preparing or executing anything',()=>{
   const {guide,root,detail}=fixture();
   let prepared=0,figures=0;
   guide.init({caseDefinition,prompts,preparePrompt:()=>prepared++,usePrompt:()=>assert.fail('selection must not dispatch a catalog prompt'),showFigures:()=>figures++});
   assert.equal(root.nodes.length,6);
   assert.equal(root.nodes[0].attributes['aria-pressed'],'true');
-  assert.match(root.html,/selection does not run agents/);
-  assert.match(root.html,/Findings return to the ledger/);
+  assert.match(root.html,/aria-label="Research stages"/);
+  assert.match(root.html,/<h2>Evidence<\/h2>/);
+  assert.doesNotMatch(root.html,/hypothesis-guide-overview|hypothesis-guide-map/);
   assert.doesNotMatch(root.html,/role="progressbar"|class="[^"]*\bdone\b|data-step-done/);
   for(const [index,node] of root.nodes.entries()) {
     node.click();
@@ -262,14 +264,12 @@ test('following waits for actual tool activity and manual exploration resumes at
   guide.handleEvent('function_tool_call',{part:{tool_name:'lab.design'}});
   assert.equal(selectedStep(root),'proposer');
   root.nodes.find(node=>node.dataset.guideStep==='critic').click();
-  assert.equal(root.mode.textContent,'Exploring a step');
+  assert.equal(root.mode.textContent,'Manual review');
   assert.equal(root.resume.hidden,false);
   guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
   assert.equal(selectedStep(root),'critic');
-  assert.equal(root.overview.open,true);
   root.resume.click();
   assert.equal(selectedStep(root),'evidence');
-  assert.equal(root.overview.open,false);
   assert.equal(root.resume.hidden,true);
   assert.equal(root.mode.textContent,'Following conversation');
   guide.handleEvent('log',{message:'Critic done; all six stages complete.'});
@@ -344,8 +344,12 @@ test('case figures win duplicate filenames and conversation-only images remain e
   guide.setCaseFigures([caseFigure()]);
   guide.setConversationFigures([conversationFigure('temperature.png'),conversationFigure('other.png')]);
   assert.equal(gallery.buttons.length,2);
+  assert.match(gallery.html,/Conversation figures/);
+  assert.doesNotMatch(gallery.html,/April metadata checked/);
+  assert.equal(guide.selectFigure(0,true),true);
   assert.match(gallery.html,/Case figures/);
   assert.match(gallery.html,/April metadata checked/);
+  assert.equal(guide.selectFigure(0,false),true);
   assert.match(gallery.html,/Conversation figures/);
   assert.match(gallery.html,/case association is unverified/);
   assert.equal(root.figureCount.textContent,'2 figures');
@@ -365,32 +369,32 @@ test('stream text and unchanged file refreshes preserve gallery DOM and do not s
   assert.equal(gallery.writes,writes);
   assert.equal(gallery.focused,0);
   assert.equal(gallery.scrolled,0);
-  assert.equal(root.overview.open,false);
-  root.overview.open=true;
   root.nodes[0].click();
   guide.setConversationFigures([conversationFigure()]);
-  assert.equal(root.overview.open,true);
   assert.equal(root.figureCount.hidden,false);
   assert.equal(gallery.focused,0);
 });
 
-test('explicit Figures opens a local empty state and thumbnails enlarge only by user action',()=>{
+test('explicit Figures opens an empty state, thumbnails select and only Enlarge opens a preview',()=>{
   const {guide,root,gallery}=fixture();const previews=[];
   guide.init({caseDefinition,prompts,showDetails:(title,html)=>previews.push({title,html})});
   guide.showFigures();
   assert.equal(gallery.hidden,false);
-  assert.match(gallery.html,/Figures appear here when/);
+  assert.match(gallery.html,/Awaiting saved figures/);
   assert.equal(gallery.focused,1);
   assert.equal(gallery.scrolled,1);
   guide.setCaseFigures([{...caseFigure(),source:'Source <script> is text'}]);
   assert.equal(previews.length,0);
   gallery.buttons[0].click();
+  assert.equal(previews.length,0);
+  gallery.enlarge.click();
   assert.equal(previews.length,1);
   assert.match(previews[0].html,/Source &lt;script&gt; is text/);
   assert.match(previews[0].html,/Source JSON/);
   guide.init({caseDefinition,prompts});
   guide.setConversationFigures([conversationFigure()]);
   gallery.buttons[0].click();
+  gallery.enlarge.click();
   assert.equal(root.expanded.hidden,false);
   assert.match(root.expanded.innerHTML,/case association is unverified/);
 });
@@ -407,9 +411,34 @@ test('a new conversation clears its images and following state while retaining c
   assert.equal(selectedStep(root),'ledger');
   assert.equal(root.mode.textContent,'Following conversation');
   assert.equal(root.status.textContent,'Waiting for conversation');
-  assert.equal(root.overview.open,true);
   assert.equal(gallery.buttons.length,1);
   assert.match(gallery.html,/April metadata checked/);
   assert.doesNotMatch(gallery.html,/Conversation figures/);
   assert.match(root.sources.innerHTML,/ledger\.json/);
+});
+
+
+test('one focused figure survives refresh and manual review holds when new conversation images arrive',()=>{
+  const {guide,root,gallery}=fixture();
+  guide.init({caseDefinition,prompts});
+  guide.setCaseFigures([caseFigure(),caseFigure('precipitation','precipitation.png')]);
+  assert.equal(guide.selectFigure(1,true),true);
+  const writes=gallery.writes;
+  guide.setCaseFigures([caseFigure(),caseFigure('precipitation','precipitation.png')]);
+  assert.equal(gallery.writes,writes);
+  assert.match(gallery.html,/evidence-figure-heading"><h3>precipitation/);
+  guide.setConversationFigures([conversationFigure('new.png')]);
+  assert.match(gallery.html,/evidence-figure-heading"><h3>precipitation/);
+  assert.equal(root.mode.textContent,'Manual review');
+  assert.equal(guide.selectFigure(99,true),false);
+  root.resume.click();
+  guide.setConversationFigures([conversationFigure('new.png'),conversationFigure('latest.png')]);
+  assert.match(gallery.html,/evidence-figure-heading"><h3>latest.png/);
+  assert.match(gallery.html,/Case not verified/);
+  assert.doesNotMatch(gallery.html,/Source JSON/);
+  guide.setConversationFigures([]);
+  assert.match(gallery.html,/evidence-figure-heading"><h3>temperature/);
+  guide.setCaseFigures([]);
+  assert.match(gallery.html,/Awaiting saved figures/);
+  assert.doesNotMatch(gallery.html,/<img/);
 });
