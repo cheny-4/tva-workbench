@@ -1,30 +1,29 @@
-# v0.10.0 verification
+# v0.11.0 verification
 
-Verified November 9, 2026 on macOS. This revision gives the lab one welcome, a full-height left conversation and one focused evidence workspace on the right. ORNL/Genesis branding, the fixed April case, libraries and VISTA contracts remain in place.
+Verified November 9, 2026 on macOS. The previous ORNL/Genesis theme and interactive workflow are restored. Libraries are compact, and saved conversations move to the lab History control. The case, VISTA scope and science contracts are unchanged.
 
 ## Automated checks
 
-- **40 Python checks passed:** local adapter/project knowledge, launcher/instance identity and study catalog, with isolated mock servers.
-- **81 JavaScript checks passed:** case/source validation, following and manual review, focused figure selection/refresh/new arrivals, case versus unverified images, scoped/coalesced reads, session races, composer bounds, literature and retained artifact/library behavior.
-- A selected figure survives unchanged refreshes and new arrivals during manual review. Following automatically focuses a newly displayed conversation image. Removed figures fall back to a remaining valid figure; clearing evidence removes image markup. Only checked case figures get source JSON links.
-- JavaScript syntax, whitespace, HTML nesting/IDs and local asset references were checked.
+- **40 Python checks passed:** adapter/project knowledge, launcher identity and study catalog using isolated mock servers.
+- **83 JavaScript checks passed:** retained case/source validation, following/selection, scoped reads, session races, composer bounds, literature normalization/search and artifact behavior. New checks cover workflow expansion/collapse and result-list rendering without automatic image loading; Preview still opens the safe local raster and downloads remain available.
+- HTML nesting, unique IDs, script/style references, JavaScript syntax and whitespace were checked.
 
 ## Browser checks
 
-- At 1366×900 and 1280×720 the conversation stays on the left with one evidence workspace on the right, filling the space below the brand header. Both columns scroll internally. At 390×844 the chat precedes the evidence and no horizontal page overflow was observed.
-- The opening welcome contains exactly two starting questions. Each prepares the correct fixed-case request without sending a message. The welcome disappears when a saved conversation opens. Extra hints remain in Conversations.
-- A read-only fake VISTA saved-session watcher emitted phased structured events. The topic followed lab.design; manual Human review held while realization arrived; Resume returned to the actual saved-evidence topic. No model, agent, skill or compute process ran, and fixture mutation endpoints returned 405.
-- Four visibly watermarked case PNGs appeared in a thumbnail strip, with one large selected figure. Thumbnail selection stayed on the page; Enlarge opened a modal with original/source links. A separately displayed conversation PNG became the focus while following, labeled Case not verified, without source JSON. Unsafe, stale, upload and non-raster controls were filtered out. A wrong-week manifest cleared case images and research links.
-- The resizer's keyboard maximum at 1366×900 left a 100px transcript and visible Send/Stop controls; Home and Enter restored the bounded minimum/default. Existing pointer, storage and viewport tests also passed.
-- Literature showed 42 source-linked records in the simpler reading-list layout. Navigation to network, skills, conversations, Results Library and Connection settings remained available. Settings retained Odo, Frontier, Lux and planned CCSI without changing the saved backend/project fields.
-- No browser console errors were observed. The real local VISTA backend responded, but Water4Energy-TVA-agent-loop was absent. Package previews show that actual missing-project state, not synthetic scientific results. QA imagery stays outside the repository/package.
+- The sidebar is the previous navy (#13263f), with ORNL green controls and original ORNL/Genesis logos. Main navigation is Hypothesis lab, Literature library, Results Library, TVA network, Skills & sources.
+- The interactive six-node workflow starts expanded in the single right evidence workspace. Selecting Critic explains that topic and prepares its question only through the explicit Ask button. Following and checked/unverified figure handling remain in place; actual evidence events can collapse the workflow, which can be reopened.
+- History in the lab header opens saved conversations. A saved QA conversation returned to the lab with its transcript and interactive workflow intact. Back to lab also returns to the current conversation; no conversation was deleted or sent to an agent.
+- Typical literature entries measured about 67–90px at 1366×900, with citation and links sharing a row. Searching munoz 2021 found ERA5-Land. Details revealed the pinned repository path and file size. The two repair entries kept their source-reported notes visible without expansion.
+- Sixteen synthetic saved outputs rendered as roughly 55px file rows at 1366×900, with zero preloaded images inside the list. Search found a temperature PNG; Preview opened an enlarged modal with the original download. Fixture files were conspicuously QA-only, and no real agent or compute operation was run. QA proof images remain outside the package.
+- At 1280×720 the left chat and right evidence each filled the available height; the composer maximum preserved a 100px transcript and visible Send. At 390×844 both compact libraries had no horizontal page overflow and their controls remained available.
+- Network, skills, Results Library, Literature and Connection settings were inspected after navigation changes. No browser console errors were observed. Real local VISTA responded but the named demo project remained missing; release previews show that actual state. Saved settings were not changed during QA.
 
 ## Literature snapshot
 
-The existing audited snapshot is unchanged. Four pinned repository commits are recorded in public/data/literature.json. HEADWATER f79283770e84585753f16c1efafda956c0cfd229 tracks 22 shelf PDFs: 20 without a repair flag and two flagged by repository notes. The complete tab has 24 repository PDFs, two repair entries, 15 references and one review note. Only metadata and links are packaged; repository presence does not establish article validity or VISTA indexing. Reload catalog rereads this snapshot.
+The existing audited snapshot is unchanged: 42 records across four pinned repositories, consisting of 24 repository PDFs, two repair entries, 15 references and one review note. HEADWATER f79283770e84585753f16c1efafda956c0cfd229 tracks 22 shelf PDFs, including two repair flags. Only metadata and links are bundled; PDF presence does not establish article validity or VISTA indexing. Reload catalog rereads the package snapshot.
 
 ## Runnable package
 
-The macOS launcher started v0.10.0 on an available loopback port while the older 8765 copy continued untouched. The release packaging checks ZIP integrity, every manifest hash and executable launcher modes. A fresh extracted copy is smoke-tested for version, project, case schema and assets, then reopened to verify exact-instance reuse.
+The launcher starts v0.11.0 on an available loopback port while an older 8765 copy remains untouched. The archive verifies ZIP integrity, every manifest hash and executable launcher modes. A fresh extracted copy is launched through its actual macOS shell launcher, checked for version/project/assets and reopened to verify exact-instance reuse.
 
-Owned preview and fixture listeners were stopped after verification. No real project, skill, knowledge base, training, inference, ERA5 download or HPC job was created or changed. Scientific dependencies remain documented in VISTA_SETUP.md. Windows/Linux launchers are included; desktop launch verification was on macOS.
+Owned QA listeners were stopped. No real project, skill, knowledge base, training, inference, ERA5 download or HPC job was created or changed. VISTA_SETUP.md still lists the scientific demo dependencies. Windows/Linux launchers are included; desktop verification was on macOS.

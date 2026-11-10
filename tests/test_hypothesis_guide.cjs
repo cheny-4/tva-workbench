@@ -111,9 +111,9 @@ test('selecting stage buttons explains each step without preparing or executing 
   guide.init({caseDefinition,prompts,preparePrompt:()=>prepared++,usePrompt:()=>assert.fail('selection must not dispatch a catalog prompt'),showFigures:()=>figures++});
   assert.equal(root.nodes.length,6);
   assert.equal(root.nodes[0].attributes['aria-pressed'],'true');
-  assert.match(root.html,/aria-label="Research stages"/);
+  assert.match(root.html,/aria-label="Explore the six steps of hypothesis lab"/);
   assert.match(root.html,/<h2>Evidence<\/h2>/);
-  assert.doesNotMatch(root.html,/hypothesis-guide-overview|hypothesis-guide-map/);
+  assert.match(root.html,/hypothesis-guide-map/);
   assert.doesNotMatch(root.html,/role="progressbar"|class="[^"]*\bdone\b|data-step-done/);
   for(const [index,node] of root.nodes.entries()) {
     node.click();
@@ -441,4 +441,22 @@ test('one focused figure survives refresh and manual review holds when new conve
   guide.setCaseFigures([]);
   assert.match(gallery.html,/Awaiting saved figures/);
   assert.doesNotMatch(gallery.html,/<img/);
+});
+
+
+test('the interactive workflow stays open for exploration and yields space to actual saved evidence',()=>{
+  const {guide,root}=fixture();
+  guide.init({caseDefinition,prompts});
+  assert.equal(root.overview.open,true);
+  guide.setCaseFigures([caseFigure()]);
+  assert.equal(root.overview.open,true);
+  root.nodes[2].click();
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
+  assert.equal(root.overview.open,true);
+  root.resume.click();
+  assert.equal(root.overview.open,false);
+  guide.resetConversation();
+  assert.equal(root.overview.open,true);
+  guide.handleEvent('function_tool_call',{part:{tool_name:'lab.realize'}});
+  assert.equal(root.overview.open,false);
 });

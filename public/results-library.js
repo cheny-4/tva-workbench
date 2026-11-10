@@ -56,7 +56,7 @@
     return element;
   }
   function empty(container, heading, description) {
-    const wrapper = node('div', 'results-library-empty');
+    const wrapper = node(container.tagName === 'UL' ? 'li' : 'div', 'results-library-empty');
     wrapper.append(node('strong', '', heading), node('p', '', description));
     container.replaceChildren(wrapper);
   }
@@ -69,41 +69,30 @@
     const caption = `${sizeLabel(file.size)} · ${dateLabel(file)}`;
     options.showDetails(file.name, `<figure class="results-library-figure"><img src="${escapeHTML(url)}?preview=true" alt="${escapeHTML(file.name)}"><figcaption>${escapeHTML(caption)}</figcaption></figure><p><a href="${escapeHTML(url)}" download>Download original figure ↗</a></p>`);
   }
-  function buildCard(file, options) {
-    const card = node('article', 'results-library-card');
+  function buildRow(file, options) {
+    const row = node('li', 'results-library-row');
     const url = outputURL(options.fileUrl, file.name);
-    if (file.preview) {
-      const preview = node('button', 'results-library-preview');
-      preview.type = 'button';
-      preview.setAttribute('aria-label', 'Preview ' + file.name);
-      const image = node('img');
-      image.src = url + '?preview=true';
-      image.alt = file.name;
-      image.loading = 'lazy';
-      image.decoding = 'async';
-      image.addEventListener('error', () => preview.replaceChildren(node('span', '', 'Preview unavailable · open original')));
-      preview.append(image);
-      preview.addEventListener('click', () => showFigure(file, url, options));
-      card.append(preview);
-    } else {
-      const type = node('div', 'results-library-filetype');
-      type.append(node('span', '', extension(file.name).toUpperCase() || 'FILE'));
-      card.append(type);
-    }
-    const content = node('div', 'results-library-card-content');
+    const type = node('span', 'results-library-extension', extension(file.name).toUpperCase() || 'FILE');
+    const content = node('div', 'results-library-row-name');
     const title = node('h3', '', file.name);
     title.title = file.name;
-    content.append(title, node('p', 'results-library-filemeta', sizeLabel(file.size) + ' · ' + dateLabel(file)));
+    content.append(title);
+    const meta = node('p', 'results-library-filemeta', sizeLabel(file.size) + ' · ' + dateLabel(file));
     const actions = node('div', 'results-library-actions');
-    actions.append(node('span', 'tag quiet', CATEGORIES.find(item => item[0] === file.category)[1]));
+    if (file.preview) {
+      const preview = node('button', 'text-button', 'Preview');
+      preview.type = 'button';
+      preview.setAttribute('aria-label', 'Preview ' + file.name);
+      preview.addEventListener('click', () => showFigure(file, url, options));
+      actions.append(preview);
+    }
     const download = node('a', 'text-button', 'Download ↧');
     download.href = url;
     download.download = file.name.split('/').pop();
     download.setAttribute('aria-label', 'Download ' + file.name);
     actions.append(download);
-    content.append(actions);
-    card.append(content);
-    return card;
+    row.append(type,content,meta,actions);
+    return row;
   }
   function mount(container, files, options) {
     container.replaceChildren();
@@ -119,7 +108,8 @@
     input.value = searchText;
     const count = node('p', 'results-library-count');
     count.setAttribute('role', 'status');
-    const grid = node('div', 'results-library-grid');
+    const grid = node('ul', 'results-library-list');
+    grid.setAttribute('aria-label', 'Saved output files');
     const controls = [];
     function update() {
       for (const [name, button] of controls) button.setAttribute('aria-pressed', String(name === selectedCategory));
@@ -128,7 +118,7 @@
       if (!visible.length) {
         empty(grid, 'No matching results.', 'Try another file type or search term.');
       } else {
-        grid.replaceChildren(...visible.map(file => buildCard(file, options)));
+        grid.replaceChildren(...visible.map(file => buildRow(file, options)));
       }
     }
     for (const [name, label] of CATEGORIES) {

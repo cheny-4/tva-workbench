@@ -156,8 +156,8 @@ function switchView(view) {
   state.view=view;
   document.body.classList.toggle('lab-active',view==='workspace');
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
-  $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversations',files:'Results Library',literature:'Literature library'}[view];
+  $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===(view==='history'?'workspace':view)));
+  $('#view-breadcrumb').textContent={workspace:'Hypothesis lab',network:'Study network',skills:'Skills & sources',history:'Conversation history',files:'Results Library',literature:'Literature library'}[view];
   if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='literature') window.TVALiteratureLibrary?.render();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
@@ -540,6 +540,8 @@ $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log')
 $('#mode-info').addEventListener('click',showSettings);
 $('#provenance-button').addEventListener('click',showProvenance);
 $('#export-report').addEventListener('click',exportBrief);
+$('#lab-history').addEventListener('click',()=>switchView('history'));
+$('#history-back').addEventListener('click',()=>switchView('workspace'));
 $('#new-chat').addEventListener('click',newConversation);$('#history-new').addEventListener('click',newConversation);
 $('#chat-messages').addEventListener('click',event=>{
   const button=event.target.closest('[data-start-prompt]');if(!button || state.busy)return;
