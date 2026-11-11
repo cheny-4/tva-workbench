@@ -524,7 +524,6 @@ $$('.nav-item').forEach(el=>el.addEventListener('click',()=>switchView(el.datase
 $('.brand').addEventListener('click',event=>{event.preventDefault();switchView('introduction');});
 $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
 $('#skills-refresh').addEventListener('click',async()=>{await refreshSkills();await refreshKnowledge();await refreshDemo();});
-$('#workflow-details').addEventListener('click',showWorkflowDetails);
 $('#demo-setup-button').addEventListener('click',showSettings);
 $('#view-case-figures').addEventListener('click',openCaseFigures);
 $('#site-search').addEventListener('input',renderNetworkRoster);
@@ -539,7 +538,6 @@ $('#settings-form').addEventListener('submit',async event=>{
   catch(error){$('#settings-status').textContent=error.message;}finally{button.disabled=false;}
 });
 $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log');log.hidden=!log.hidden;$('#activity-toggle').setAttribute('aria-expanded',String(!log.hidden));});
-$('#mode-info').addEventListener('click',showSettings);
 $('#provenance-button').addEventListener('click',showProvenance);
 $('#export-report').addEventListener('click',exportBrief);
 $('#lab-history').addEventListener('click',()=>switchView('history'));

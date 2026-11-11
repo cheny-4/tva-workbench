@@ -1,4 +1,4 @@
-# TVA Workbench · Hypothesis-lab demo · v0.12.0
+# TVA Workbench · Hypothesis-lab demo · v0.12.1
 
 A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. The case is fixed: **16–22 April 2019, issued 15 April 2019**. VISTA supplies the live agent, loaded skills, knowledge bases and saved files.
 
@@ -6,7 +6,7 @@ A local ORNL/Genesis interface for Dali's HEADWATER hypothesis-lab walkthrough. 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.12.0.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **TVA-Workbench-v0.12.1.zip**, then double-click **Start TVA Workbench.command** inside its `TVA-Workbench` folder on macOS. Keep the Terminal window open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
 
 The launcher prints the version, folder and actual local URL, and opens a browser tab. It prefers port 8765. If another copy occupies that port, this version uses an available loopback port without stopping the other process. Opening this same copy again reuses its validated running instance. Follow the printed URL; an older tab on port 8765 may belong to another version. Control+C stops this wrapper.
 
@@ -25,7 +25,7 @@ The main tabs follow this order:
 | **TVA Case Lab** | Ask a case question and inspect cited files and figures beside the chat |
 | **Results Library** | Browse saved output files in the compact results list |
 | **Literature library** | Find source papers and project references in compact reading rows |
-| **Skills & sources** | Inspect the selected VISTA project's actual capabilities and source readiness |
+| **Skills & sources** | Inspect loaded project skills and the core capability checklist |
 
 TVA network introduces spring storage versus flood space, downstream water needs, energy-water connections and the cold-water concern recorded in the project briefing. It links to official TVA river-management guidance and the 15 September briefing. The 54-location catalog is study coverage, with 12 headwater reservoirs and 42 other locations; its reference markers are not a complete operational routing model. Selecting a background location does not change the April case or enable a dam policy. Headwaters start expanded, the other locations collapsed; search reveals matches and clearing it restores your expansion preferences.
 
@@ -93,6 +93,7 @@ The wrapper stores only backend/project selection and validated launch-port meta
 | v0.10.0 | Quiet two-column research desk, single welcome and focused evidence viewer |
 | v0.11.0 | Restored brand colors and interactive workflow, compact libraries and lab History |
 | v0.12.0 | Separate method/case introduction, TVA decision context and guided TVA Case Lab |
+| v0.12.1 | Remove the introduction footer and two technical source/readiness disclosures |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or use GitHub's Code → Download ZIP. GitHub hosts source; the Python/VISTA app runs on the laptop.
 
