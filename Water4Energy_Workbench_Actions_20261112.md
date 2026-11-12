@@ -3,52 +3,101 @@
 **For:** Yang Chen
 **From:** Dali Wang
 **Package:** the workbench you already ship, interface v0.12.1
-**Goal:** make that interface the workbench for the whole project, and add the HEADWATER development path beside the TVA path, in time for today’s demo.
+**Goal:** ship this interface as the workbench for the Water4Energy project, in time for today’s demo.
+
+The workbench is the project. HEADWATER development is the workflow the demo walks. The 16–22 April 2019 TVA week is one case inside the project. The first screen is HEADWATER development. A person can open the TVA case from there. Opening that case changes the question list and the evidence pane. It leaves the product name, the sidebar, and the libraries as the project.
 
 The science sentences below are fixed. This pass does not need a live ledger, a new VISTA project, or a job submission.
 
 Edit your workbench tree (v0.12.1). Leave the copy under `Downscaling_Interface/` alone. Keep the VISTA project id `Water4Energy-TVA-agent-loop`, the launcher filenames, and the ORNL and Genesis marks. Bump the on-screen version to **v0.13.0** so a demo tab is obviously this build.
 
-The folder may stay `TVA-Workbench`. The on-screen name becomes **Water4Energy workbench**.
+The folder may stay `TVA-Workbench`. The on-screen name is **Water4Energy workbench** on every screen, including while the TVA case is open.
 
 ## 1. Rename the product on screen
+
+These strings name the project, on every view:
 
 | Where | Now | Becomes |
 |---|---|---|
 | Page title, sidebar brand small-text, top breadcrumb prefix | TVA Research Workbench / TVA HYPOTHESIS LAB | **Water4Energy workbench** |
 | Sidebar project label and footer | TVA research workbench · TVA WORKBENCH | **Water4Energy workbench** |
 | Chat agent label | TVA agent | **Water4Energy agent** (the VISTA chip stays) |
-| Case Lab titles, History “Back to…”, “Try this question in…”, “Questions for this TVA case” | TVA Case Lab | **Case Lab** |
-| Meta description | Explore TVA decisions | Method, HEADWATER development, and the April TVA case |
+| Skills page eyebrow and heading | TVA PROJECT CAPABILITIES | **Project capabilities** |
+| Literature page lead | papers connected to the TVA hypothesis lab | papers and references for the Water4Energy project |
+| History empty state and “Back to…” | this laptop’s TVA conversations / Back to TVA Case Lab | this laptop’s project conversations / **Back to Case Lab** |
+| Meta description | Explore TVA decisions | The Water4Energy project workbench: HEADWATER development, and the cases inside the project |
 
-Files: `public/index.html`, `public/app.js` (breadcrumb map in `switchView`), `public/case-journey.js` (the prepare-question button and the question-menu summary).
+The TVA name stays on the TVA case itself: the network view, the April evidence, and the Case Lab subtitle while that case is selected.
 
-## 2. Add a HEADWATER development view beside TVA
+Files: `public/index.html`, `public/app.js` (breadcrumb map in `switchView`, the default view, the agent label, the history empty state), `public/case-journey.js`.
 
-New sidebar item, second, directly under Hypothesis lab:
+## 2. Information architecture
 
-**HEADWATER development**
+The app opens on **HEADWATER development**. Set the initial view there, and give that nav item the active state in `index.html`. Hypothesis lab remains the method. It is no longer the home screen, and its introduction is no longer “Method & April case.”
 
-Order: Hypothesis lab → **HEADWATER development** → TVA network → Case Lab → Results Library → Literature library → Skills & sources.
+Sidebar order:
 
-TVA network, the 54 locations, the fill-or-hold questions, the April case, Trial 0, the ERA5 runoff panel, and the optional dam readout stay as they are. They are one track of the project.
+1. **HEADWATER development** — project workflow, and the screen the demo starts on
+2. **Hypothesis lab** — the project method
+3. **TVA case** — the one loaded case (rename the current “TVA network” item to this)
+4. **Case Lab** — the project conversation
+5. **Results Library**
+6. **Literature library**
+7. **Skills & sources**
 
-On Hypothesis lab, add a second path above the current three-step TVA path:
+### Hypothesis lab
 
-1. **HEADWATER development** → the new view
-2. **TVA case** → the existing path (method → TVA network → Case Lab)
+Kicker: **Project method**. Lead: the research loop for Water4Energy. A question becomes one reviewed test, a person approves it, and the score returns to the ledger.
 
-The six-node map stays the method. Clicking a node still only prepares a question. It does not start Proposer, Critic, Referee, or a train.
+Keep the six-node map. Clicking a node still only prepares a question. It does not start Proposer, Critic, Referee, or a train.
 
-## 3. What the new view shows
+Replace the three-step path “Understand the method → Explore TVA decisions → Ask & inspect evidence” with two entries under the map:
+
+- **Open HEADWATER development**
+- **Open the TVA case**
+
+Move the spring fill-or-hold brief off this page. That brief already lives on the TVA case view. This page’s side panel is the project loop in one paragraph: hypothesis, data on Frontier, a person picks one experiment, execution on the H100s and Lux, score back to the ledger.
+
+The button that prepares a question reads **Try this question in Case Lab**. The question it prepares follows the active context. From this page the context is the project method.
+
+### TVA case
+
+This view keeps what it has now: 54 study locations, the fill-or-hold questions, downstream water, energy-water connections, and the cold-water concern. The heading can stay specific to this case: **TVA case**. The eyebrow names the case, not the product.
+
+Its continue button reads **Open this case in Case Lab**. That action selects the TVA case and opens Case Lab. It does not make the TVA week the identity of the workbench.
+
+### Case Lab
+
+Title: **Case Lab**. The subtitle is the active context, not a permanent April date.
+
+A switcher sits in the header:
+
+- **HEADWATER development** — selected when the app opens, and when a person arrives from the development view or from Hypothesis lab
+- **TVA · 16–22 April 2019** — selected only after a person opens the TVA case
+
+**HEADWATER development** uses a new question list in `public/headwater-workflow.js`. Each item fills the composer. Sending still requires the person to press Send. Each prepared request refuses job submission, training, and invented scores. Suggested questions:
+
+- What has the ledger already scored?
+- What is the one change in the current brief?
+- What did Frontier already prepare?
+- Which board rows are ready, and which training flags are off?
+- What did the 2019 valley score return?
+
+Welcome copy for this context: “Start from the ledger. Choose a question to put an editable request in the message box.”
+
+**TVA · 16–22 April 2019** restores the current April behavior: the six questions, the April evidence pane, Trial 0, the ERA5 runoff observation, and the optional dam readout. Welcome and “Questions for this case” use the April wording only while this case is selected. The menu summary reads **Questions for this case**.
+
+`public/data/prompts.json`, the step logic in `hypothesis-guide.js`, `demo-case.json`, and the evidence manifest stay as they are. The April contract is the TVA case. It is not the shell of the app.
+
+## 3. What HEADWATER development shows
 
 One static page, five stages, in this order. This is the demo walk. A clicked stage opens a short card. It does not call VISTA, set `human_flag`, or submit a job.
 
 1. **Hypothesis.** Ledger, then Proposer, Critic, Referee. Link: open Hypothesis lab. Line: the lab starts from what was already scored.
 2. **Data.** Frontier. **153** weekly examples, then the root-zone soil copy. The dates and the destination were already written down. The dataset agent runs that committed job.
-3. **Design.** The brief names one change. A person picks that experiment and sets the training flag. Button label: **Review this in Case Lab**. It only fills the composer.
+3. **Design.** The brief names one change. A person picks that experiment and sets the training flag. Button label: **Review this in Case Lab**. It selects the HEADWATER context and fills the composer.
 4. **Execution.** The same brief is the job. Name the H100s (`ccsi-gpu`) as where `det_v2_soil_k9` was trained, and Lux as nine scored run directories. List the nine names below. No valley temperature on the Lux card.
-5. **Score.** The 2019 valley number returns to the ledger, and the next brief is written from that ledger. Show one figure slot. Until a file is dropped in, use a labeled empty frame: “April map supplied for the demo.” Preferred file, if it is added: a static copy of the valley temperature figure for 2019, placed in `public/assets/`. Caption the **16–22 April 2019** week only.
+5. **Score.** The 2019 valley number returns to the ledger, and the next brief is written from that ledger. Show one figure slot. Until a file is dropped in, use a labeled empty frame: “April map supplied for the demo.” Preferred file, if it is added: a static copy of the valley temperature figure for 2019, placed in `public/assets/`. Caption the **16–22 April 2019** week only. This figure is a score that came back to the project ledger. It is not a second home screen.
 
 Lux run names, listed as scored on Lux. Their score files are on Lux, not in this checkout:
 
@@ -78,7 +127,7 @@ A local video mount sits at the top of this view: poster frame of the six-node m
 
 Promote the existing Frontier, Lux, H100 / CCSI, and Odo cards onto this view as read-only status. Connection settings remains the only place that saves the backend URL and the project name.
 
-## 4. Copy that is allowed on the new view
+## 4. Copy that is allowed on HEADWATER development
 
 - Model `det_v2_soil_k9`, fit on 1979–2017, stopped on 2018, scored on 2019.
 - Four-week valley temperature: **0.77°C** against **0.86°C** for the 1979–2017 week stored in the example files. Exact figures if a table needs them: **0.767 K** and **0.861 K**. Say degrees Celsius in any sentence. Use kelvin only in the table, labeled as a difference.
@@ -89,7 +138,9 @@ Promote the existing Frontier, Lux, H100 / CCSI, and Odo cards onto this view as
 
 The comparison label is **the 1979–2017 week already in the example files**. Use that phrase as written. Where an existing caption says the temperature result is a frozen week plus the residual 9×9, retitle it with this same phrase.
 
-## 5. Copy that stays off this screen
+## 5. Copy that stays off the project shell
+
+These limits apply to the home screen, the sidebar, Hypothesis lab, Case Lab in the HEADWATER context, and the libraries. The TVA case view may keep its own April evidence labels.
 
 - A Lux valley temperature, or any line that Lux trained the 0.77°C map. That figure is the H100 9×9.
 - A new name for the 1979–2017 week. Do not call it a long-term normal, a 30-year reference, or a funding-skill result.
@@ -100,14 +151,15 @@ The comparison label is **the 1979–2017 week already in the example files**. U
 - A count of thousands of GPUs as work already in the log. That scale is the project goal.
 - Any line that a clicked node or a clicked stage started an agent or a job.
 - Policy language about long-term average conditions. Keep the wording to the stored week, the valley score, and the machines.
+- Any heading that presents the April week, the reservoir network, or a fill-or-hold question as the name of the workbench.
 
 ## 6. Files and checks
 
-New: `public/headwater-workflow.js` and `public/headwater-workflow.css`, mounted from `index.html`. Keep the five stages and the board as data in that script so the HTML stays a shell.
+New: `public/headwater-workflow.js` and `public/headwater-workflow.css`, mounted from `index.html`. Keep the five stages, the board, the HEADWATER question list, and the active-context switcher as data in that script so the HTML stays a shell.
 
-Also touch: `public/index.html`, `public/app.js`, `public/case-journey.js`, `README.md` (one version row for v0.13.0).
+Also touch: `public/index.html`, `public/app.js`, `public/case-journey.js`, `README.md` (one version row for v0.13.0, and a lead sentence that this package is the Water4Energy project workbench).
 
-Leave `public/data/prompts.json`, the step logic in `hypothesis-guide.js`, `demo-case.json`, and the evidence manifest contract unchanged. The April questions still refuse job submission.
+Leave `public/data/prompts.json`, the step logic in `hypothesis-guide.js`, `demo-case.json`, and the evidence manifest contract unchanged. The April questions still refuse job submission. They run when the TVA case is the active context.
 
 After the edit, run:
 
@@ -116,11 +168,16 @@ python3 -m unittest discover -s tests -v
 node --test tests/*.cjs
 ```
 
-Add one frontend test that the new view’s text contains “1979–2017 week” and does not contain “megawatt”, and that the Lux card does not contain “0.77”.
+Add frontend checks for these four facts:
+
+- The document title is `Water4Energy workbench`.
+- The first screen is the HEADWATER development view, and its text contains “1979–2017 week”.
+- That first screen does not contain “megawatt”, and the Lux card does not contain “0.77”.
+- The TVA network markup is still in the page, including the 54 study locations, and the April case strings are inside that case view.
 
 ## Split for today
 
-**Yang:** sections 1–3 and 6, with the sentences in sections 4 and 5 pasted as card text.
+**Yang:** sections 1, 2, 3, and 6, with the sentences in sections 4 and 5 pasted as card text. The first screen a person sees is HEADWATER development. The TVA week is one case.
 
 **Dali:** the video file, which map to drop in the score frame, and the voiceover.
 
