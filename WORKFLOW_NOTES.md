@@ -1,52 +1,31 @@
-# Water4Energy project workflow
+# Water4Energy workflow · v0.15.0
 
-## Source and product scope
+The project remains **Water4Energy workbench** on every screen. It uses one VISTA project, **Water4Energy-TVA-agent-loop**, the existing launcher filenames and ORNL/Genesis marks. This revision selectively incorporates Dali's supplied workbench content while retaining the verified local runtime, combined setup and April contract.
 
-v0.13.0 implements [Dali's Water4Energy workbench action list](https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md), source commit `d9c185da04bb72e51414c72c4004447cd38292ee`, supplied on 12 November 2026. The project is **Water4Energy workbench**. **HEADWATER development** is its initial workflow view; the April TVA week is one case inside the project. The copy under `Downscaling_Interface/` is not part of this edit.
+## Three contexts, one conversation layout
 
-The workbench uses the existing backend project ID `Water4Energy-TVA-agent-loop`, existing launcher filenames and original ORNL/Genesis marks. The shell version is 0.13.0. The April `prompts.json`, `hypothesis-guide.js`, `demo-case.json` and evidence schema remain byte-identical; the case definition's embedded 0.12.1 version remains historical metadata.
+**HEADWATER development** remains the first view. The recorded question is whether soil information and a local neighborhood can improve a weekly weather estimate. Five development steps connect question, documented inputs, specific change, recorded execution and score. A separate Downscaling example introduces monthly local refinement.
 
-## Development walk
+**Hypothesis lab · 24 October 2026** follows one completed cycle: ledger → proposer → critic → referee → human gate → result back to the ledger. Its six original records are pinned under `HEADWATER/hypothesis_lab/runs/20261024_track_review/`. The proposal adds soil/static information to a Reslim correction. Its measured four-week error of 0.955 K and January error of 1.103 K miss the primary stopping tests. The direction stops; the 9×9 soil model remains the valley model. The pack requires human acceptance but provides no separate acceptance receipt. This is a historical cycle, not a claim about the current selected November brief or an independently verified scheduler date.
 
-The five stages are Hypothesis, Data, Design, Execution and Score. The lab starts from the ledger; Frontier prepared 153 weekly examples, then the root-zone soil copy; the brief names one change; a person selects an experiment and approves its flag; the same brief is the job; the score returns to the ledger for the next brief. Clicking a stage opens its card. Review this in Case Lab prepares a guarded project-context request.
+**TVA · 16–22 April 2019**, issued 15 April, remains the separate case. Its six questions, guarded prompt catalog, hypothesis guide, case metadata, schema, verified narratives and 32 original evidence files are protected. The network retains 54 study locations and its 12-headwater grouping. A marker does not choose an operational reservoir/rule.
 
-The approved model record is `det_v2_soil_k9`, fit on 1979–2017, stopped on 2018 and scored on 2019. The H100s (`ccsi-gpu`) own the 0.77 degrees Celsius four-week valley-temperature value, compared with 0.86 degrees Celsius for **the 1979–2017 week already in the example files**. That phrase is the comparison label. No alternative baseline or funding-skill wording is introduced. The details table labels kelvin values as temperature differences. April rain records 55.9 mm observed, 24.4 mm for that stored week and 24.7 mm for the 9×9 map; the map redrew the historical week.
+Conversation stays on the left while the selected page or evidence uses the right. Each context has a separate draft/session association. Busy turns block context switching; asynchronous checks reject old context/session results. Prepared questions are editable and require manual Send. The composer height is adjustable. Successful file displays drive figure following, including repeat displays; manual inspection pauses it.
 
-Lux displays the supplied nine scored run names without a valley-temperature claim. A Reslim run name does not identify the current model, and the `daily90` name does not establish a temporal-attention implementation. Root-zone soil on Frontier is the input recorded as moving the valley temperature. Current connection badges do not verify or rescore this supplied record.
+## Scientific distinctions
 
-The 12 November board has both recorded H100 and Lux training flags off. April rain rank reads soil files with no GPU; the Lux check prints one MI355X device name without training; `E_tcwv_9x9` waits on the rank file and a person; an odd temporal kernel cannot see all 90 days. Temporal attention along the 90 days has no script and no board row.
+The H100/CCSI `det_v2_soil_k9` comparison is temperature error across four 2019 weeks: about 0.77°C versus 0.86°C for **the 1979–2017 week already in the example files**. These are errors, not actual temperatures, an April-only score or proof that soil information alone caused the improvement. Some weeks and rainfall remain weak. Lux lists run names separately.
 
-## Method and case contexts
+Dali's five supplied PNGs have pinned hashes and scopes. Three show four saved weeks; temperature is air temperature, and precipitation is weekly totals in mm. They do not show the October soil-residual result. The two refinement maps cover all 30 days of April 2019, 1° to 1/24° (about 4 km), with monthly mean and daily 95th percentile. Temperature is daily maximum temperature; precipitation is mm/day.
 
-Hypothesis lab is the Water4Energy project method: ledger → Proposer → Critic → Referee → human review → evidence back to the ledger. Its new request text uses the project context while the six-node step logic stays unchanged. The project loop side panel connects hypothesis, data on Frontier, one human-selected experiment, H100/Lux execution and score return. A selected node is not evidence that any role ran.
+Monthly refinement is distinct from the protected weekly Trial 0 comparison, its 0.25° output and 730-day standardized aggregate score. Neither establishes a HEADWATER-to-downscaler handoff. Original arrays and figure-generating calculations are not bundled. The runoff summary is observed ERA5, not forecast runoff, a spatial map or reservoir inflow.
 
-The Case Lab switcher selects HEADWATER development or TVA · 16–22 April 2019. Development/method navigation restores HEADWATER. Opening the TVA case selects April questions and evidence, while preserving the product identity and libraries. Prepared requests refuse submission, training and invented scores; Send remains with the person. Context-specific session/draft associations and asynchronous revision guards keep old case responses from replacing a newly selected context. A busy turn prevents context switching.
+The original HEADWATER answer narratives remain unchanged. Its November pack contains several proposals without an established selected current brief. The historical 2 November board and supplied 12 November off flags remain distinct; no saved status authorizes a new run. Later completed April persistence/spring scores supersede older pending language. The exact original Trial 0 scorer remains missing, and the optional dam skill needs an agreed reservoir/rule.
 
-The TVA case remains **16–22 April 2019, issued 15 April 2019**. Its existing frozen weather evidence, ERA5 observed runoff, already-scored Trial 0 comparison and optional Normandy/Norris readout are unchanged. An agreed rule and matching source are still required for the dam panel. A network marker does not select an operating policy. Native VISTA forum/debate orchestration is a separate feature rather than an assumed result of these UI controls.
+## Sources and execution
 
-The 54-location study network and 12-headwater grouping remain in the TVA case. General flow, water-supply, navigation, energy-water and flood-space context was checked previously against TVA's [Managing the Tennessee River for Multiple Benefits](https://www.tva.com/environment/managing-the-river) and [How TVA Manages Water Levels](https://www.tva.com/Environment/Lake-Levels/How-TVA-Manages-Water-Levels) on 9 November 2026. The Norris cold-water concern and fill/hold entry point follow the supplied [15 September briefing](https://github.com/daliwang/water4energy_projectPlan/blob/main/TVA_Task3_Briefing_Summary_20260915.md) and [2 November April plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md). These are case context, not the identity or an operational simulation of the project.
+Sources are pinned to HEADWATER `5ea54ac4dd817ab38c82284331974d6668afde09` and Dali's supplied workbench `d0199a817ddbfa0fbf65c9e81d9fcc53081611ee`, alongside the original April provenance. The registry contains 69 source records; the frozen legacy registry retains its original 57 records. Nine source/guide documents are indexed.
 
-## Media and execution boundary
+Guided requests select a matching context/profile, quote a source-checked answer and display returned files through actual tool calls. Reading a saved proposal, critique or referee record does not run that role. No current brief, approval, command or coupled pipeline is invented. Unreadable raw provider tool framing becomes an unavailable answer with a draft-only manual retry.
 
-Dali supplies the video, captions, April score map and voiceover. The read-only local-media endpoint exposes only the approved nonempty MP4/VTT/PNG/JPG paths. The player remains hidden without both MP4 and captions, uses a six-node-map poster and never autoplays. The score stage remains an empty frame labelled April map supplied for the demo until the approved static score figure arrives. Its caption names only 16–22 April 2019 and treats the image as a score returned to the ledger.
-
-No dataset job, training, download, scientific agent run, flag mutation or HPC submission was performed to author this interface. The home page is a supplied development record. Reading it is not a live ledger query, and choosing a stage or question is not execution authorization. The existing skill/source/API contracts are documented in [VISTA_SETUP.md](VISTA_SETUP.md) and [BACKEND.md](BACKEND.md).
-
-## v0.13.1 backend compatibility
-
-Current VISTA accepts kebab-case skill names. The eight exact demo aliases are recognized without changing dotted contract labels or the April prompts/guide/schema. Descriptive Markdown filenames identify indexed lead documents. The local replay setup uses original pinned weather/Trial 0 maps and an explicitly labelled ERA5 receipt-summary chart. It is not a new train, inference, re-score or agent conversation. Local VISTA data remains separate from the source package.
-
-## v0.13.2 answer and evidence corrections
-
-Use the current dated source record rather than an older referee sentence when later evidence exists. The April persistence diagnosis and the later spring score are already recorded; a proposed next experiment must state its new change and cannot present completed work as missing. Weekly precipitation totals are not daily rates or RMSE. Trial 0 test-split aggregates and its single displayed wet day have different scopes, and the pinned files do not establish a HEADWATER-to-Trial-0 handoff. The 12 November demo flags are distinct from historical board flags. Without an agreed rule the optional dam panel cannot invent a fill/hold decision.
-
-Figure following now observes successful display identity, including a redisplay of a checked case figure. Source files remain stable across replay, preserving current conversation history. The scientific hypothesis-step logic, April prompts, case metadata and evidence schema remain unchanged.
-
-
-## v0.14.0 recorded development story
-
-Lead with a plain question, five recorded steps and a scoped result. Keep history, machine details and the board behind disclosures. Document dates in October–November 2026 describe the development record; 2019 identifies the target weather weeks. H100 four-week temperature error is not an all-weeks improvement or proof of soil causality.
-
-Each HEADWATER question selects matching saved evidence and its own reader profile. The November review outputs share one provenance pack; no selected current proposal is invented. The optional history export supplies a source-linked four-record CSV. April prompts and verified narratives remain unchanged.
-
-Guided requests remain fully editable and sent only by a person. After sending, their long instructions fold under Request details. Raw unexecuted provider tool framing is an unavailable answer, with a manual prepare-and-Send retry; it is never interpreted as an actual tool event or executed by the frontend.
+Dali supplies video/captions, approved home-score image and voiceover separately. The local media gate stays limited to the named nonempty MP4/VTT/PNG/JPG paths, requires captions for video and never autoplays. Package creation and setup run no science job. Live acceptance checks initiate only saved-reader conversations; their actual outcomes and limitations belong in [VERIFICATION.md](VERIFICATION.md).

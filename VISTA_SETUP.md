@@ -1,67 +1,12 @@
-# Connecting Dali's TVA hypothesis-lab demo
+# Combined VISTA setup · v0.15.0
 
-The interface is runnable on its own. This checklist connects the scientific backend described in Dali's 2 November plan. It is not a claim that these skills or artifacts are installed.
+Use the single combined ZIP and **Start TVA Workbench.command**. The recipient needs installed VISTA and their own working model credentials in VISTA Settings. The launcher prepares the project automatically; a separate setup bundle or manual Skill Hub import is unnecessary.
 
-## Project and skills
+## What is installed
 
-Create/configure the VISTA project **Water4Energy-TVA-agent-loop** using the existing Case A pattern: project, Skill Hub and knowledge base. Dali's plan assigns project/skill loading to Junqi, the lab and realization to Dali, downscale scorecard to Haoran, and the optional reservoir choice/rule to Yang.
+The fixed project is **Water4Energy-TVA-agent-loop**. Its source index is **water4energy-tva-demo-2019**. Eight saved-file adapters wrap local pinned readers:
 
-Load these exact core skill IDs, each wrapping its existing script and returning file-backed evidence:
-
-| Skill | Source / result |
-| --- | --- |
-| `lab.literature` | Literature shelf for gaps left open by the ledger |
-| `lab.download` | Existing literature/local-download status |
-| `lab.ledger` | Scored, closed and blocked ledger records |
-| `lab.board` | Open rows from `board.py`, without launching work |
-| `lab.design` | Ledger-grounded protocol for human review |
-| `lab.show_command` | Existing train/score command strings, without execution |
-| `lab.realize` | Saved 9×9 temperature/precipitation and observed ERA5 runoff figure |
-| `downscale.scorecard` | Frozen Trial 0 scorecard and existing maps beside bilinear |
-
-`dam.readout` is optional and is counted separately. The UI checks actual selected-project skill names, not the presence of a planned card. It does not load global VISTA library skills.
-
-## Lead knowledge sources
-
-Index the following and wait for actual VISTA index readiness:
-
-1. `hypothesis_lab/README.md` — title **HEADWATER hypothesis lab**.
-2. `hypothesis_lab/RUNTIME.md` — title **Where the hypothesis lab runs**.
-3. `TVA_AGENT_DEMO_PLAN_20261102.md`.
-4. `TVA_Task3_Briefing_Summary_20260915.md`.
-5. The frozen September 7 Trial 0 scorecard.
-6. A short April 2019 ledger excerpt.
-
-The source URLs, accepted filenames and descriptive titles are in `public/data/demo-case.json`. Preserve meaningful titles if VISTA converts documents during indexing. A generic `README.md` filename alone does not prove which README was indexed. The UI separates index readiness from coverage of these six lead sources; unknown or ambiguous coverage stays unverified.
-
-## Fixed-case evidence manifest
-
-Stage the figures and supporting source files in this VISTA project's **outputs**. Write **tva-demo-20190416-20190422.json** there using `public/data/demo-evidence.schema.json`. The schema is an adapter contract for this interface; it does not supply scientific values.
-
-The root case metadata must match start **2019-04-16**, end **2019-04-22**, issued **2019-04-15**. Panel records declare source, kind, model/observation metadata and a relative figure path. Paths must resolve to files in the same project's output listing. The supplied schema and validator define the precise required fields.
-
-- Temperature/precipitation identify `det_v2_soil_k9` and frozen prediction evidence.
-- Runoff identifies **ERA5 sro observation** and explicitly unavailable HEADWATER runoff forecast.
-- Downscale identifies frozen **Trial 0**, score date **2026-09-07**, **1° → 0.25°**, and U-Net/bilinear comparison for a day inside the case week.
-- An optional `dam.source_file` in the manifest points to a separate JSON readout containing the same case, Normandy or Norris, fill/hold decision, agreed rule text and `realization_source_file` naming an available panel’s backing JSON. The enabled UI reservoir/rule must match before a sentence is shown.
-
-The interface rejects mismatched dates, unsupported source kinds, unavailable files and unsafe paths. It does not infer provenance from an image filename or compute an operating decision. Keep numeric interpretation and score scope in the source artifacts. Four-week aggregate scores must not be relabeled as the single displayed week's score.
-
-Use `display_file` for conversation artifacts, and refresh the case evidence when files change. A three-panel figure may be reused by multiple panel records when it is the actual labeled realization file. Generic saved outputs remain accessible through Results Library even when they do not satisfy the case contract.
-
-## Cold-open walkthrough
-
-Open the project; inspect actual skill/KB readiness; ask the agent what the ledger already closed; inspect the open gap and protocol review; show the existing command without executing it; open the realization and Trial 0 figures. The six questions on the interface are prompts for a real check, not automatically marked pass.
-
-Enable the dam panel only if the team elects to include it. Choose one reservoir and enter the agreed rule. Request a file-grounded readout; do not derive an operations policy from a single rainfall number in the browser.
-
-Source: [TVA agent demo plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md). Backend project creation, scientific wrappers, original predictions, ERA5 observation files and compute access remain VISTA/HEADWATER setup work.
-
-## Local replay setup completed 12 November 2026
-
-The dedicated project has eight local replay adapters. These were authored to read pinned source files; they are not existing team-certified wrappers or a new science run.
-
-| Demo contract | Actual VISTA skill |
+| Contract ID | VISTA skill name |
 | --- | --- |
 | lab.literature | lab-literature |
 | lab.download | lab-download |
@@ -72,33 +17,28 @@ The dedicated project has eight local replay adapters. These were authored to re
 | lab.realize | lab-realize |
 | downscale.scorecard | downscale-scorecard |
 
-The six-source knowledge base `water4energy-tva-demo-2019` was indexed to Ready and a real retrieval query returned the demo plan. Original Markdown notes and Markdown renderings of the original Trial 0 JSON and derived April ledger excerpt are indexed. Their filenames retain descriptive source identity. Index status and source coverage are checked separately.
+The UI recognizes dotted contract labels and the actual kebab-case names. It checks index readiness separately from source coverage; a generic README does not prove the intended source was indexed.
 
-Sources are pinned to HEADWATER `5ea54ac4dd817ab38c82284331974d6668afde09`, water4energy_experiment `ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5`, and the provenance receipt for the briefing/actions. Each replay adapter carries a SHA-256 provenance manifest and validates its source bytes. Original inputs, saved proposals and new proposals stay distinct. The older board/ledger snapshots are labelled by their original dates; the supplied 12 November demo board is a separate record.
+Nine documents are indexed: the six original lead sources, the April answer guide, the HEADWATER development guide, and **October_24_cycle_and_monthly_refinement_guide_v0150.md**. Original source/guide bytes are retained. The added guide cites six real October files and the supplied figure scopes. Pinned sources and per-file SHA-256 receipts travel with the adapters; catalog references are not a claim that paper PDFs or ERA5 arrays are bundled.
 
-Four panels are staged in project outputs using the unchanged evidence contract:
+## Existing installations
 
-- Original 16–22 April temperature and precipitation maps, with their existing comparison columns retained. Committed plotting code maps Residual 9×9 to `det_v2_soil_k9`. Values in source JSON are transcribed from published labels, not recomputed predictions. The four-week aggregate RMSE is not labelled as this one-week score.
-- ERA5 surface runoff: 7.364 mm valley mean accumulated over the valid week, from the committed `20261102_sro_sample/receipt.json`. The plotted summary is explicitly not a spatial map. No runoff forecast is supplied.
-- Original Trial 0 wet-day map for 19 April 2019, backed by the original 7 September scorecard. Aggregate standardized test scores over 730 days are not presented as scores for the displayed day.
+Matching items are adopted without duplicate imports. Known original v0.13.1/v0.13.2/v0.14.0 backend items are checked and backed up before upgrade. Interface v0.14.1 used the same v0.14.0 backend. Preflight refuses unknown policy changes, local skill edits, shared global skills and conflicting evidence. Complete backups remain in `.local/upgrade-backups/`; interrupted setup can resume safely. Never forward `.local/` with a package.
 
-The readers copy saved figures, read records and render the receipt summary locally. They submit no jobs, train no models and do not rerun inference or scoring. Their eight entry points were checked inside VISTA. Chat sending remains manual; the six conversational cold-open answers have not been certified by this setup. The exact original Trial 0 scorer command is not in the staged bundle and is reported missing rather than invented. The optional dam skill remains unloaded pending an agreed reservoir rule. Video, approved home-score map and voiceover remain with Dali.
+The setup receipt distinguishes backend readiness and configured model access from an actual model test. Source indexing may take a few minutes. If it fails or remains pending, keep VISTA open, resolve its message, then rerun the same launcher.
 
-The replay project allows file reading, local replay code, file display and retrieval tools. It has no HPC submission tools or HPC job definitions. Existing Genesis_Water4Energy project configuration is retained. Local source bundles and VISTA state are not included in the application ZIP or Git repository.
+## Protected April evidence
 
-## v0.13.2 combined setup and grounded readouts
+The original **32 files** in `backend/evidence.zip` retain their hashes. The manifest **tva-demo-20190416-20190422.json** keeps start 2019-04-16, end 2019-04-22 and issue 2019-04-15. Its four panels remain:
 
-The combined release includes the local project setup and pinned replay skills. Start it through **Start TVA Workbench.command**. The original six indexed sources are supplemented by one derived, source-cited answer guide. Recognized v0.13.1 files are verified and backed up before upgrade; unknown local edits or shared global skills are preserved and reported.
+- Frozen `det_v2_soil_k9` temperature and weekly precipitation.
+- Observed ERA5 `sro` receipt summary, with no supplied HEADWATER runoff forecast or reservoir inflow prediction.
+- Frozen Trial 0, 1° to 0.25°, scored 7 September 2026; the 19 April illustration is separate from its 730-day standardized aggregate scores.
 
-The six April questions use compact, explicitly deterministic saved-evidence readouts rather than flooding the model with obsolete and current archive paragraphs together. Full original records and complete versioned inspection JSON remain available. The agent must use actual `display_file` calls for returned figure paths and distinguish original figures, a derived receipt chart, aggregate scores and the selected week. The optional dam gate still requires an agreed reservoir and rule; the exact original Trial 0 scorer command remains unavailable.
+Original guarded prompts, April narratives and schema remain unchanged. New October and monthly displays use their own output names and source JSONs. The five supplied PNGs are also packaged with the interface; their comparison/monthly scopes cannot be substituted into the April contract.
 
-The original 24 staged evidence files retain their bytes. Eight versioned readouts supply the corrected scopes and review chronology. Stable copying preserves identical files and mtimes so later evidence reads do not invalidate saved conversation figures. The original April case dates, manifest schema and guarded prompts remain unchanged.
+## Use during the demo
 
+Start with HEADWATER development, open the October Hypothesis lab to follow one completed cycle, then select TVA for the April questions. Chat stays on the left. Choose a question, review the draft and press Send. Reading a saved review does not execute a role or set a training flag. The six October profiles correspond to ledger, proposer, critic, referee, human gate and measured result; the pack has no separate human-acceptance receipt.
 
-## v0.14.0 development and combined setup
-
-The current combined launcher includes eight lead documents: the original six, the April answer guide, and a source-cited HEADWATER development guide. Known v0.13.1 and v0.13.2 installations are verified against complete file/policy snapshots, backed up, and upgraded; unknown edits remain protected. The project ID and eight skill aliases are retained.
-
-Five HEADWATER question profiles and an optional development-history export use their matching reader in the HEADWATER context. Development review artifacts now all come from the same November review pack. Dates on the history table are document dates, separate from 2019 weather weeks. The supplied records do not identify a selected current next brief.
-
-The original six April guided requests and their verified narratives remain unchanged. Live validation and its provider-response limitation are recorded in VERIFICATION.md. Setup itself starts no conversations or science jobs. The original 32 staged v0.13.2 evidence files retain their hashes.
+Setup and the saved readers perform no training, new science inference/scoring, dataset download or HPC submission. A person approves any future experiment. The exact original Trial 0 scorer command and optional dam rule remain unavailable. Dali's video/captions and voiceover remain supplied separately. See [VERIFICATION.md](VERIFICATION.md) for the test record and limits; a first launch on another person's laptop is not certified here.

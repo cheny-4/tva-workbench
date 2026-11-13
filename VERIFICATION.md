@@ -1,3 +1,51 @@
+# v0.15.0 verification
+
+This revision selectively integrates Dali's October-cycle content and five supplied figures, retains persistent left-side conversation, and separates HEADWATER development, the 24 October Hypothesis lab and the April TVA case. No science job, new inference/scoring, data download or approval-flag change was performed by setup or acceptance checks.
+
+## Actual setup and regression checks
+
+The known v0.14.0 backend was upgraded after exact project/skill ownership and complete mounted-file verification. The result is **eight skills, nine Ready indexed documents and 32 protected April evidence files**. Complete original project/skill backups remain under ignored `.local/upgrade-backups/`.
+
+Two controlled, unreleased answer refinements were separately backed up and verified against known mounted content. The final refresh has an AST guard allowing only the new proposer narrative to change. All **624 mounted file hashes** were checked after replacement. Project policy, nine lead documents, pinned source bytes, original HEADWATER answer narratives and all 32 April files remain unchanged. No permanent migration was added for an unreleased same-version iteration.
+
+- **70 Python infrastructure/setup tests passed**, including 29 real-payload installer checks: fresh setup, known v0.13.1/v0.13.2/v0.14.0 upgrades, mixed/interrupted resume, complete backups, damaged-backup refusal, unknown/shared edit protection and idempotence.
+- **23 backend tests passed**, including protected source/answer/evidence hashes, context/profile routing, real October records and monthly source-JSON provenance.
+- **155 JavaScript tests passed**, including three-context drafts/sessions, stale-response guards, same-node chat docking, readiness aliases, current-raster figure validation, manual selection/resume, and stable polling DOM.
+
+## Scripted live VISTA checks
+
+There were **27 explicitly authorized saved-reader turns across 19 guided questions**, including targeted rechecks after the new October narratives were shortened. Original attempts remain preserved; these are not 19 perfect first attempts.
+
+| Context | Reader and display checks | Full narrative after typography normalization |
+| --- | --- | --- |
+| Existing HEADWATER questions, history and new monthly example | 7/7 | 7/7 |
+| Six roles in the 24 October cycle | 6/6 | 5/6 |
+| Six protected April questions | 6/6 | 5/6 |
+
+All **19 latest reader JSON responses** match their expected source-derived contracts. All **27 required latest display paths** have actual successful display calls, saved receipts and matching downloaded SHA-256 hashes. The monthly example displays two PNGs; its auxiliary source JSON is separately downloadable with a matching contract hash. Five supplied figure copies retain their original hashes and separate scientific scopes.
+
+The two strict-quote differences are retained as limitations: the October referee answer adds an article; the April runoff reply omits the broader-absence caution while keeping the correct observed-panel and package scope. No false runoff forecast, reservoir inflow, execution approval or coupled pipeline was claimed. The final proposer response includes the change, fixed conditions and human gate. No raw unexecuted protocol failure occurred in these 27 scripted turns.
+
+Initial October replies sometimes omitted the end of longer narratives despite correct source reads/displays. Only the new October narratives were compacted; the original HEADWATER and April narratives were kept. This improves the checked demo requests without certifying free-form narration, exact quotation or upstream first-attempt reliability. A separate manual browser monthly question is tracked as QA turn 28 rather than folded into the scripted counts. It passed scientific, matching-reader, two-PNG display/receipt/hash and auxiliary-source checks. Its answer used equivalent units (mm day⁻¹ and km), which remains a strict-quote difference. The browser showed both maps in the right evidence gallery and allowed precipitation selection without opening Results Library.
+
+## Browser and package checks
+
+Browser review passed at 1440 × 900: conversation and evidence have equal 780-pixel heights, chat stays on the left, the right pane scrolls independently, and the branding remains visible. The document has no horizontal overflow or header overlap. At 1000 × 800 the April evidence remains visible below chat rather than being hidden. All three context drafts were preserved; the composer expanded to 332 pixels and reset to 74 while Send stayed inside the panel. The non-April skill checklist correctly showed eight Loaded skills.
+
+The manual monthly Send stayed on HEADWATER development, displayed both actual source-checked PNGs in the right workspace, and supported manual temperature selection followed by Resume to precipitation. The temporary viewport override was reset. Screenshots below show the merged views.
+
+![Merged project workflow](Preview-home-v0150.png)
+
+![Completed October cycle](Preview-hypothesis-v0150.png)
+
+![Actual monthly conversation figures](Preview-downscaling-v0150.png)
+
+The actual combined ZIP passed extracted Mac launch checks, including a path with spaces, occupied-port fallback, executable launcher, all five supplied static PNGs, all five staged copies and their three backing JSONs, nine Ready indexed documents, all 32 original evidence hashes, and the missing-backend review path. Setup started zero agent turns/jobs and the project conversation list remained unchanged. The package contains one Mac launcher; every manifest hash and archive entry was checked. Local configuration, credentials, databases and actual project/session IDs are excluded. The package checker verifies a Mac extraction path with spaces, launcher execution, source hashes, nine-document readiness, all protected evidence hashes, supplied static figures, missing-backend review and unchanged agent-conversation count. Its strict optional mode also checks all five already-generated supplied PNGs and backing JSONs. Total project outputs are observed dynamically; **32 is the protected startup-file count, not a claim that the project has only 32 outputs**.
+
+A first installation on Dali's separate laptop is not certified here. He needs installed VISTA and his own model credentials. Free-form model behavior remains outside the guided acceptance. Dali's video/captions, approved home-score image and voiceover remain separately supplied. The optional reservoir readout still requires an agreed rule, and the exact original Trial 0 scorer remains unavailable.
+
+## Previous release validation record
+
 # v0.14.1 package update
 
 This patch adds a clickable **Powered by VISTA** link to `https://github.com/Genesis-VISTA/vista`, opening a new tab with `noopener noreferrer`. The combined Mac ZIP contains that link and consistent interface/setup version labels. The complete backend payload is byte-identical to v0.14.0, so its science validation below remains applicable and an existing matching backend is reused without migration. Package integrity, launcher permissions, local-state exclusions and extracted-launch checks are repeated for this ZIP.

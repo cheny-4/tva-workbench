@@ -48,7 +48,7 @@ test('starter prompts prepare the fixed case without sending or adding backgroun
   const controls={'#prompt':field,'#chat-form':form};
   context.document={querySelector:selector=>controls[selector],querySelectorAll:()=>[]};
   context.promptFixture=prompt;
-  vm.runInContext("state.busy=false; state.activeContext='tva'; state.prompts=[promptFixture]; state.network={sites:[{id:'WOLF_CREEK',name:'Wolf Creek'}]}; state.focusSiteId='WOLF_CREEK'; globalThis.sent=0; sendLive=()=>{sent++;}; switchView=view=>{globalThis.openedView=view;}; toast=()=>{}; usePrompt('ledger');",context);
+  vm.runInContext("state.busy=false; state.view='history'; state.activeContext='tva'; state.prompts=[promptFixture]; state.network={sites:[{id:'WOLF_CREEK',name:'Wolf Creek'}]}; state.focusSiteId='WOLF_CREEK'; globalThis.sent=0; sendLive=()=>{sent++;}; switchView=view=>{globalThis.openedView=view;}; toast=()=>{}; usePrompt('ledger');",context);
   assert.equal(context.openedView,'workspace');
   assert.equal(context.sent,0);
   assert.equal(field.focused,true);

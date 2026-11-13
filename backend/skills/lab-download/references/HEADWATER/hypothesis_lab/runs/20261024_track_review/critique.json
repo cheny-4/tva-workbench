@@ -1,0 +1,67 @@
+{
+  "run_id": "20261024_track_review",
+  "role": "critic",
+  "date": "2026-10-24",
+  "prior": "Ledger refreshed from INPUT_RUN_COMPARISON.json plus score_slice.json. Critic recomputed the four-week means from runs/*/heldout_2019_scores.json on the GPU host.",
+  "novelty_check": {
+    "result": "pass",
+    "reasons": [
+      "No experiment replays ONI, Gulf, surface pressure, a valley weight, kernel 9, or patch 2 without a delta.",
+      "E_patch2_soil_residual states the delta: residual inputs. Patch, loss, files, and split stay fixed.",
+      "Spring training is in explicitly_rejected, so H_spring_week_vs_season is not being run under a second cause.",
+      "The ledger row det_v2_soil_rootzone was still marked deferred. INPUT_RUN_COMPARISON.json already scores det_v2_soil. The critic uses the comparison file, not the stale deferred row."
+    ]
+  },
+  "grades": [
+    {
+      "hypothesis_id": "H_soil_is_the_input",
+      "grade": "supported",
+      "notes": "COMPARISON.json det_v2_soil valley mean 0.8413 versus det_v1 0.9301. April 1.1506 remains behind climatology 1.0903."
+    },
+    {
+      "hypothesis_id": "H_neighborhood_to_9",
+      "grade": "supported",
+      "notes": "Recomputed means: k3 0.7957, k9 0.7668. k9 July 1.2597 is worse than climatology 1.2109. k9 precip mean 0.0301 matches the historical-week band. The wider-kernel falsifier has already fired on July and on rain."
+    },
+    {
+      "hypothesis_id": "H_reslim6_trades_valley_for_globe",
+      "grade": "supported",
+      "notes": "Recomputed: valley 1.0154, global temperature 1.5245, against soil global 1.6219. January 0.8482 and October 0.8467 are the valley gap."
+    },
+    {
+      "hypothesis_id": "H_valley_weight_is_not_a_path",
+      "grade": "supported",
+      "notes": "Weight 1 mean 0.9156 at epoch 2, with April 0.7102 and the four-week mean still behind the soil CNN. Weight 0.1 mean 2.1279. The weight did not recover the valley. Do not propose it again."
+    },
+    {
+      "hypothesis_id": "H_patch2_without_soil_residual",
+      "grade": "supported",
+      "notes": "Recomputed valley temperature 1.1235, worse than patch 6 at 1.0154. Precip 0.0283 is a real shift. April temperature 1.3432 is worse than climatology 1.0903. The temperature claim stands. The rain shift does not draw the streak; the maps in the valley report are the evidence for that limit."
+    },
+    {
+      "hypothesis_id": "H_soil_on_patch2_residual",
+      "grade": "underdetermined",
+      "notes": "Named in EXPERIMENT_SUMMARY_20261023.md and not scored. The delta is real. It is one mechanism, not a guarantee. Kill test is the 9x9 bar."
+    },
+    {
+      "hypothesis_id": "H_spring_week_vs_season",
+      "grade": "underdetermined",
+      "notes": "Files exist. No score. A 23-channel train would not test the trunk that left the historical week. Correctly held."
+    }
+  ],
+  "do_not_run": [
+    "X_kernel_wider_than_9",
+    "X_valley_weight_again",
+    "X_patch2_replay",
+    "X_spring_train_now",
+    "X_850_or_daily_conv_next",
+    "X_oni_gulf_ps_replay"
+  ],
+  "kill_tests": [
+    {
+      "experiment_id": "E_patch2_soil_residual",
+      "kills_the_claim_if": "2019 four-week valley temperature mean is not below 0.7668, or January valley temperature is above 0.5969.",
+      "then": "Stop Reslim temperature variants. Keep det_v2_soil_k9 as the valley-temperature model. Rain stays a separate open claim and is not a reason to widen the kernel."
+    }
+  ]
+}

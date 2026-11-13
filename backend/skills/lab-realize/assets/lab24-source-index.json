@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "context": "lab24",
+  "record_date": "2026-10-24",
+  "source_commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+  "pack": "hypothesis_lab/runs/20261024_track_review",
+  "scope": "Dated saved review/result; not a selected current brief, new role execution, human-approval receipt or live job.",
+  "allowlisted_sources": [
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md",
+      "blob_sha": "68e99ded96689e59b44dab4b36ba346f9d6b0afa",
+      "sha256": "c71458796351881229d801ed85e8b67f1cdc75f8722f5287bb30e2ea29d2fcdd",
+      "size": 689,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md"
+    },
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/critique.json",
+      "blob_sha": "102dfa9d023ccb244be1d83efbc9875558ccdfd6",
+      "sha256": "0f22da927547cee31ff8a1574942cb22a8db8b64c114a6ff97c8b6dab203805d",
+      "size": 3453,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/critique.json"
+    },
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/experiments.json",
+      "blob_sha": "6ecd53b8273d17401d7778b513a3a15500292bf0",
+      "sha256": "dd1c62ef5ed2da911e527142d5065f6aecc2566189dcae880765220449bac633",
+      "size": 2604,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/experiments.json"
+    },
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/hypotheses.json",
+      "blob_sha": "5a27245700ea06b54804ab4c44ada741ebcbc280",
+      "sha256": "2e91e1fb99bae0c3d1998194af0bc76411652d9a9148a59ab35992ae86865fd5",
+      "size": 6706,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/hypotheses.json"
+    },
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/referee_brief.md",
+      "blob_sha": "b3a31ae94832c1fa963811eba735ff2a40c69b6e",
+      "sha256": "0a805723601890f29e2411efdc30d5376919170194147f5a7dd3482bb82656c1",
+      "size": 3427,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/referee_brief.md"
+    },
+    {
+      "repo": "HEADWATER",
+      "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+      "path": "hypothesis_lab/runs/20261024_track_review/score_slice.json",
+      "blob_sha": "1496f15a32374bd7746a7086b12e90f50e74acd3",
+      "sha256": "8fb3ad47bff73f99714f325879a3c58ad09b951c7960a9534a125fb202adfaa5",
+      "size": 9541,
+      "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/score_slice.json"
+    }
+  ],
+  "profiles": {
+    "lab24-ledger": "lab.ledger",
+    "lab24-proposer": "lab.design",
+    "lab24-critic": "lab.design",
+    "lab24-referee": "lab.design",
+    "lab24-human": "lab.board",
+    "lab24-evidence": "lab.ledger"
+  },
+  "figure_scope": "Prior four-week CNN/Reslim comparisons are not a map of the 0.955 K soil-residual run.",
+  "human_acceptance_receipt_present": false
+}

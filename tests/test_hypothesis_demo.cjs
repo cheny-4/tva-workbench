@@ -114,6 +114,24 @@ function refreshHarness(provider) {
   instance.init({caseDefinition:definition,projectUrl:suffix=>'/api/vista/projects/'+definition.project+suffix,api:provider});
   return {instance,outputBase,refresh:(next={})=>instance.refresh({project:definition.project,status:{project_found:true},...next})};
 }
+test('project capabilities update without April output reads and survive a case reset, with kebab-case skill aliases',()=>{
+  const containers=Object.fromEntries(['#required-skills','#demo-readiness','#demo-sources'].map(id=>[id,{innerHTML:''}]));
+  const context=vm.createContext({module:{exports:{}},document:{querySelector:selector=>containers[selector]||null}});
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../public/hypothesis-demo.js'),'utf8'),context);
+  const instance=context.module.exports;let outputReads=0;
+  instance.init({caseDefinition:definition,projectUrl:suffix=>'/api/vista/projects/'+definition.project+suffix,api:()=>{outputReads++;throw new Error('Capabilities must not read case outputs');}});
+  const skills={project:definition.project,project_found:true,count:8,skills:definition.requiredSkills.map(skill=>({name:skill.id.replace(/[._]/g,'-')}))};
+  const knowledge={project:definition.project,project_found:true,count:9,ready_count:9,knowledge_bases:definition.sources.map(source=>({ready:true,documents:[{filename:source.paths[0],index_status:'indexed'}]}))};
+  const result=instance.updateCapabilities({project:definition.project,status:{project_found:true},skills,knowledge});
+  assert.equal(result.loaded,8);assert.match(containers['#demo-readiness'].innerHTML,/8 \/ 8 loaded/);assert.match(containers['#demo-readiness'].innerHTML,/9 \/ 9 indexes ready/);
+  assert.equal((containers['#required-skills'].innerHTML.match(/class="demo-badge loaded"/g)||[]).length,8);
+  assert.doesNotMatch(containers['#required-skills'].innerHTML,/Unknown/);
+  instance.reset();assert.equal(outputReads,0);
+  assert.equal((containers['#required-skills'].innerHTML.match(/class="demo-badge loaded"/g)||[]).length,8);
+  instance.updateCapabilities({project:'Other project',status:{project_found:true},skills,knowledge});
+  assert.match(containers['#required-skills'].innerHTML,/Unknown/);assert.doesNotMatch(containers['#required-skills'].innerHTML,/class="demo-badge loaded"/);
+  assert.equal(outputReads,0);
+});
 function researchFixture() {
   const manifest=fixture();
   manifest.research={ledger_file:'records/ledger April.json',proposal_file:'review/proposal.md',critic_file:'review/critic.md',referee_file:'review/referee.md',protocol_file:'review/human protocol.md'};

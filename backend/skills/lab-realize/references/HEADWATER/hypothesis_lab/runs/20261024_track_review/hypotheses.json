@@ -1,0 +1,93 @@
+{
+  "run_id": "20261024_track_review",
+  "charge": "charges/four_week_departure_v1.md",
+  "mode": "supervised_proposer",
+  "focus": "track_review_after_soil_cnn_and_reslim",
+  "prior_pack": "20261018_iter1_april",
+  "hypotheses": [
+    {
+      "id": "H_soil_is_the_input",
+      "status": "already_tested",
+      "claim": "Root-zone soil on the 1x1 trunk is the input that moved the 2019 four-week valley temperature mean, from det_v1 0.930 K to 0.841 K. All-month ONI, Gulf, and a second try at pressure are closed.",
+      "seasons": ["all"],
+      "mechanism": "A valley cell is corrected from its own soil and its own issue-week air. The correction is local.",
+      "citations": [],
+      "ledger_refs": ["det_v1", "det_v2_ps", "det_v2_soil", "det_v2_oni", "det_v2_gulf"],
+      "predicted_signature": "INPUT_RUN_COMPARISON.json det_v2_soil temperature_valley_rmse_mean 0.8413; April still 1.1506 against climatology 1.0903.",
+      "falsifier": "A later single-field run on the same 1x1 trunk beats 0.841 K on the four-week valley mean without a week worse than det_v2_soil.",
+      "blocks_reproposal": true
+    },
+    {
+      "id": "H_neighborhood_to_9",
+      "status": "already_tested",
+      "claim": "A wider local neighborhood on the soil CNN lowers the four-week valley temperature mean through 9 degrees: 0.841 K at 1x1, 0.796 K at 3x3, 0.767 K at 9x9. July is the week that gets worse than the historical week at 9x9.",
+      "seasons": ["all"],
+      "mechanism": "The first convolution sees neighboring degrees. The second stays 1x1, so the receptive field equals the kernel. At 9x9 the cell sees four degrees each way. July shows the cost of mixing the surroundings into the valley cell.",
+      "citations": [],
+      "ledger_refs": ["det_v2_soil", "det_v2_soil_k3", "det_v2_soil_k9"],
+      "predicted_signature": "score_slice det_v2_soil_k9 valley mean 0.7668; July 1.2597 against climatology 1.2109; precip valley mean 0.0301.",
+      "falsifier": "A kernel wider than 9 lowers the four-week mean below 0.767 K without July worse than 1.211 K, and moves April valley rain off the 24 mm reference toward the observed 56 mm.",
+      "blocks_reproposal": true
+    },
+    {
+      "id": "H_reslim6_trades_valley_for_globe",
+      "status": "already_tested",
+      "claim": "Reslim at patch 6, under the global residual loss, improves the global 2019 temperature map and loses the valley. The 6 degree token and a residual that does not see soil cannot make the CNN's local correction.",
+      "seasons": ["January", "October"],
+      "mechanism": "The valley is 40 cells. The loss is the other 64800. The decoder paints one template inside each 6 degree patch.",
+      "citations": [],
+      "ledger_refs": ["det_v2_reslim", "det_v2_soil"],
+      "predicted_signature": "score_slice det_v2_reslim valley mean 1.0154 and global temperature 1.5245, against soil 1x1 valley 0.8413.",
+      "falsifier": "The same patch-6 trunk, with no other change, beats the soil CNN four-week valley mean.",
+      "blocks_reproposal": true
+    },
+    {
+      "id": "H_valley_weight_is_not_a_path",
+      "status": "already_tested",
+      "claim": "Up-weighting the valley in the Reslim loss does not create a 1 degree soil path. Weight 1 can move April and still loses the four-week mean. Weight 0.1 makes three weeks about 2.5 K.",
+      "seasons": ["all"],
+      "mechanism": "The weight changes which error the optimizer sees. It does not give the residual the soil channel.",
+      "citations": [],
+      "ledger_refs": ["det_v2_reslim_valley", "det_v2_reslim_valley01"],
+      "predicted_signature": "score_slice valley-weight-1 mean 0.9156 at epoch 2; weight 0.1 mean 2.1279.",
+      "falsifier": "A valley weight between 0 and 1, with no trunk change, beats the 9x9 four-week mean of 0.767 K.",
+      "blocks_reproposal": true
+    },
+    {
+      "id": "H_patch2_without_soil_residual",
+      "status": "already_tested",
+      "claim": "A 2 degree token, with the same residual that sees only issue-week temperature and precipitation, makes valley temperature worse than the 6 degree token and shifts April rain off the reference without drawing the observed streak.",
+      "seasons": ["all"],
+      "mechanism": "Finer tokens split the valley. They still do not see root-zone soil at 1 degree. The rain shift is a change in the valley mean, not a recovered streak.",
+      "citations": [],
+      "ledger_refs": ["det_v2_reslim_patch2", "det_v2_reslim", "det_v2_soil_k9"],
+      "predicted_signature": "score_slice patch2 valley temperature 1.1235, precip 0.0283; April temperature 1.3432.",
+      "falsifier": "Repeating patch 2 with no residual change beats 0.767 K.",
+      "blocks_reproposal": true
+    },
+    {
+      "id": "H_soil_on_patch2_residual",
+      "status": "planned_in_docs",
+      "claim": "Putting root-zone soil and the static maps on the 1 degree residual, and leaving the patch at 2, gives Reslim the local path the CNN already used. That is the remaining trunk test of whether attention can sit on top of that path.",
+      "seasons": ["all"],
+      "mechanism": "The CNN's gain came from soil at the cell. Every scored Reslim residual omitted that channel. This run adds it and changes nothing else.",
+      "citations": [],
+      "ledger_refs": ["det_v2_reslim_patch2", "det_v2_soil_k9", "trunk_locality_1x1"],
+      "predicted_signature": "2019 four-week valley temperature below 0.7668 K, January at or under 0.5969 K, July no worse than climatology 1.2109 K, April still ahead of 1.0903 K.",
+      "falsifier": "The four-week valley temperature mean is not below 0.767 K, or January is worse than 0.597 K. Then the local soil path on this trunk does not beat the 9x9 CNN, and further Reslim temperature variants stop.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_spring_week_vs_season",
+      "status": "planned_in_docs",
+      "claim": "The files in headwater_examples_spring can tell a 16-22 April miss from a spring-wide miss. They cannot test the 9x9 soil CNN, because they are 23-channel files.",
+      "seasons": ["April"],
+      "mechanism": "The spring cut changes the weeks and keeps the version-1 inputs. A soil channel in the same run would mix the two causes.",
+      "citations": [],
+      "ledger_refs": ["april_cold_week_mechanism"],
+      "predicted_signature": "No 2019 score yet. The question is written in docs/SPRING_SET_PURPOSE.md.",
+      "falsifier": "Neighboring spring weeks depart from their own historical weeks in the same direction as 16-22 April, on a trunk that already leaves the historical week. Until that trunk can read the files, the hypothesis stays open and untested.",
+      "blocks_reproposal": false
+    }
+  ]
+}

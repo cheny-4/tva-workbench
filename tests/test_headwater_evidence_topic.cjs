@@ -10,7 +10,7 @@ function fixture(){
  const container={},calls=[];
  const state={activeContext:'headwater',headwaterEvidenceTopic:'overview'};
  const context=vm.createContext({state,isAprilContext:()=>state.activeContext==='tva',$:()=>container,
-  Water4EnergyWorkflow:{evidenceTopicForRequest:text=>text==='Frontier question'?'data':'overview',renderContextEvidence:(target,options)=>calls.push({target,topic:options.topic})}});
+  renderProjectFigures:()=>{},Water4EnergyWorkflow:{evidenceTopicForRequest:text=>text==='Frontier question'?'data':'overview',renderContextEvidence:(target,options)=>calls.push({target,topic:options.topic})}});
  vm.runInContext(source.slice(start,end),context);
  return {state,context,calls,container};
 }

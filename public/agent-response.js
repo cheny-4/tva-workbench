@@ -48,7 +48,7 @@
     if(firstNewline<1||text[firstNewline+1]!=='\n')return null;
     const question=text.slice(0,firstNewline),details=text.slice(firstNewline+2);
     if(!question.trim())return null;
-    const prefixes=['Water4Energy project — HEADWATER development.',
+    const prefixes=['Water4Energy project — HEADWATER development.','Water4Energy project — Hypothesis lab · 24 October 2026.',
       'Case: 16–22 April 2019, issued 15 April 2019, in Water4Energy-TVA-agent-loop.'];
     if(!prefixes.some(prefix=>details.startsWith(prefix))||!details.includes('\nSaved-evidence answer\n'))return null;
     // Neither part is normalized: the original request can be reconstructed

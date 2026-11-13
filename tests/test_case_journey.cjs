@@ -71,3 +71,19 @@ test('navigation changes only the view, while a case question prepares its expli
   assert.match(f.questions.innerHTML,/data-case-question="runoff"/);
   assert.equal((f.api.welcomeHTML().match(/data-case-question=/g)||[]).length,3);
 });
+test('the installed completed-cycle module owns method rendering and its questions use the separate lab callback',()=>{
+  const calls=[],prepared=[],legacy=[],mount={innerHTML:''},questions={innerHTML:''};
+  const lab={init:settings=>calls.push(['init',settings]),selectStep:id=>{calls.push(['select',id]);return id==='critic';},selectedStep:()=> 'critic',questionRequest:id=>'lab24 request '+id,renderMethod:()=>calls.push(['render'])};
+  let listener;
+  const document={querySelector:s=>s==='#intro-workflow'?mount:s==='#case-question-controls'?questions:null,querySelectorAll:()=>[],addEventListener:(name,fn)=>{listener=fn;}};
+  const context=vm.createContext({module:{exports:{}},document,Water4EnergyLab24:lab});
+  vm.runInContext(source,context);const api=context.module.exports;
+  api.init({guide,caseDefinition:definition,prompts,prepareLabPrompt:text=>prepared.push(text),prepareProjectPrompt:text=>legacy.push(text),preparePrompt:text=>legacy.push(text)});
+  assert.equal(calls[0][0],'init');assert.equal(typeof calls[0][1].prepareQuestion,'function');
+  assert.equal(mount.innerHTML,'','the legacy map must not overwrite the completed-cycle module');
+  assert.equal(api.selectStep('critic'),true);
+  listener({target:{dataset:{},disabled:false,closest(){return this;},hasAttribute:name=>name==='data-intro-prepare'}});
+  assert.deepEqual(prepared,['lab24 request critic']);assert.deepEqual(legacy,[]);
+  const april=api.questionRequest('ledger',{guide,caseDefinition:definition,prompts});
+  assert.match(april,/16–22 April 2019, issued 15 April 2019/);assert.doesNotMatch(april,/lab24/);
+});

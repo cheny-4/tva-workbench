@@ -107,7 +107,7 @@ def main(argv=None, root=ROOT):
         ready = True
     except SetupError as error:
         print('\nBackend setup needs attention: ' + str(error), flush=True)
-        print('Unknown or locally edited projects, global skills, and differing evidence are preserved. Verified v0.13.1 or v0.13.2 demo items may be upgraded with a local backup.', flush=True)
+        print('Unknown or locally edited projects, global skills, and differing evidence are preserved. Verified v0.13.1, v0.13.2 or v0.14.0 backend items may be upgraded with a local backup; interface v0.14.1 uses that same v0.14.0 backend.', flush=True)
         if not args.setup_only:
             print('Opening the interface for review. Live chat and saved figures require successful backend setup.\n', flush=True)
     except KeyboardInterrupt:

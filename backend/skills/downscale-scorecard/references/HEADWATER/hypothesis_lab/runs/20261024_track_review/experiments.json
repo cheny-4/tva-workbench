@@ -1,0 +1,51 @@
+{
+  "run_id": "20261024_track_review",
+  "focus": "track_review_after_soil_cnn_and_reslim",
+  "experiments": [
+    {
+      "id": "E_patch2_soil_residual",
+      "status": "proposed_new",
+      "priority": 1,
+      "hypothesis_ids": ["H_soil_on_patch2_residual"],
+      "title": "Root-zone soil and static maps on the patch-2 residual",
+      "host": "GPU cluster, one GPU",
+      "delta": "Residual inputs. Patch size stays 2. Loss, files, split, and width stay as det_v2_reslim_patch2.",
+      "protocol": [
+        "Same headwater_examples_v1_soil files as det_v2_reslim_patch2.",
+        "Add root-zone soil and the static maps (land-sea mask, orography, land cover, latitude) to the 1 degree residual. The attention trunk does not gain a new field.",
+        "Patch size 2, embed 64, depth 4, 4 heads, keep ratio 0.25, learning rate 0.0001, patience 20, global residual loss, one map per step.",
+        "2018 chooses the epoch. 2019 stays untouched.",
+        "Save as runs/det_v2_reslim_patch2_soilresid. A patch-2 checkpoint does not load into it.",
+        "Do not start this run until the PI accepts the referee brief."
+      ],
+      "success_criterion": "2019 four-week valley temperature mean below 0.767 K; January at or under 0.597 K; July no worse than 1.211 K; April ahead of 1.090 K. Report global temperature RMSE and valley precipitation. April rain is read against the patch-2 mean of 0.0301 m and the observed week.",
+      "requires_human_gate": true
+    }
+  ],
+  "explicitly_rejected": [
+    {
+      "id": "X_kernel_wider_than_9",
+      "reason": "det_v2_soil_k9 already made July worse than the historical week, and rain stayed on the reference. blocks_reproposal."
+    },
+    {
+      "id": "X_valley_weight_again",
+      "reason": "det_v2_reslim_valley and det_v2_reslim_valley01 are scored and retired. blocks_reproposal."
+    },
+    {
+      "id": "X_patch2_replay",
+      "reason": "det_v2_reslim_patch2 is the same trunk without a residual delta. Valley temperature got worse."
+    },
+    {
+      "id": "X_spring_train_now",
+      "reason": "H_spring_week_vs_season stays open. The spring files are 23 channels. Training them now drops the soil channel that produced the 0.767 K result."
+    },
+    {
+      "id": "X_850_or_daily_conv_next",
+      "reason": "850 hPa is the July field and waits on a trunk that can change a valley cell. A daily temporal convolution is a later lever, after the residual score."
+    },
+    {
+      "id": "X_oni_gulf_ps_replay",
+      "reason": "Ledger blocks_reproposal on det_v2_oni, det_v2_gulf, det_v2_ps, and both season masks."
+    }
+  ]
+}

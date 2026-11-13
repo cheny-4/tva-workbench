@@ -44,6 +44,7 @@
     return `<div class="hypothesis-guide-map intro-workflow-map"><svg class="hypothesis-guide-connectors" viewBox="0 0 336 210" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs><marker id="intro-workflow-arrow" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L6 3L0 6Z"/></marker></defs><g marker-end="url(#intro-workflow-arrow)"><path d="M148 32H186"/><path d="M252 58V72"/><path d="M188 98H150"/><path d="M84 124V138"/><path d="M148 164H186"/><path class="hypothesis-guide-return" d="M252 190V204H7V32H18"/></g></svg><div class="hypothesis-guide-nodes" role="group" aria-label="Explore the hypothesis method">${steps.map((s,i)=>`<button type="button" class="hypothesis-guide-node hypothesis-guide-node-${s.id}" data-intro-step="${s.id}" aria-pressed="${s.id===selected}" aria-controls="intro-step-detail" aria-label="${esc(s.title+' — '+s.role)}"><span class="hypothesis-guide-node-number" aria-hidden="true">${i+1}</span><span class="hypothesis-guide-node-copy"><strong>${esc(s.label)}</strong><small>${esc(s.role)}</small></span></button>`).join('')}</div><span class="hypothesis-guide-return-label">Findings return to the ledger</span></div>`;
   }
   function renderStep(){
+    if(global.Water4EnergyLab24?.renderMethod){global.Water4EnergyLab24.renderMethod();return;}
     const guide=options.guide,step=guide?.steps.find(s=>s.id===selected),mount=global.document?.querySelector('#intro-step-detail');
     if(!step||!mount)return;
     global.document.querySelectorAll('[data-intro-step]').forEach(button=>{
@@ -55,6 +56,7 @@
     mount.innerHTML=`<h3>${esc(step.title)}</h3><p>${esc(PROJECT_COPY[selected]||step.description)}</p><p class="intro-case-link">${esc(PROJECT_LINKS[selected])}</p><p class="intro-question">“${esc(options.methodRequest?request?.split('\n')[0]||step.title:step.question)}”</p><button type="button" class="text-button" data-intro-prepare${ready?'':' disabled'}>Try this question in Case Lab ↗</button>`;
   }
   function selectStep(id){
+    if(global.Water4EnergyLab24?.selectStep)return global.Water4EnergyLab24.selectStep(id);
     if(!options.guide?.steps.some(s=>s.id===id))return false;
     selected=id;renderStep();return true;
   }
@@ -70,7 +72,7 @@
     if(target.hasAttribute('data-open-tva-case')){options.openCase?.(target.dataset.openTvaCase||'workspace');return;}
     if(target.dataset.journeyNav){if(VIEWS.has(target.dataset.journeyNav))options.navigate?.(target.dataset.journeyNav);return;}
     if(target.dataset.introStep){selectStep(target.dataset.introStep);return;}
-    if(target.hasAttribute('data-intro-prepare')){const request=options.methodRequest?options.methodRequest(selected):options.guide?.requestFor(selected,options);if(request)(options.prepareProjectPrompt||options.preparePrompt)?.(request);return;}
+    if(target.hasAttribute('data-intro-prepare')){if(global.Water4EnergyLab24){const request=global.Water4EnergyLab24.questionRequest(global.Water4EnergyLab24.selectedStep());if(request)options.prepareLabPrompt?.(request);return;}const request=options.methodRequest?options.methodRequest(selected):options.guide?.requestFor(selected,options);if(request)(options.prepareProjectPrompt||options.preparePrompt)?.(request);return;}
     const request=questionRequest(target.dataset.caseQuestion);if(request)options.preparePrompt?.(request);
   }
   function questionMenuHTML(){return `<details><summary>Questions for this case</summary><div class="case-question-list">${QUESTIONS.map(q=>`<button type="button" data-case-question="${q.id}"${questionRequest(q.id)?'':' disabled'}><strong>${esc(q.question)}</strong><span>${esc(q.hint)}</span></button>`).join('')}</div></details>`;}
@@ -78,7 +80,8 @@
     options=settings;selected='ledger';
     const doc=global.document,mount=doc?.querySelector('#intro-workflow');
     if(!mount||!settings.guide?.steps)return false;
-    mount.innerHTML=workflowHTML(settings.guide.steps);renderStep();
+    if(global.Water4EnergyLab24)global.Water4EnergyLab24.init({prepareQuestion:settings.prepareLabPrompt,navigate:settings.navigate});
+    else {mount.innerHTML=workflowHTML(settings.guide.steps);renderStep();}
     const questions=doc.querySelector('#case-question-controls');if(questions)questions.innerHTML=questionMenuHTML();
     if(!bound){doc.addEventListener('click',dispatch);bound=true;}
     setView('introduction');return true;

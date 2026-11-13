@@ -62,7 +62,7 @@ class ReplayTests(unittest.TestCase):
             name = task.replace('.', '-').replace('_', '-')
             replay = reader(BACKEND / 'skills' / name)
             result = replay.run(task, self.out, 'headwater')
-            if task in ('lab.realize', 'downscale.scorecard'):
+            if task == 'lab.realize':
                 with self.assertRaisesRegex(ValueError, 'April weather/downscale'):
                     replay.compact_readout(result)
                 inspection = replay.readout_filename(task, 'headwater')
@@ -70,12 +70,13 @@ class ReplayTests(unittest.TestCase):
             else:
                 compact = replay.compact_readout(result)
                 inspection = Path(compact['inspection_readout_path']).name
-            self.assertTrue(inspection.startswith('w4e-v0140-headwater-'))
+            self.assertTrue(inspection.startswith(('w4e-v0140-headwater-', 'w4e-v0150-headwater-')))
             self.assertTrue((self.out / inspection).is_file())
             self.assertTrue(all((self.out / Path(path).name).is_file() for path in compact['display_paths']))
         after = fingerprints(self.out)
         self.assertEqual({name: after[name] for name in before}, before)
-        self.assertEqual(len(set(after) - set(before)), 17)
+        self.assertTrue(all(name.startswith(('w4e-v0140-headwater-', 'w4e-v0150-'))
+                            for name in set(after) - set(before)))
         for task in self.reader.TASKS:
             name = task.replace('.', '-').replace('_', '-')
             replay = reader(BACKEND / 'skills' / name)
@@ -239,6 +240,125 @@ class ReplayTests(unittest.TestCase):
         csv_text = (self.out / 'w4e-v0140-headwater-history.csv').read_text()
         self.assertIn('record_date,documented_record,meaning,next_decision,source_urls', csv_text)
         self.assertIn('https://github.com/daliwang/', csv_text)
+
+    def test_original_headwater_narratives_are_byte_identical(self):
+        expected = json.loads((BACKEND / 'tests/headwater-narrative-sha256.json').read_text())
+        for question, digest in expected.items():
+            task = self.reader.HEADWATER_PROFILES[question]
+            answer = self.reader.compact_readout(self.reader.run(task, self.out, 'headwater'), question)
+            self.assertEqual(hashlib.sha256(answer['verified_answer'].encode()).hexdigest(), digest)
+
+    def test_october_profiles_reject_other_contexts_and_readers_before_cli_writes(self):
+        for question, task in self.reader.LAB24_PROFILES.items():
+            self.assertEqual(self.reader.validate_requested_profile(task, 'lab24', question), question)
+            with self.assertRaises(ValueError):
+                self.reader.validate_requested_profile(task, 'headwater', question)
+            with self.assertRaisesRegex(ValueError, 'requires --context lab24'):
+                self.reader.validate_requested_profile(task, 'tva', question)
+        with self.assertRaisesRegex(ValueError, 'matching October 24'):
+            self.reader.validate_requested_profile('lab.ledger', 'lab24', 'lab24-referee')
+        for task, question in [('lab.ledger', 'lab24-referee'), ('lab.design', 'headwater-brief')]:
+            command = [sys.executable, str(BACKEND / 'skills/lab-ledger/scripts/replay.py'),
+                       '--task', task, '--context', 'lab24', '--question', question, '--output', str(self.out)]
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(list(self.out.iterdir()), [])
+
+    def test_october_pack_is_pinned_and_all_role_displays_match_actual_sources(self):
+        pack = BACKEND / 'sources/HEADWATER/hypothesis_lab/runs/20261024_track_review'
+        expected = {'w4e-v0150-lab24-hypotheses.json': 'hypotheses.json',
+                    'w4e-v0150-lab24-critique.json': 'critique.json',
+                    'w4e-v0150-lab24-referee-brief.md': 'referee_brief.md',
+                    'w4e-v0150-lab24-experiments.json': 'experiments.json',
+                    'w4e-v0150-lab24-score-slice.json': 'score_slice.json',
+                    'w4e-v0150-lab24-residual-result.md': 'RESIDUAL_RESULT.md'}
+        for question, task in self.reader.LAB24_PROFILES.items():
+            module = reader(BACKEND / 'skills' / task.replace('.', '-'))
+            answer = module.compact_readout(module.run(task, self.out, 'lab24'), question)
+            self.assertEqual(answer['context'], 'lab24')
+            self.assertEqual(answer['record_date'], '2026-10-24')
+            self.assertEqual(answer['jobs_submitted'], 0)
+            self.assertTrue(answer['display_paths'])
+            self.assertTrue(all((self.out / Path(p).name).is_file() for p in answer['display_paths']))
+            self.assertTrue(all('5ea54ac4dd817ab38c82284331974d6668afde09' in s['url']
+                                for s in answer['source_citations']))
+        for output, source in expected.items():
+            self.assertEqual((self.out / output).read_bytes(), (pack / source).read_bytes())
+            self.assertEqual(self.reader.provenance(self.reader.LAB24_PACK / source)['commit'],
+                             '5ea54ac4dd817ab38c82284331974d6668afde09')
+
+    def test_october_result_and_human_gate_follow_the_source_not_invented_approval(self):
+        result = self.reader.run('lab.ledger', self.out, 'lab24')
+        facts = result['answer_facts']
+        self.assertEqual(facts['residual_result']['heldout_2019']['temperature_valley_rmse_mean'], .9547)
+        self.assertEqual(facts['residual_result']['heldout_2019']['weeks']['2019-01-15']['temperature_valley_rmse'], 1.1029)
+        self.assertFalse(facts['human_acceptance_receipt_present'])
+        self.assertTrue(facts['protocol']['experiments'][0]['requires_human_gate'])
+        self.assertEqual(facts['critique']['novelty_check']['result'], 'pass')
+        evidence = self.reader.compact_readout(result, 'lab24-evidence')['verified_answer']
+        self.assertIn('0.955 K', evidence)
+        self.assertIn('not maps of this 0.955 K soil-residual run', evidence)
+        human = self.reader.compact_readout(self.reader.run('lab.board', self.out, 'lab24'), 'lab24-human')['verified_answer']
+        self.assertIn('does not include a separate human-acceptance receipt', human)
+        self.assertIn('today’s board', human)
+
+    def test_october_answers_are_complete_single_paragraph_readouts(self):
+        values = {}
+        for question, task in self.reader.LAB24_PROFILES.items():
+            value = self.reader.compact_readout(self.reader.run(task, self.out, 'lab24'), question)['verified_answer']
+            values[question] = value
+            self.assertNotIn('\n', value)
+            self.assertIn('24 October 2026', value)
+            self.assertLessEqual(len(value.split()), 150)
+        proposal = values['lab24-proposer']
+        for term in ['data files', 'training/test split', 'loss', 'model width', '2-degree patch size',
+                     'det_v2_reslim_patch2_soilresid', 'human acceptance of the referee brief', 'no approval or job']:
+            self.assertIn(term, proposal.lower())
+        for limit in ['0.767 K', '0.597 K', '1.211 K', '1.090 K', '0.7668 K', '0.5969 K']:
+            self.assertIn(limit, values['lab24-referee'])
+
+    def test_new_contexts_keep_all_original_april_evidence_and_replay_is_stable(self):
+        with zipfile.ZipFile(BACKEND / 'evidence.zip') as archive:
+            archive.extractall(self.out)
+        before = fingerprints(self.out)
+        for task in set(self.reader.LAB24_PROFILES.values()):
+            self.reader.run(task, self.out, 'lab24')
+        self.reader.run('downscale.scorecard', self.out, 'headwater')
+        self.assertEqual({name: fingerprints(self.out)[name] for name in before}, before)
+        all_before = fingerprints(self.out)
+        for task in set(self.reader.LAB24_PROFILES.values()):
+            self.reader.run(task, self.out, 'lab24')
+        self.reader.run('downscale.scorecard', self.out, 'headwater')
+        self.assertEqual(fingerprints(self.out), all_before)
+
+    def test_monthly_refinement_has_separate_units_time_window_and_source_checked_figures(self):
+        result = self.reader.run('downscale.scorecard', self.out, 'headwater')
+        answer = self.reader.compact_readout(result, 'headwater-downscale')
+        self.assertIn('30 days', answer['verified_answer'])
+        self.assertIn('mm/day', answer['verified_answer'])
+        self.assertIn('not the frozen Trial 0', answer['verified_answer'])
+        self.assertIn('not the weekly mean', answer['verified_answer'])
+        self.assertFalse((self.out / self.reader.MANIFEST).exists())
+        self.assertEqual(len(answer['display_paths']), 2)
+        self.assertTrue(all(path.endswith('.png') for path in answer['display_paths']))
+        self.assertEqual(answer['source_json_path'], '/mnt/data/output/w4e-v0150-monthly-figures-source.json')
+        self.assertEqual(answer['source_json_sha256'],
+                         hashlib.sha256((self.out / Path(answer['source_json_path']).name).read_bytes()).hexdigest())
+        source = json.loads((self.out / 'w4e-v0150-monthly-figures-source.json').read_text())
+        self.assertEqual(len(source['files']), 2)
+        self.assertTrue(all(row['scope'] == 'april_2019_month_30_days' for row in source['files']))
+        for row in source['files']:
+            data = (self.out / row['output_file']).read_bytes()
+            self.assertEqual(hashlib.sha256(data).hexdigest(), row['sha256'])
+        self.assertTrue(all('d0199a817ddbfa0fbf65c9e81d9fcc53081611ee' in c['url'] for c in answer['source_citations']))
+
+    def test_tampered_october_source_is_refused_before_display(self):
+        copied = Path(self.temporary.name) / 'lab-design'
+        shutil.copytree(BACKEND / 'skills/lab-design', copied)
+        (copied / 'references/HEADWATER/hypothesis_lab/runs/20261024_track_review/critique.json').write_text('{}')
+        with self.assertRaisesRegex(ValueError, 'Source hash mismatch'):
+            reader(copied).run('lab.design', self.out, 'lab24')
+        self.assertFalse((self.out / 'w4e-v0150-lab24-critique.json').exists())
 
 
 if __name__ == '__main__':

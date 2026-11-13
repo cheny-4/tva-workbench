@@ -23,7 +23,15 @@ HEADWATER_PROFILES = {
     'headwater-data': 'lab.download', 'headwater-board': 'lab.board',
     'headwater-score': 'lab.ledger', 'headwater-history': 'lab.ledger',
     'headwater-commands': 'lab.show_command', 'headwater-literature': 'lab.literature',
+    'headwater-downscale': 'downscale.scorecard',
 }
+LAB24_PROFILES = {
+    'lab24-ledger': 'lab.ledger', 'lab24-proposer': 'lab.design',
+    'lab24-critic': 'lab.design', 'lab24-referee': 'lab.design',
+    'lab24-human': 'lab.board', 'lab24-evidence': 'lab.ledger',
+}
+LAB24_PACK = HW / 'hypothesis_lab/runs/20261024_track_review'
+SUPPLIED = SOURCES / 'water4energy_SC26Demo'
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -45,7 +53,9 @@ def write_json(path, value):
     return write_bytes(path, (json.dumps(value, indent=2, ensure_ascii=False) + '\n').encode('utf-8'))
 
 def readout_filename(task, context):
-    prefix = 'w4e-v0140-headwater-' if context == 'headwater' else 'w4e-v0132-'
+    prefix = {'headwater': 'w4e-v0140-headwater-', 'lab24': 'w4e-v0150-lab24-'}.get(context, 'w4e-v0132-')
+    if context == 'headwater' and task == 'downscale.scorecard':
+        prefix = 'w4e-v0150-headwater-'
     return prefix + task.replace('.', '-') + '-readout.json'
 
 def provenance(path):
@@ -60,6 +70,24 @@ def provenance(path):
     return record
 
 def stage_research(out, context='tva'):
+    if context == 'lab24':
+        files = {
+            'ledger_file': ('score-slice.json', 'score_slice.json'),
+            'proposal_file': ('hypotheses.json', 'hypotheses.json'),
+            'critic_file': ('critique.json', 'critique.json'),
+            'referee_file': ('referee-brief.md', 'referee_brief.md'),
+            'protocol_file': ('experiments.json', 'experiments.json'),
+            'result_file': ('residual-result.md', 'RESIDUAL_RESULT.md'),
+        }
+        research = {}
+        for key, (suffix, original) in files.items():
+            source = LAB24_PACK / original
+            provenance(source)
+            name = 'w4e-v0150-lab24-' + suffix
+            copy_stable(source, out / name)
+            research[key] = name
+        write_json(out / 'w4e-v0150-lab24-source-index.json', load(ROOT / 'assets/lab24-source-index.json'))
+        return research
     if context == 'headwater':
         pack = HW / 'hypothesis_lab/runs/20261106_second_model'
         files = {
@@ -72,7 +100,7 @@ def stage_research(out, context='tva'):
         for name, source in files.items():
             provenance(source)
             copy_stable(source, out / name)
-        write_json(out / 'w4e-v0140-headwater-source-provenance.json', load(ROOT / 'source-provenance.json'))
+        write_json(out / 'w4e-v0140-headwater-source-provenance.json', load(ROOT / 'legacy-source-provenance.json'))
         return {'ledger_file': 'w4e-v0140-headwater-experiment-ledger.json',
                 'proposal_file': 'w4e-v0140-headwater-proposer.json',
                 'critic_file': 'w4e-v0140-headwater-critic.json',
@@ -88,7 +116,8 @@ def stage_research(out, context='tva'):
     for name, source in files.items():
         provenance(source)
         copy_stable(source, out / name)
-    write_json(out / 'w4e-source-provenance.json', load(ROOT / 'source-provenance.json'))
+    # The original April evidence is immutable across additive source upgrades.
+    write_json(out / 'w4e-source-provenance.json', load(ROOT / 'legacy-source-provenance.json'))
     return {'ledger_file': 'experiment_ledger.json', 'proposal_file': 'proposer_brief.md',
             'critic_file': 'critique.json', 'referee_file': 'referee_brief.md',
             'protocol_file': 'experiments.json'}
@@ -231,7 +260,8 @@ def headwater_facts(task):
 def headwater_profile(task, question=None):
     default = {'lab.ledger': 'headwater-ledger', 'lab.design': 'headwater-brief',
                'lab.download': 'headwater-data', 'lab.board': 'headwater-board',
-               'lab.show_command': 'headwater-commands', 'lab.literature': 'headwater-literature'}
+               'lab.show_command': 'headwater-commands', 'lab.literature': 'headwater-literature',
+               'downscale.scorecard': 'headwater-downscale'}
     topic = question or default.get(task)
     if topic not in HEADWATER_PROFILES or HEADWATER_PROFILES[topic] != task:
         raise ValueError('Use the matching HEADWATER question profile and reader. April weather/downscale evidence belongs to the TVA case.')
@@ -240,6 +270,10 @@ def headwater_profile(task, question=None):
 def validate_requested_profile(task, context, question):
     if context == 'headwater':
         return headwater_profile(task, question)
+    if context == 'lab24':
+        return lab24_profile(task, question)
+    if question and question.startswith('lab24-'):
+        raise ValueError('An October 24 profile requires --context lab24.')
     if question and question.startswith('headwater-'):
         raise ValueError('A HEADWATER question profile requires --context headwater, not the TVA case.')
     return question
@@ -269,6 +303,131 @@ def history_csv(story):
         writer.writerow([row['date'], row['record'], row['meaning'], row['next_decision'],
                          ' '.join(source['url'] for source in row['sources'])])
     return stream.getvalue()
+
+def lab24_profile(task, question=None):
+    default = {'lab.ledger': 'lab24-ledger', 'lab.design': 'lab24-proposer', 'lab.board': 'lab24-human'}
+    topic = question or default.get(task)
+    if topic not in LAB24_PROFILES or LAB24_PROFILES[topic] != task:
+        raise ValueError('Use the matching October 24 question profile and reader with --context lab24.')
+    return topic
+
+def supplied_figures(out, group):
+    names = {
+        'score': ['tva_t2m_2019_reslim.png', 'tva_precip_2019_reslim.png'],
+        'cnn': ['valley_temperature_2019.png'],
+        'monthly': ['april_2019_tmax_refine.png', 'april_2019_prcp_refine.png'],
+    }[group]
+    index = load(ROOT / 'assets/dali-figures-provenance.json')
+    entries = []
+    displays = []
+    for name in names:
+        entry = next(row for row in index['files'] if row['filename'] == name)
+        source = SUPPLIED / entry['source_path']
+        record = provenance(source)
+        if record['sha256'] != entry['sha256'] or record['commit'] != index['source_commit']:
+            raise ValueError('Supplied figure provenance does not match the pinned source: ' + name)
+        output = 'w4e-v0150-' + name.replace('_', '-')
+        copy_stable(source, out / output)
+        entries.append({**entry, 'output_file': output, 'source_material': record})
+        displays.append(output)
+    backing = 'w4e-v0150-' + group + '-figures-source.json'
+    scope = ('April 2019 monthly statistics across 30 days. Daily maximum temperature in degrees Celsius; '
+             'precipitation in mm/day. Deterministic 1 degree to 1/24 degree refinement, not the weekly Trial 0 contract; '
+             'no demonstrated HEADWATER forecast handoff.' if group == 'monthly' else
+             'Four saved 2019 test weeks. Temperature maps show air temperature, not RMSE. Rain maps show weekly totals. '
+             'These are prior model comparisons, not a map of the October 24 soil-residual run with 0.955 K error.')
+    write_json(out / backing, {'schema_version': 1, 'source_kind': index['source_kind'],
+               'source_repository': index['source_repository'], 'source_commit': index['source_commit'],
+               'scope': scope, 'files': entries, 'scientific_arrays_in_bundle': False,
+               'new_inference': False, 'new_scoring': False})
+    return displays + [backing]
+
+def lab24_facts():
+    protocol = load(LAB24_PACK / 'experiments.json')
+    critique = load(LAB24_PACK / 'critique.json')
+    scores = load(LAB24_PACK / 'score_slice.json')
+    residual = next(row for row in scores['runs'] if row['id'] == 'det_v2_reslim_patch2_soilresid')
+    return {'context': 'lab24', 'record_date': '2026-10-24', 'saved_review_folder': '20261024_track_review',
+            'scope': 'Dated retrospective, not a current selected brief or a newly executed role.',
+            'protocol': protocol, 'critique': critique, 'score_slice': scores, 'residual_result': residual,
+            'human_acceptance_receipt_present': False, 'jobs_submitted': 0,
+            'date_note': '24 October is the saved review/result record date, not an independently verified scheduler timestamp.'}
+
+def compact_lab24(result, question=None):
+    topic = lab24_profile(result['contract_id'], question)
+    names = result['research_files']
+    if topic == 'lab24-ledger':
+        text = ('The saved 24 October 2026 review starts from earlier results. A soil-input model had about 0.841 degrees '
+                'Celsius valley temperature error; its wider 9×9 local view reached about 0.767 degrees Celsius across '
+                'four 2019 test weeks. Lower error is better; these are errors, not actual temperatures. July and rain '
+                'still showed weaknesses, while other tested directions were closed. The next proposal therefore needed '
+                'one stated change rather than an unchanged repeat. The accompanying map compares earlier CNN '
+                'neighborhood sizes, not the later soil-residual experiment. This dated retrospective is not the current '
+                'brief or permission for a new job.')
+        sources = [LAB24_PACK / 'score_slice.json', LAB24_PACK / 'referee_brief.md']
+        displays = [names['ledger_file'], *result['cnn_display_files']]
+    elif topic == 'lab24-proposer':
+        text = ('The saved 24 October 2026 proposal required human acceptance of the referee brief before training; '
+                'reading it creates no approval or job. Its one change was adding soil water and static landscape '
+                'information to the local correction, or residual, of the 2-degree Reslim model. Data files, '
+                'training/test split, loss, model width and 2-degree patch size stayed fixed. The proposed run was '
+                'det_v2_reslim_patch2_soilresid.')
+        sources = [LAB24_PACK / 'hypotheses.json', LAB24_PACK / 'experiments.json']
+        displays = [names['proposal_file'], names['protocol_file']]
+    elif topic == 'lab24-critic':
+        text = ('The saved critic passed novelty on 24 October 2026 because the proposal changed the correction’s '
+                'inputs while keeping the patch size, loss, files and split fixed. It differed from earlier Reslim '
+                'tests. The critic still called the idea underdetermined: a real change is not proof of improvement. '
+                'Unchanged repeats of earlier index, pressure, weighting and neighborhood experiments were rejected. '
+                'The stopping rule would decide whether this changed test qualified. This is the stored October '
+                'assessment, not a newly executed critic, current project decision or approval for training. '
+                'A person remains responsible for any future execution.')
+        sources = [LAB24_PACK / 'critique.json', LAB24_PACK / 'experiments.json']
+        displays = [names['critic_file']]
+    elif topic == 'lab24-referee':
+        text = ('The 24 October 2026 referee recommended one soil-input correction test and wrote its stopping rule '
+                'before seeing the result. Four-week valley temperature error had to be below 0.767 K, January at '
+                'or below 0.597 K, July no worse than 1.211 K, and April better than 1.090 K. Lower error is better; '
+                'these are errors across selected 2019 weeks, not actual temperatures. The critic records the first '
+                'two limits more precisely as 0.7668 K and 0.5969 K. Missing the four-week or January limit would '
+                'stop this Reslim temperature direction and retain the 9×9 soil model. This historical recommendation '
+                'did not start training and is not current approval.')
+        sources = [LAB24_PACK / 'referee_brief.md', LAB24_PACK / 'critique.json']
+        displays = [names['referee_file']]
+    elif topic == 'lab24-human':
+        text = ('The 24 October 2026 experiment required the principal investigator to accept the referee brief before '
+                'that one soil-residual run could start. A recommendation alone did not launch training or set a flag. '
+                'The later saved result documents scored work, but the pack does not include a separate '
+                'human-acceptance receipt or verified approval timestamp. We should describe the required gate without '
+                'inventing a sign-off. Opening a card or sending this question only reads the historical evidence. '
+                'It authorizes no new experiment and does not change today’s board, training flags or selected brief. '
+                'A person approves any future execution.')
+        sources = [LAB24_PACK / 'experiments.json', LAB24_PACK / 'referee_brief.md', LAB24_PACK / 'RESIDUAL_RESULT.md']
+        displays = [names['protocol_file'], names['referee_file']]
+    else:
+        text = ('The saved 24 October 2026 result reports 0.955 K four-week valley temperature error and 1.103 K '
+                'January error, missing the 0.767 K and 0.597 K limits. Lower error is better. The stopping rule '
+                'fired: this Reslim temperature direction stopped, while the 9×9 soil model remained the valley model. '
+                'April and July improvements did not overturn the failed tests. Exact saved values are 0.9547 K '
+                'overall and 1.1029 K for January across the selected 2019 weeks. The accompanying prior comparison '
+                'maps are not maps of this 0.955 K soil-residual run. This historical result creates no new score, '
+                'review, job or current approval.')
+        sources = [LAB24_PACK / 'RESIDUAL_RESULT.md', LAB24_PACK / 'score_slice.json', LAB24_PACK / 'referee_brief.md']
+        displays = [names['result_file'], *result['score_display_files']]
+    titles = {'score_slice.json': 'Recorded experiment scores — 24 October 2026',
+              'hypotheses.json': 'Proposer ideas — 24 October 2026',
+              'experiments.json': 'One-change experiment and human gate — 24 October 2026',
+              'critique.json': 'Critic review — 24 October 2026',
+              'referee_brief.md': 'Referee brief and stopping rule — 24 October 2026',
+              'RESIDUAL_RESULT.md': 'Recorded result and decision — 24 October 2026'}
+    refs = [source_ref(path) for path in sources]
+    return {'mode': 'deterministic saved-evidence readout; not a new scientific result',
+            'context': 'lab24', 'topic': topic, 'record_date': '2026-10-24', 'verified_answer': text,
+            'display_paths': ['/mnt/data/output/' + name for name in displays], 'source_paths': refs,
+            'source_citations': [{'title': titles[path.name], 'url': ref['url']} for path, ref in zip(sources, refs)],
+            'inspection_readout_path': '/mnt/data/output/' + readout_filename(result['contract_id'], 'lab24'),
+            'must_not_infer': 'Dated retrospective only. No newly executed role, current brief, approval receipt, job or coupled pipeline is established. The prior comparison maps are not the 0.955 K residual result.',
+            'jobs_submitted': 0}
 
 def compact_headwater(result, question=None):
     topic = headwater_profile(result['contract_id'], question)
@@ -334,6 +493,9 @@ def compact_headwater(result, question=None):
                 'to the stored week. For that April illustration, observed rain is 55.9 mm, the stored week is 24.4 mm, '
                 'and the 9×9 map is 24.7 mm. The temperature improvement does not establish that all weather problems are solved. '
                 'No new score is calculated here.')
+        displays = result['score_display_files']
+        sources += [SUPPLIED / 'Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png',
+                    SUPPLIED / 'Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png']
     elif topic == 'headwater-history':
         story = result['answer_facts']['story']
         text = ('These dates identify documents, not training start or completion times. The development history in 2026 is '
@@ -348,6 +510,21 @@ def compact_headwater(result, question=None):
                 'does not create a new scientific conclusion, selected experiment or job.')
         sources = [inventory, ledger, review / 'experiments.json', review / 'referee_brief.md', actions]
         displays = ['w4e-v0140-headwater-history.csv']
+    elif topic == 'headwater-downscale':
+        text = ('These supplied figures are a separate downscaling example for the whole month of April 2019: '
+                '30 days, rather than the 16–22 April case week. They compare a deterministic 1-degree field refined '
+                'to 1/24 degree, about 4 kilometers, with Daymet/ERA5. The right column shows the difference.\n\n'
+                'The temperature figure describes daily maximum temperature, not the weekly mean 2-meter temperature '
+                'used in the HEADWATER case. Its top row is the monthly mean and its bottom row the daily 95th percentile. '
+                'The precipitation figure uses the same layout, with values in mm/day. Those daily-rate statistics are '
+                'different from the April case’s weekly rainfall totals.\n\n'
+                'Dali supplied these recorded figures as Haoran’s refinement example. They are not the frozen Trial 0 '
+                '1-degree to 0.25-degree comparison, a new forecast, or evidence that the HEADWATER forecast and this '
+                'downscaler already form one pipeline. No training, refinement or new scoring is run here.')
+        sources = [SUPPLIED / 'Water4Energy_workbench.md',
+                   SUPPLIED / 'Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png',
+                   SUPPLIED / 'Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png']
+        displays = result['display_files']
     elif topic == 'headwater-commands':
         text = ('The supplied Lux training recipe can be read as an existing command reference. Its presence does not establish '
                 'the exact command that produced the H100 result. The selected next HEADWATER brief is not established by '
@@ -370,6 +547,11 @@ def compact_headwater(result, question=None):
         str(review / 'hypotheses.json'): 'Proposer record — 6 November 2026',
         str(review / 'critique.json'): 'Critic record — 6 November 2026',
         str(review / 'referee_brief.md'): 'Referee record — 6 November 2026',
+        str(SUPPLIED / 'Water4Energy_workbench.md'): 'Supplied refinement scope and narration — 12 November 2026',
+        str(SUPPLIED / 'Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png'): 'Four-week temperature comparison — supplied figure',
+        str(SUPPLIED / 'Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png'): 'Four-week precipitation comparison — supplied figure',
+        str(SUPPLIED / 'Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png'): 'April 2019 monthly maximum-temperature refinement — supplied figure',
+        str(SUPPLIED / 'Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png'): 'April 2019 monthly precipitation refinement — supplied figure',
     }
     refs = [source_ref(path) for path in sources]
     return {'mode': 'deterministic saved-evidence readout; not a new scientific result', 'context': 'headwater',
@@ -377,6 +559,8 @@ def compact_headwater(result, question=None):
             'display_paths': ['/mnt/data/output/' + name for name in displays], 'source_paths': refs,
             'source_citations': [{'title': titles.get(str(path), path.name), 'url': ref['url']} for path, ref in zip(sources, refs)],
             'inspection_readout_path': '/mnt/data/output/' + readout_filename(result['contract_id'], 'headwater'),
+            **({'source_json_path': result['source_json_path'], 'source_json_sha256': result['source_json_sha256']}
+               if topic == 'headwater-downscale' else {}),
             'must_not_infer': 'Quote this saved readout faithfully. Do not select a current brief, infer permission from flags, confuse record dates with execution dates, or substitute April mode for HEADWATER development.',
             'jobs_submitted': 0}
 
@@ -512,8 +696,12 @@ def compact_readout(result, question=None):
     Keeping obsolete raw review paragraphs out of stdout prevents them from
     drowning out the later source record that completes the same measurement.
     """
+    if result['context'] == 'lab24':
+        return compact_lab24(result, question)
     if result['context'] == 'headwater':
         return compact_headwater(result, question)
+    if question and question.startswith('lab24-'):
+        raise ValueError('An October 24 profile requires --context lab24.')
     if question and question.startswith('headwater-'):
         raise ValueError('A HEADWATER profile requires the HEADWATER context.')
     task = result['contract_id']
@@ -630,13 +818,32 @@ def compact_readout(result, question=None):
             'jobs_submitted': 0}
 
 def run(task, out, context='tva'):
+    if context not in ('tva', 'headwater', 'lab24'):
+        raise ValueError('Unknown workbench context.')
+    if context == 'lab24':
+        lab24_profile(task)
     out.mkdir(parents=True, exist_ok=True)
     research = stage_research(out, context)
+    if context == 'lab24':
+        result = {'answer_facts': lab24_facts(), 'research_files': research,
+                  'score_display_files': supplied_figures(out, 'score'),
+                  'cnn_display_files': supplied_figures(out, 'cnn'),
+                  'contract_id': task, 'context': 'lab24', 'case': None,
+                  'record_date': '2026-10-24', 'reader_version': '0.15.0',
+                  'mode': 'saved-file replay; dated October 24 retrospective', 'jobs_submitted': 0}
+        write_json(out / readout_filename(task, context), result)
+        return result
     if context == 'headwater':
         write_bytes(out / 'w4e-v0140-headwater-history.md', history_markdown(headwater_story()).encode('utf-8'))
         write_bytes(out / 'w4e-v0140-headwater-history.csv', history_csv(headwater_story()).encode('utf-8'))
         write_json(out / 'w4e-v0140-headwater-history.json', headwater_story())
-    if task == 'lab.realize':
+    if task == 'downscale.scorecard' and context == 'headwater':
+        files = supplied_figures(out, 'monthly')
+        source_json = files.pop()
+        result = {'display_files': files, 'source_json_path': '/mnt/data/output/' + source_json,
+                  'source_json_sha256': hashlib.sha256((out / source_json).read_bytes()).hexdigest(), 'new_training': False,
+                  'scope': 'Separate April 2019 monthly 30-day refinement, not the fixed April week or Trial 0.'}
+    elif task == 'lab.realize':
         result = realization(out)
     elif task == 'downscale.scorecard':
         result = downscale(out)
@@ -693,11 +900,13 @@ def run(task, out, context='tva'):
         result = {'source': provenance(source), 'existing_command_file': read(source), 'executed': False,
             'trial0_command': None, 'missing': 'The exact original Trial 0 scoring command is not in this staged bundle; do not invent one.',
             'display_files': [readout_filename(task, context)]}
+    if context == 'headwater' and task == 'lab.ledger':
+        result['score_display_files'] = supplied_figures(out, 'score')
     result = {'answer_facts': answer_facts(task, context), **result}
     result['display_paths'] = ['/mnt/data/output/' + name for name in result.get('display_files', [])]
     result.update({'contract_id': task, 'case': CASE if context == 'tva' else None, 'context': context,
                    'mode': 'saved-file replay', 'jobs_submitted': 0,
-                   'reader_version': '0.13.2' if context == 'tva' else '0.14.0'})
+                   'reader_version': '0.13.2' if context == 'tva' else ('0.15.0' if task == 'downscale.scorecard' else '0.14.0')})
     write_json(out / readout_filename(task, context), result)
     return result
 
@@ -705,8 +914,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--task', required=True, choices=TASKS)
     parser.add_argument('--output', type=Path, default=Path('/mnt/data/output'))
-    parser.add_argument('--context', choices=['headwater', 'tva'], required=True)
-    parser.add_argument('--question', choices=['ledger', 'weather', 'runoff', 'downscale', 'design', 'commands', 'board', 'literature', 'download', 'purpose', *HEADWATER_PROFILES])
+    parser.add_argument('--context', choices=['headwater', 'tva', 'lab24'], required=True)
+    parser.add_argument('--question', choices=['ledger', 'weather', 'runoff', 'downscale', 'design', 'commands', 'board', 'literature', 'download', 'purpose', *HEADWATER_PROFILES, *LAB24_PROFILES])
     args = parser.parse_args()
     validate_requested_profile(args.task, args.context, args.question)
     result = run(args.task, args.output, args.context)

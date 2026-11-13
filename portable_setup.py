@@ -17,7 +17,7 @@ PROJECT = 'Water4Energy-TVA-agent-loop'
 SLUG = 'water4energy-tva-demo-2019'
 SKILLS = {'lab-literature', 'lab-download', 'lab-ledger', 'lab-board',
           'lab-design', 'lab-show-command', 'lab-realize', 'downscale-scorecard'}
-VERSION = '0.14.1'
+VERSION = '0.15.0'
 
 
 class SetupError(RuntimeError):
@@ -254,6 +254,27 @@ print('W4E_SKILL_PREFLIGHT_OK')
             finally:
                 if temporary.exists():
                     temporary.unlink()
+        # A resumed upgrade must still have complete, valid originals for
+        # every remaining old skill. Validate the entire existing archive too:
+        # a damaged backup is not permission to continue replacing files.
+        try:
+            with zipfile.ZipFile(backup) as archive:
+                entries = archive.namelist()
+                if len(entries) != len(set(entries)):
+                    raise SetupError('The original skill backup contains duplicate files.')
+                backed_up = {}
+                for key in entries:
+                    name, relative = key.split('/', 1)
+                    original = migration['skills'].get(name, {}).get('files', {})
+                    if relative not in original or digest(archive.read(key)) != original[relative]:
+                        raise SetupError('The original skill backup failed verification: ' + key)
+                    backed_up.setdefault(name, set()).add(relative)
+                if any(files != set(migration['skills'][name]['files']) for name, files in backed_up.items()):
+                    raise SetupError('The original skill backup is incomplete.')
+                if not set(skills).issubset(backed_up):
+                    raise SetupError('The original skill backup does not contain every skill still needing an upgrade.')
+        except (ValueError, OSError, zipfile.BadZipFile) as error:
+            raise SetupError('The original skill backup could not be verified. It was preserved.') from error
         snapshot = target / 'original-project-and-skills.json'
         if not snapshot.exists():
             snapshot.write_text(json.dumps({'project': project, 'skills': skills, 'version': migration['version']}, indent=2) + '\n', encoding='utf-8')

@@ -12,7 +12,7 @@ const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;})
 
 function fixture(){
  const initial=deferred(),artifacts=deferred(),artifactEntered=deferred();
- const effects={watchers:[],busy:[],guideEvents:[],evidenceTopics:[],visible:'Current transcript',artifactReads:0};
+ const effects={watchers:[],busy:[],guideEvents:[],evidenceTopics:[],lab24EvidenceTopics:[],visible:'Current transcript',artifactReads:0};
  const state={sessionId:first,activeContext:'tva',contextRevision:0,config:{project:'Water4Energy-TVA-agent-loop',backend_url:'http://127.0.0.1:8790'}};
  const context=vm.createContext({
   state,
@@ -22,6 +22,7 @@ function fixture(){
   api:()=>initial.promise,projectUrl:suffix=>'/projects/'+state.config.project+suffix,
   rememberSession:()=>{},messagesFromHistory:()=>[{role:'agent',text:'First session transcript'}],
   refreshHeadwaterEvidence:prompt=>effects.evidenceTopics.push(prompt),
+  refreshLab24Evidence:prompt=>effects.lab24EvidenceTopics.push(prompt),
   $:()=>({replaceChildren:()=>{effects.visible='';}}),
   addMessage:(role,text)=>{effects.visible+=text;},showWelcome:()=>{effects.visible='Welcome';},
   resetActivity:()=>{},addActivity:()=>{},
@@ -65,10 +66,11 @@ test('an old artifact read cannot start a watcher after the session or backend c
 
 
 test('a late session GET cannot overwrite a different case or a returned context with a newer epoch',{timeout:2000},async()=>{
- for(const change of ['case','epoch']){
+ for(const change of ['case','lab24','epoch']){
   const f=fixture();
   const pending=f.context.loadSession(first,true);
   if(change==='case')f.state.activeContext='headwater';
+  if(change==='lab24')f.state.activeContext='lab24';
   // An epoch change also covers TVA → HEADWATER → TVA with the same saved id.
   f.state.contextRevision++;
   f.effects.visible='New context transcript';
@@ -81,11 +83,12 @@ test('a late session GET cannot overwrite a different case or a returned context
 });
 
 test('a late artifact read cannot reconnect a watcher after the active case or context epoch changes',{timeout:2000},async()=>{
- for(const change of ['case','epoch']){
+ for(const change of ['case','lab24','epoch']){
   const f=fixture();
   const pending=f.context.loadSession(first,true);
   f.initial.resolve(saved);await f.artifactEntered.promise;
   if(change==='case')f.state.activeContext='headwater';
+  if(change==='lab24')f.state.activeContext='lab24';
   f.state.contextRevision++;
   f.effects.visible='New context transcript';
   f.artifacts.resolve();await pending;
@@ -115,6 +118,20 @@ test('HEADWATER history restores evidence for the latest user question only afte
  const old=stale.context.loadSession(first,true);stale.state.contextRevision++;
  stale.initial.resolve({...saved,run_status:'done'});await old;
  assert.deepEqual(stale.effects.evidenceTopics,[]);
+});
+
+test('October history restores only its own latest question and cannot replay events into the April guide',{timeout:2000},async()=>{
+ const f=fixture();f.state.activeContext='lab24';
+ f.context.messagesFromHistory=()=>[{role:'user',text:'Earlier October question'},{role:'agent',text:'Saved answer'},{role:'user',text:'Latest October question'}];
+ const pending=f.context.loadSession(first,true);
+ f.initial.resolve({...saved,run_status:'done',run_events:[{event:'function_tool_call',data:{part:{tool_name:'lab.design'}}}]});
+ await f.artifactEntered.promise;f.artifacts.resolve();await pending;
+ assert.deepEqual(f.effects.lab24EvidenceTopics,['Latest October question']);
+ assert.deepEqual(f.effects.evidenceTopics,[]);assert.deepEqual(f.effects.guideEvents,[]);
+ const stale=fixture();stale.state.activeContext='lab24';
+ const old=stale.context.loadSession(first,true);stale.state.activeContext='headwater';stale.state.contextRevision++;
+ stale.initial.resolve({...saved,run_status:'done'});await old;
+ assert.deepEqual(stale.effects.lab24EvidenceTopics,[]);assert.deepEqual(stale.effects.evidenceTopics,[]);
 });
 
 

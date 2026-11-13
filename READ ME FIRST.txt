@@ -1,74 +1,65 @@
 Water4Energy workbench — combined Mac package 1
-Interface v0.14.1
+Interface v0.15.0
 
 Send this single ZIP to Dali. There is no second setup download.
 
 1. Extract the complete ZIP into a writable folder on the Mac.
 2. Double-click Start TVA Workbench.command inside TVA-Workbench.
-3. Keep Terminal and VISTA open while using the workbench.
+3. Keep Terminal and VISTA open. Use the local address printed by this copy.
 
-The first launch opens installed VISTA, imports the Water4Energy project and its
-eight replay skills, uploads/indexes the six original source documents plus the
-two source-grounded guides for the April case and HEADWATER development, loads the saved April
-figures, and opens the webpage. Indexing may take a few minutes. Later launches
-verify and reuse matching items; they do not create duplicate projects or
-overwrite different existing projects, skills, or results. Recognized v0.13.1 and v0.13.2
-demo installations are upgraded automatically after verification and a local
-backup. Locally edited or shared skills are preserved and reported for review.
+Dali needs VISTA installed and his own model/provider credentials configured in
+VISTA Settings. VISTA normally supplies Python; otherwise Python 3.9+ is needed.
+No GitHub login, npm or pip commands are required. VISTA itself is a separate
+application and is not redistributed in this ZIP.
 
-For live chat, Dali needs VISTA installed and his own model/provider credentials
-configured in VISTA Settings. An existing VISTA installation supplies Python;
-otherwise Python 3.9+ is required to open the interface. No npm or pip commands
-are needed. VISTA itself is a separate application and is not redistributed in
-this ZIP. If VISTA is missing or setup needs attention, Terminal explains the
-next step and the webpage still opens for design review. Correct the issue and
-run the same launcher again.
+The launcher opens installed VISTA if needed, loads eight saved-evidence skills,
+indexes nine documents and verifies 32 original April evidence files. Later
+questions can create additional source-checked displays. Indexing may take a few
+minutes. Matching installations are reused without duplicates. Known v0.13.1,
+v0.13.2 and v0.14.0 backend items can be verified, backed up and upgraded;
+interface v0.14.1 used that same v0.14.0 backend. Unknown local edits, shared
+skills and differing results are preserved and reported.
 
-VISTA normally uses http://127.0.0.1:8001. For a nonstandard VISTA installation,
-Terminal users can set W4E_VISTA_INSTALL to its package directory and/or run:
+If port 8765 is occupied, this copy uses another local port. Reopen the printed
+address instead of an older saved tab. Ctrl+C stops the workbench; VISTA remains
+under its application's control. If setup needs attention, Terminal explains it
+and the webpage can still open for design review. Correct the issue and rerun
+the same launcher.
+
+For a nonstandard installation, set W4E_VISTA_INSTALL to the VISTA package
+directory and/or use:
 python3 launch_workbench.py --backend-url http://127.0.0.1:8001
 
-The browser opens this exact extracted copy. If port 8765 is occupied, the
-launcher prints and opens another local port. Use the printed address rather
-than an older saved browser tab. Ctrl+C stops the workbench; VISTA stays under
-its own application's control. Reopening this same package resumes setup safely.
+Start on HEADWATER development. Chat remains on the left; explanations and
+figures appear on the right. Choose a question, review its editable request,
+then press Send. Hypothesis lab shows the completed 24 October 2026 research
+cycle. TVA selects the separate 16–22 April 2019 case. Each context remembers
+its own conversation and draft. The message-box height is adjustable.
 
-Included: v0.14.1 interface; ORNL/Genesis marks; eight saved-evidence adapters
-with pinned source snapshots and provenance; eight lead documents; original
-saved evidence plus versioned answer readouts; integrity manifest; and one Mac
-launcher.
-Excluded: account secrets, Yang's VISTA database/settings, chats, local UUIDs,
-raw ERA5 arrays, checkpoints, and cluster credentials. No GitHub login is needed
-to import the included snapshots. The literature catalog links to papers; paper
-PDFs themselves are not included.
+The five supplied figures retain distinct scopes: four-week weather comparisons
+and whole-month April refinement at about 4 km. Monthly rainfall statistics in
+mm/day are separate from weekly rainfall totals and the frozen Trial 0 case.
+The existing six April questions, original HEADWATER answers and 32 original
+April evidence files are retained. Source links explain what each figure shows.
 
-Setup uses local VISTA API operations and verified standard-library file
-checks/copies in the project sandbox. It sends no agent prompt and starts no training,
-new scientific inference/scoring, data download, or HPC job. The optional dam
-skill remains absent until a reservoir and agreed rule are supplied.
+Included: interface and ORNL/Genesis marks; one Mac launcher; project setup;
+eight adapters with pinned sources; nine indexed guides/sources; original saved
+evidence; five supplied figures; integrity manifest.
+Excluded: credentials, VISTA databases/settings, chats, local UUIDs, raw ERA5
+arrays, checkpoints and cluster access. Paper PDFs are not bundled.
 
-Start with HEADWATER development: five short steps explain the question, test,
-and result. Technical records are folded below. Case Lab keeps conversation
-on the left and the matching evidence on the right. Its five development
-questions use dated, source-cited records; an optional history question exports
-the four-record timeline. Select TVA to use the six unchanged April questions.
-The interface identifies unreadable agent responses and offers manual retry. Review
-live answers alongside their cited evidence. The saved figures retain their original
-scope: April weather, observed ERA5 receipt summary (no runoff forecast), and
-frozen Trial 0 maps with aggregate test-split scores. Dali's video, voiceover and
-approved home-score image are still supplied separately when available.
+Setup sends no agent prompt and starts no training, scientific inference,
+scoring, download or HPC job. A saved board state is not execution permission.
+The optional dam skill still needs an agreed reservoir/rule. The exact original
+Trial 0 scorer remains missing. Review live answers with their cited evidence;
+free-form model behavior and a first launch on Dali's separate laptop are not
+certified by local tests. Unreadable responses offer a draft-only manual retry.
 
 Troubleshooting
 - If macOS blocks the command, use Finder's Open action and the approval flow
-  allowed by your institution. The Terminal equivalent is:
+  allowed by your institution. Terminal equivalent:
   sh "Start TVA Workbench.command"
-- If an existing project/skill/result differs, the launcher preserves it and
-  reports the conflict. Review it in VISTA before deciding how to proceed.
-- If source indexing is not ready, keep VISTA open and rerun after it finishes.
-- Setup records only non-secret readiness counts in .local/setup-receipt.json.
-  Verified upgrades keep the original project configuration and complete skill
-  files in .local/upgrade-backups. This backup contains no model credentials.
-  Do not include .local when forwarding a package you have already launched.
-
-Package update v0.14.1: Powered by VISTA links to the VISTA GitHub repository.
-The backend setup and saved scientific evidence are unchanged from v0.14.0.
+- If source indexing is pending, keep VISTA open and rerun when it finishes.
+- If an existing item differs, review the preserved conflict in VISTA.
+- .local/setup-receipt.json holds non-secret readiness counts; verified upgrades
+  retain complete originals in .local/upgrade-backups. Do not forward .local.

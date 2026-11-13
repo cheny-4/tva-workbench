@@ -27,9 +27,9 @@ test('stage selection only opens the supplied card; explicit review and navigati
 });
 test('missing or unapproved media remain hidden or empty; approved video requires captions and never autoplays',()=>{
   const f=fixture();f.api.selectStage('score');
-  let html=f.api.renderHTML();assert.match(html,/data-headwater-video hidden/);assert.doesNotMatch(html,/<video/);assert.match(html,/April map supplied for the demo/);assert.doesNotMatch(html,/<img/);
+  let html=f.api.renderHTML();assert.match(html,/data-headwater-video hidden/);assert.doesNotMatch(html,/<video/);assert.match(html,/April map supplied for the demo/);assert.match(html,/tva_t2m_2019_reslim.png/);assert.doesNotMatch(html,/water4energy-april-2019-score.png/);
   f.api.setAssets({video:'/assets/water4energy-workbench-90s.mp4'});assert.doesNotMatch(f.api.renderHTML(),/<video/);
-  f.api.setAssets({video:'https://example.org/video.mp4',captions:'/assets/water4energy-workbench-90s.vtt',scoreMap:'/api/vista/projects/Other/outputs/map.png'});html=f.api.renderHTML();assert.doesNotMatch(html,/<video|<img/);
+  f.api.setAssets({video:'https://example.org/video.mp4',captions:'/assets/water4energy-workbench-90s.vtt',scoreMap:'/api/vista/projects/Other/outputs/map.png'});html=f.api.renderHTML();assert.doesNotMatch(html,/<video|projects\/Other/);assert.match(html,/tva_t2m_2019_reslim.png/);
   f.api.setAssets({video:'/assets/water4energy-workbench-90s.mp4',captions:'/assets/water4energy-workbench-90s.vtt',scoreMap:'/assets/water4energy-april-2019-score.png'});html=f.api.renderHTML();assert.match(html,/<video controls playsinline preload="none"/);assert.match(html,/<track kind="captions"[^>]+ default>/);assert.doesNotMatch(html,/autoplay/);assert.match(html,/<figcaption>16–22 April 2019/);assert.match(html,/water4energy-april-2019-score.png/);
 });
 test('connection messages cannot insert score claims into the Lux card and the evidence stays a supplied project record',()=>{
@@ -91,7 +91,7 @@ test('next-step navigation explores the recorded cycle without preparing or exec
   const f=fixture();
   f.click(f.control({headwaterStageGo:'data'}));
   assert.match(f.detail.innerHTML,/<h2>Data<\/h2>/);
-  assert.match(f.detail.innerHTML,/Viewing step 2 of 5 · Recorded work/);
+  assert.match(f.detail.innerHTML,/Viewing step 2 of 6 · Recorded work/);
   f.click(f.control({headwaterStageGo:'score'}));
   assert.match(f.detail.innerHTML,/<h2>Score<\/h2>/);
   assert.match(f.detail.innerHTML,/<details class="development-score-details"><summary>April case evidence<\/summary>/);
@@ -127,4 +127,41 @@ test('project-method questions retain their roles but use the matching HEADWATER
   }
   assert.equal(f.api.methodRequest('unknown'),null);
   assert.deepEqual(f.prepared,[]);
+});
+
+
+test('the sixth step keeps the supplied monthly downscaling example separate from the protected weekly case',()=>{
+  const f=fixture();assert.equal(f.api.STAGES.length,6);
+  assert.deepEqual(Array.from(f.api.contexts,c=>c.id),['headwater','lab24','tva']);
+  f.api.selectStage('downscale');
+  const html=f.detail.innerHTML;
+  assert.match(html,/Viewing step 6 of 6/);
+  assert.match(html,/all 30 days of April 2019/);
+  assert.match(html,/1° field is refined to 1\/24°, about 4 km/);
+  assert.match(html,/daily maximum temperature[\s\S]*precipitation/i);
+  assert.match(html,/mean daily amount[\s\S]*daily 95th percentile/);
+  assert.match(html,/mm\/day/);assert.match(html,/not weekly or monthly totals/);
+  assert.match(html,/separate from the 16–22 April weekly Trial 0/);
+  assert.match(html,/do not establish a coupled HEADWATER-to-downscaling pipeline/);
+  assert.match(html,/april_2019_tmax_refine.png/);assert.match(html,/april_2019_prcp_refine.png/);
+  assert.doesNotMatch(html,/tva_t2m_2019_reslim.png/);
+  const request=f.api.questionRequest('downscale');
+  assert.match(request,/Use only downscale.scorecard with --context headwater and --question headwater-downscale/);
+  assert.equal(f.api.evidenceTopicForRequest(request),'downscale');
+  const box={innerHTML:''};f.api.renderContextEvidence(box,{topic:'downscale'});
+  assert.match(box.innerHTML,/Supplied maps · April 2019 · 30 days/);
+  assert.match(box.innerHTML,/Download figure/);assert.match(box.innerHTML,/dali-figures-provenance.json/);
+  assert.deepEqual(f.prepared,[]);
+});
+
+test('saved comparison figures expose correct model families and provenance without replacing the approved April map',()=>{
+  const f=fixture(),html=f.api.comparisonFiguresHTML();
+  assert.match(html,/<details class="development-score-details development-visual-evidence"><summary>/);
+  assert.match(html,/not the 24 October soil-residual test result/);
+  assert.match(html,/CNN neighborhood sizes: 1×1, 3×3 and 9×9/);
+  assert.match(html,/different comparison from the Reslim figures/);
+  assert.match(html,/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/);
+  assert.match(html,/target="_blank" rel="noopener noreferrer"/);
+  assert.equal(f.api.suppliedFigureHTML('unknown'),'');
+  assert.doesNotMatch(html,/water4energy-april-2019-score.png/);
 });

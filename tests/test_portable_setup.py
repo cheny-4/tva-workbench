@@ -136,6 +136,8 @@ class FakeVista:
         self.outputs = {}
         self.requests = []
         self.index_fails = False
+        self.replace_fail_after = None
+        self.replacement_count = 0
         self.has_credential = True
         self.expected_evidence = {}
         with ZipFile(root / "backend" / "evidence.zip") as archive:
@@ -275,12 +277,15 @@ class FakeVista:
                     fixture.outputs = {p.relative_to(output).as_posix(): p.read_bytes() for p in output.rglob("*") if p.is_file()}
                     return self.reply({"isError": result.returncode != 0, "content": [{"type": "text", "text": result.stdout + result.stderr}]})
                 if method == "POST" and path == "/projects/" + PROJECT + "/skills/from-output":
+                    if fixture.replace_fail_after is not None and fixture.replacement_count >= fixture.replace_fail_after:
+                        return self.reply({"detail": "Simulated interrupted upgrade"}, 503)
                     prefix = data["folder"] + "/"
                     files = {name[len(prefix):]: value for name, value in fixture.outputs.items() if name.startswith(prefix)}
                     folder = fixture.root / ".fake-sandbox/data/output" / data["folder"]
                     item = skill_detail(folder)
                     fixture.skills[item["name"]] = item
                     fixture.skill_files[item["name"]] = files
+                    fixture.replacement_count += 1
                     return self.reply(item, 201)
                 return self.reply({"detail": "Unexpected mutation " + path}, 404)
 
@@ -678,6 +683,109 @@ class PortableSetupTests(unittest.TestCase):
                 for name in names:
                     for relative, sha in baseline['skills'][name]['files'].items():
                         self.assertEqual(hashlib.sha256(archive.read(name + '/' + relative)).hexdigest(), sha)
+        self.assert_no_agent_or_job()
+
+    def test_v0140_backend_from_v0140_or_v0141_interface_has_complete_backup_and_idempotence(self):
+        migration = self.install_legacy_fixture('0.14.0')
+        original_outputs = dict(self.fake.outputs)
+        self.fake.outputs['w4e-v0140-headwater-history.csv'] = b'date,record\n2026-10-26,saved ledger\n'
+        report = self.run_setup()
+        self.assertEqual(report['upgrade_sources'], ['0.14.0'])
+        self.assertEqual(report['interface_version'], self.module.VERSION)
+        self.assertEqual(self.fake.replacement_count, 8)
+        for name, data in original_outputs.items():
+            self.assertEqual(self.fake.outputs[name], data)
+        self.assertEqual(self.fake.outputs['w4e-v0140-headwater-history.csv'], b'date,record\n2026-10-26,saved ledger\n')
+        backups = list((self.root / '.local/upgrade-backups').glob('v0140-*/original-skills.zip'))
+        self.assertEqual(len(backups), 1)
+        with ZipFile(backups[0]) as archive:
+            for name, old in migration['skills'].items():
+                for relative, sha in old['files'].items():
+                    self.assertEqual(hashlib.sha256(archive.read(name + '/' + relative)).hexdigest(), sha)
+        self.fake.requests.clear()
+        self.run_setup()
+        self.assertFalse([path for method, path, _ in self.fake.requests if method != 'GET'])
+        self.assert_no_agent_or_job()
+
+    def test_v0140_interruption_resumes_without_replacing_finished_skills_or_original_backup(self):
+        migration = self.install_legacy_fixture('0.14.0')
+        self.fake.replace_fail_after = 2
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        self.assertEqual(self.fake.replacement_count, 2)
+        backup = next((self.root / '.local/upgrade-backups').glob('v0140-*/original-skills.zip'))
+        saved_backup = backup.read_bytes()
+        with ZipFile(backup) as archive:
+            self.assertEqual(len(archive.namelist()), sum(len(old['files']) for old in migration['skills'].values()))
+        self.fake.replace_fail_after = None
+        self.fake.requests.clear()
+        report = self.run_setup()
+        self.assertEqual(report['upgraded_from'], '0.14.0')
+        self.assertEqual(self.fake.replacement_count, 8)
+        self.assertEqual(len([path for method, path, _ in self.fake.requests if path.endswith('/skills/from-output')]), 6)
+        self.assertEqual(backup.read_bytes(), saved_backup)
+        self.assert_no_agent_or_job()
+
+    def test_v0140_local_file_change_is_refused_before_policy_upgrade(self):
+        self.install_legacy_fixture('0.14.0')
+        name = SKILLS[0]
+        self.fake.skill_files[name]['scripts/replay.py'] += b'\n# Locally edited reader\n'
+        project = copy.deepcopy(self.fake.project)
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        self.assertEqual(self.fake.project, project)
+        self.assertFalse([path for method, path, _ in self.fake.requests if method == 'PUT' or path.endswith('/skills/from-output')])
+        self.assertTrue(self.fake.skill_files[name]['scripts/replay.py'].endswith(b'# Locally edited reader\n'))
+
+    def test_v0140_shared_global_skill_is_not_replaced(self):
+        self.install_legacy_fixture('0.14.0')
+        self.fake.other_projects = [{'name': 'Another research project', 'skills': [SKILLS[0]]}]
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        self.assertFalse([path for method, path, _ in self.fake.requests if method != 'GET'])
+
+    def test_v0140_resume_refuses_damaged_original_backup(self):
+        self.install_legacy_fixture('0.14.0')
+        self.fake.replace_fail_after = 1
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        backup = next((self.root / '.local/upgrade-backups').glob('v0140-*/original-skills.zip'))
+        backup.write_bytes(b'Damaged local backup; preserve for inspection')
+        self.fake.replace_fail_after = None
+        self.fake.requests.clear()
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        self.assertEqual(self.fake.replacement_count, 1)
+        self.assertEqual(backup.read_bytes(), b'Damaged local backup; preserve for inspection')
+        self.assertFalse([path for method, path, _ in self.fake.requests if method == 'PUT' or path.endswith('/skills/from-output')])
+
+    def test_three_known_backend_versions_and_current_skills_can_resume_together(self):
+        versions = {}
+        for version in ['0.13.1', '0.13.2', '0.14.0']:
+            self.install_legacy_fixture(version)
+            versions[version] = (copy.deepcopy(self.fake.skills), copy.deepcopy(self.fake.skill_files))
+        expected = {'0.13.1': SKILLS[:2], '0.13.2': SKILLS[2:4], '0.14.0': SKILLS[4:7]}
+        for version, names in expected.items():
+            skills, files = versions[version]
+            for name in names:
+                self.fake.skills[name] = skills[name]
+                self.fake.skill_files[name] = files[name]
+        current = SKILLS[7]
+        folder = self.root / 'backend/skills' / current
+        self.fake.skills[current] = skill_detail(folder)
+        self.fake.skill_files[current] = {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+        report = self.run_setup()
+        self.assertEqual(report['upgrade_sources'], ['0.13.1', '0.13.2', '0.14.0'])
+        self.assertEqual(self.fake.replacement_count, 7)
+        backups = list((self.root / '.local/upgrade-backups').glob('*/original-skills.zip'))
+        self.assertEqual(len(backups), 3)
+        for backup in backups:
+            version = next(version for version in expected if backup.parent.name.startswith('v' + version.replace('.', '') + '-'))
+            with ZipFile(backup) as archive:
+                self.assertEqual({name.split('/', 1)[0] for name in archive.namelist()}, set(expected[version]))
+                for key in archive.namelist():
+                    name, relative = key.split('/', 1)
+                    self.assertEqual(archive.read(key), versions[version][1][name][relative])
         self.assert_no_agent_or_job()
 
 

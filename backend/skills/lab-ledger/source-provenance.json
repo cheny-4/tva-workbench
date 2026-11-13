@@ -511,5 +511,113 @@
     "sha256": "eed64f33d3e07937512fc272eea8d2c23b88389ef18daf8948afb4e916dc887e",
     "size": 12910,
     "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md",
+    "blob_sha": "68e99ded96689e59b44dab4b36ba346f9d6b0afa",
+    "sha256": "c71458796351881229d801ed85e8b67f1cdc75f8722f5287bb30e2ea29d2fcdd",
+    "size": 689,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/critique.json",
+    "blob_sha": "102dfa9d023ccb244be1d83efbc9875558ccdfd6",
+    "sha256": "0f22da927547cee31ff8a1574942cb22a8db8b64c114a6ff97c8b6dab203805d",
+    "size": 3453,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/critique.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/experiments.json",
+    "blob_sha": "6ecd53b8273d17401d7778b513a3a15500292bf0",
+    "sha256": "dd1c62ef5ed2da911e527142d5065f6aecc2566189dcae880765220449bac633",
+    "size": 2604,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/experiments.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/hypotheses.json",
+    "blob_sha": "5a27245700ea06b54804ab4c44ada741ebcbc280",
+    "sha256": "2e91e1fb99bae0c3d1998194af0bc76411652d9a9148a59ab35992ae86865fd5",
+    "size": 6706,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/hypotheses.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/referee_brief.md",
+    "blob_sha": "b3a31ae94832c1fa963811eba735ff2a40c69b6e",
+    "sha256": "0a805723601890f29e2411efdc30d5376919170194147f5a7dd3482bb82656c1",
+    "size": 3427,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/referee_brief.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/score_slice.json",
+    "blob_sha": "1496f15a32374bd7746a7086b12e90f50e74acd3",
+    "sha256": "8fb3ad47bff73f99714f325879a3c58ad09b951c7960a9534a125fb202adfaa5",
+    "size": 9541,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/score_slice.json"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy_workbench.md",
+    "blob_sha": "ffb654ffdcfac10f7065ed9e08a076855e62619b",
+    "sha256": "fc8b462c339f8e6d9aa2d758b86e06258228b52d5d40847c1a0d22ad5d518702",
+    "size": 12593,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy_workbench.md"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png",
+    "blob_sha": "28591f04fd41255cb564ab42e07a111a29c6226a",
+    "sha256": "dc9a509ccc806f0849aec85cbac1efd360bd13d43e8df5bb5356d73a8fc65c37",
+    "size": 500225,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png",
+    "blob_sha": "70cfd7d83a12c759765c55024554da05a17ad917",
+    "sha256": "ba0f188af002812c584a7ccea80830ddfc980c6461fc1a39b48914aa53e7c894",
+    "size": 504574,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/valley_temperature_2019.png",
+    "blob_sha": "12caf33784fbf2550abe80aac7ec215dc1cc33a1",
+    "sha256": "5e7266f43b59db7ea7738603011875ce6dc57c0f745fcd4112dcd2e2ef2e7e73",
+    "size": 493275,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/valley_temperature_2019.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png",
+    "blob_sha": "683284871d1e2d064284486ad3a299f73b454072",
+    "sha256": "bf428289b997f11050951470f42c97c6afe3d871566974adb2d224884e391e97",
+    "size": 639561,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png",
+    "blob_sha": "17c1ca604a004974f07f6d27b5ba779b0c1bf4c1",
+    "sha256": "5307f90f25af6e7741aa2a4f021e52e48cdbaf825694923c488d2ea4bb86470d",
+    "size": 723567,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png"
   }
 ]

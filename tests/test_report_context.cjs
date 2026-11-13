@@ -12,7 +12,7 @@ function fixture(activeContext='tva'){
  let resolve;const response=new Promise(done=>{resolve=done;});
  const button={disabled:false},effects={requests:[],downloads:[],toasts:[]};
  const state={sessionId:'same-session',history:[{role:'user',content:'Read the saved evidence.'}],activeContext,contextRevision:0,config:{project:'Water4Energy-TVA-agent-loop',backend_url:'http://127.0.0.1:8001'}};
- const context=vm.createContext({state,$:()=>button,projectUrl:suffix=>'/projects/'+state.config.project+suffix,isAprilContext:()=>state.activeContext==='tva',api:(...args)=>{effects.requests.push(args);return response;},download:(...args)=>effects.downloads.push(args),toast:text=>effects.toasts.push(text)});
+ const context=vm.createContext({state,$:()=>button,projectUrl:suffix=>'/projects/'+state.config.project+suffix,isAprilContext:()=>state.activeContext==='tva',isLab24Context:()=>state.activeContext==='lab24',api:(...args)=>{effects.requests.push(args);return response;},download:(...args)=>effects.downloads.push(args),toast:text=>effects.toasts.push(text)});
  vm.runInContext(scopeSource+'\n'+reportSource,context);
  return {context,state,effects,button,resolve};
 }
@@ -34,11 +34,16 @@ test('a report response from an old case, epoch or session cannot download in th
 });
 
 test('a report in the same scope downloads once with the active context hint',async()=>{
- for(const activeContext of ['headwater','tva']){
+ for(const activeContext of ['headwater','lab24','tva']){
   const f=fixture(activeContext),pending=f.context.exportBrief();
   const request=JSON.parse(f.effects.requests[0][1].body);
   assert.equal(request.chat_session_id,'same-session');
-  assert.match(request.hint,activeContext==='tva'?/16–22 April 2019/:/HEADWATER development/);
+  assert.match(request.hint,activeContext==='tva'?/16–22 April 2019/:activeContext==='lab24'?/24 October 2026/:/HEADWATER development/);
+  if(activeContext==='lab24'){
+   assert.match(request.hint,/approval requirement is not an approval receipt/);
+   assert.match(request.hint,/Do not describe this dated example as the current selected brief/);
+   assert.doesNotMatch(request.hint,/Trial 0|dam readout/);
+  }
   f.resolve(report);await pending;
   assert.equal(f.effects.downloads.length,1);
   assert.equal(f.effects.downloads[0][0],'saved-evidence.md');
