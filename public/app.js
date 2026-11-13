@@ -1,10 +1,11 @@
 'use strict';
+const WORKBENCH_VERSION='0.13.0';
 
 // No external services or frontend dependencies. Live calls stay behind server.py.
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const state = {
-  mode: 'live', view: 'introduction', config: {project: 'Water4Energy-TVA-agent-loop'},
+  mode: 'live', view: 'development', activeContext:'headwater', contextRevision:0, drafts:{}, config: {project: 'Water4Energy-TVA-agent-loop'},
   status: null, geo: null, siteIndex: 0,
   busy: false, sessionId: null, history: [], events: [], lastSeq: 0,
   stream: null, pending: null, liveFiles: [], liveStudy: null,
@@ -16,9 +17,40 @@ const dateLabel = (value, options = {}) => new Date(`${String(value).slice(0,10)
 const format = (n, digits=1) => n!==null && n!==undefined && n!=='' && Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits}) : '—';
 const projectUrl = (path='') => `/api/vista/projects/${encodeURIComponent(state.config.project)}${path}`;
 const fileUrl = (kind,name) => projectUrl(`/${kind}/${String(name).split('/').map(encodeURIComponent).join('/')}`);
-const sessionKey = () => `tva.session.${state.config.backend_url || ''}.${state.config.project}`;
-const rememberSession = () => { try { if (state.sessionId) localStorage.setItem(sessionKey(),state.sessionId); else localStorage.removeItem(sessionKey()); } catch {} };
-const readSessionId = () => { try { return localStorage.getItem(sessionKey()); } catch { return null; } };
+const legacySessionKey=()=>`tva.session.${state.config.backend_url||''}.${state.config.project}`;
+const sessionKey=()=>`water4energy.session.${state.config.backend_url||''}.${state.config.project}.${state.activeContext}`;
+const contextMapKey=()=>`water4energy.contexts.${state.config.backend_url||''}.${state.config.project}`;
+function sessionContext(id){try{const saved=JSON.parse(localStorage.getItem(contextMapKey())||'{}');return ['headwater','tva'].includes(saved[id])?saved[id]:(localStorage.getItem(legacySessionKey())===id?'tva':null);}catch{return null;}}
+const rememberSession=()=>{try{if(state.sessionId){localStorage.setItem(sessionKey(),state.sessionId);const saved=JSON.parse(localStorage.getItem(contextMapKey())||'{}');saved[state.sessionId]=state.activeContext;localStorage.setItem(contextMapKey(),JSON.stringify(saved));}else localStorage.removeItem(sessionKey());}catch{}};
+const readSessionId=()=>{try{return localStorage.getItem(sessionKey())||(state.activeContext==='tva'?localStorage.getItem(legacySessionKey()):null);}catch{return null;}};
+function isAprilContext(){return state.activeContext==='tva';}
+function updateContextUI(){
+  const april=isAprilContext();
+  const contexts=window.Water4EnergyWorkflow?.contexts||[{id:'headwater',label:'HEADWATER development'},{id:'tva',label:'TVA · 16–22 April 2019'}];
+  const switcher=$('#active-context');if(switcher){switcher.innerHTML=contexts.map(c=>`<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('');switcher.value=state.activeContext;switcher.disabled=state.busy;}
+  $('#case-lab-subtitle').textContent=april?'TVA · 16–22 April 2019 · Issued 15 April 2019':'HEADWATER development';
+  $('#prompt').placeholder=april?'Ask about the April case, or choose a question…':'Start from the ledger, or choose a question…';
+  $$('[data-april-only]').forEach(el=>el.hidden=!april);
+  $('#development-evidence').hidden=april;
+  $('#case-question-controls').innerHTML=april?TVACaseJourney.questionMenuHTML():Water4EnergyWorkflow.questionMenuHTML();
+  if(!april)Water4EnergyWorkflow.renderContextEvidence($('#development-evidence'));
+  renderDemoStatus();window.TVAComposerResize?.refresh();
+}
+function selectContext(next,{restore=true}={}){
+  if(!['headwater','tva'].includes(next))return false;
+  if(next===state.activeContext)return true;
+  if(state.busy){toast('Finish or stop the current turn before changing context.');if($('#active-context'))$('#active-context').value=state.activeContext;return false;}
+  state.drafts[state.activeContext]=$('#prompt').value;rememberSession();
+  state.stream?.abort();state.stream=null;clearLiveConversation(true);TVAHypothesisDemo.reset();
+  state.contextRevision++;state.activeContext=next;state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.demoEvidence=null;
+  resetActivity();updateContextUI();showWelcome();renderResults();$('#prompt').value=state.drafts[next]||'';
+  if(restore){state.sessionId=readSessionId();if(state.sessionId&&state.status?.project_found)void loadSession(state.sessionId,true);}
+  if(isAprilContext())void refreshDemo();return true;
+}
+function openTVACase(view='workspace'){if(!selectContext('tva'))return false;switchView(view==='network'?'network':'workspace');return true;}
+function prepareProjectPrompt(text){if(selectContext('headwater'))prepareDemoPrompt(text);}
+function prepareAprilPrompt(text){if(selectContext('tva'))prepareDemoPrompt(text);}
+
 
 async function api(url, options={}) {
   const response = await fetch(url, {...options, headers:{...(options.body && !(options.body instanceof FormData) ? {'Content-Type':'application/json'} : {}), ...options.headers}});
@@ -49,7 +81,8 @@ function setBusy(value,label) {
   $('#send-button').hidden=value;
   $('#stop-button').hidden=!value;
   $('#send-button').disabled=value;
-  $$('[data-case-question]').forEach(button=>button.disabled=value);
+  $$('[data-case-question],[data-headwater-question]').forEach(button=>button.disabled=value);
+  if($('#active-context'))$('#active-context').disabled=value;
   $('#new-chat').disabled=value; $('#history-new').disabled=value;
   $('#agent-state').textContent=label || (value ? 'Working…' : state.status?.project_found ? 'VISTA agent' : 'Connect VISTA');
   $('#agent-state').classList.toggle('working',value);
@@ -90,14 +123,14 @@ function addMessage(role,text,options={}) {
   $('#chat-messages .welcome')?.remove();
   $('.agent-panel')?.classList.add('has-messages');
   const el=document.createElement('div'); el.className=`message ${role}${options.error?' error':''}`;
-  const label=role==='agent' ? '<div class="message-label"><b>TVA agent</b><span>VISTA</span></div>' : '';
+  const label=role==='agent' ? '<div class="message-label"><b>Water4Energy agent</b><span>VISTA</span></div>' : '';
   el.innerHTML=`${label}<div class="message-body">${formatText(text)}</div>`;
   $('#chat-messages').append(el); scrollChat(); return el.querySelector('.message-body');
 }
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
 function showWelcome() {
   $('.agent-panel')?.classList.remove('has-messages');
-  $('#chat-messages').innerHTML=window.TVACaseJourney?.welcomeHTML() || '<div class="welcome"><h3>Review the April case</h3><p>Start with the saved ledger and cite its evidence.</p></div>';
+  $('#chat-messages').innerHTML=isAprilContext()?TVACaseJourney.welcomeHTML():Water4EnergyWorkflow.welcomeHTML();
 }
 function prepareDemoPrompt(text) {
   if(state.busy){toast('Finish or stop the current turn before preparing another request.');return;}
@@ -107,7 +140,7 @@ function prepareDemoPrompt(text) {
   const composer=$('#chat-form'),bounds=composer.getBoundingClientRect?.();
   if(!bounds || bounds.top<0 || bounds.bottom>window.innerHeight)composer.scrollIntoView({behavior:'smooth',block:'nearest'});
   globalThis.TVAComposerResize?.refresh();
-  toast('Request prepared in TVA Case Lab. Review it, then press Send.');
+  toast('Request prepared in Case Lab. Review it, then press Send.');
 }
 async function refreshKnowledge() {
   const project=state.config.project,backend=state.config.backend_url;
@@ -122,43 +155,43 @@ function renderDemoStatus() {
   const status=state.status;
   line.dataset.state='pending';
   if(!status){line.textContent='Checking the VISTA connection…';line.dataset.state='checking';}
-  else if(state.demoCase && status.version!==state.demoCase.version){line.textContent='An older Workbench is serving this tab. Open the current launcher and use its printed address.';}
+  else if(state.demoCase && status.version!==WORKBENCH_VERSION){line.textContent='An older Workbench is serving this tab. Open the current launcher and use its printed address.';}
   else if(!status.connected){line.textContent='Open VISTA to send questions. You can review the starting questions while it connects.';}
-  else if(!status.project_found){line.textContent='VISTA is open; the demo project still needs setup before you can send questions.';}
+  else if(!status.project_found){line.textContent='VISTA is open; the project still needs setup before you can send questions.';}
   else {
     const required=state.skills?.skills || [];
     const known=state.skills?.project_found && Number.isInteger(state.skills.count);
     const names=new Set(required.map(skill=>skill.name));
     const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id));
     const knowledgePending=state.knowledge?.project_found && state.knowledge.all_ready===false;
-    line.textContent=missing || knowledgePending?'Connected to VISTA. Some demo tools or sources still need setup.':'Connected to the April case project.';
+    line.textContent=missing || knowledgePending?'Connected to VISTA. Some project tools or sources still need setup.':isAprilContext()?'Connected to the April case project.':'Connected to the Water4Energy project.';
     line.dataset.state='connected';
   }
   const badge=$('#case-figures-status');
   if(badge)badge.textContent=state.demoEvidence?.matched?`${state.demoEvidence.available} of 4 figures`:'Awaiting source files';
 }
-async function refreshDemo() {
-  if(!state.demoCase || !window.TVAHypothesisDemo)return;
+async function refreshDemo(){
+  if(!state.demoCase||!window.TVAHypothesisDemo)return;
+  if(!isAprilContext()){renderDemoStatus();return;}
+  const revision=state.contextRevision;
   const result=await TVAHypothesisDemo.refresh({status:state.status,skills:state.skills,knowledge:state.knowledge,project:state.config.project,backend:state.config.backend_url});
-  if(result){
-    state.demoEvidence=result;
-    TVAHypothesisGuide.setResearchSources(result.researchLinks || []);
-    TVAHypothesisGuide.setCaseFigures(result.caseFigures || []);
-  }
-  renderDemoStatus();
+  if(!isAprilContext()||revision!==state.contextRevision)return;
+  if(result){state.demoEvidence=result;TVAHypothesisGuide.setResearchSources(result.researchLinks||[]);TVAHypothesisGuide.setCaseFigures(result.caseFigures||[]);}renderDemoStatus();
 }
 
 function openCaseFigures() {
-  switchView('workspace');
+  if(!openTVACase())return;
   TVAHypothesisGuide.showFigures();
 }
 
 function switchView(view) {
+  if(['development','introduction'].includes(view)&&!selectContext('headwater'))return;
+  if(view==='network'&&!selectContext('tva'))return;
   state.view=view;
   document.body.classList.toggle('lab-active',view==='workspace');
   $$('.view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));
   $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===(view==='history'?'workspace':view)));
-  $('#view-breadcrumb').textContent={workspace:'TVA Case Lab',network:'Study network',skills:'Skills & sources',introduction:'Hypothesis lab',history:'Conversation history',files:'Results Library',literature:'Literature library'}[view];
+  $('#view-breadcrumb').textContent={development:'HEADWATER development',workspace:'Case Lab',network:'TVA case',skills:'Skills & sources',introduction:'Hypothesis lab',history:'Conversation history',files:'Results Library',literature:'Literature library'}[view];
   if(view==='history'){renderPromptLibrary();renderHistory();} if(view==='files') renderFiles(); if(view==='literature') window.TVALiteratureLibrary?.render();
   if(view==='network')renderNetwork();if(view==='skills')renderSkills();
   window.scrollTo({top:0,behavior:'instant'});
@@ -173,11 +206,11 @@ async function refreshConnection() {
     const status=await api('/api/status?fresh=1');
     if(revision!==state.connectionRevision)return;
     state.status=status;state.config={backend_url:status.backend_url,project:status.project};
-    const compatible=!state.demoCase || state.status.version===state.demoCase.version;
+    const compatible=state.status.version===WORKBENCH_VERSION;
     const ok=compatible && state.status.connected && state.status.project_found;
     $('#connection-pill').classList.toggle('connected',ok);
     $('#connection-pill').innerHTML=`<i></i>${!compatible?'Open the current launcher':ok?'VISTA connected':state.status.connected?'Check project name':'VISTA offline'}`;
-    $('#connection-pill').title=compatible?state.status.detail:`This tab is served by Workbench ${state.status.version || 'unknown'}. Open the v${state.demoCase.version} launcher and use its printed local address.`;
+    $('#connection-pill').title=compatible?state.status.detail:`This tab is served by Workbench ${state.status.version || 'unknown'}. Open the v${WORKBENCH_VERSION} launcher and use its printed local address.`;
     if(!ok){clearLiveConversation(true);state.liveFiles=[];renderResults();}
     renderResources();await refreshSkills();await refreshKnowledge();await renderFiles();await refreshDemo();setBusy(state.busy);if(ok && state.sessionId)queueLiveArtifacts();
     if($('#settings-dialog').open) $('#settings-status').textContent=state.status.detail;
@@ -187,13 +220,14 @@ function resourceState(resource) {
   if(resource.planned) return ['planned','Planned'];
   if(resource.state==='ready') return ['ready','Ready in VISTA'];
   if(['not_connected','not_configured','missing','unconfigured'].includes(resource.state)) return ['error','Not connected'];
-  if(['degraded','error','unavailable','expired','login_required'].includes(resource.state)) return ['error','Needs attention'];
+  if(['degraded','error','unavailable','expired','globus_session_expired','login_required'].includes(resource.state)) return ['error','Needs attention'];
   if(resource.state==='checking') return ['','Checking'];
   return ['',state.status?.connected?'Status unavailable':'VISTA offline'];
 }
 function renderResources() {
   const resources=state.status?.resources || ['odo','frontier','lux','ccsi'].map((id,i)=>({id,name:['Odo','Frontier','Lux','CCSI GPU node'][i],state:'unknown',planned:id==='ccsi',message:id==='ccsi'?'Planned resource. Connection and a matching VISTA adapter will be added later.':'Open VISTA to check resource status.'}));
   if($('#sidebar-resources'))$('#sidebar-resources').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<div class="resource-mini ${r.id==='ccsi'?'ccsi':''}" title="${esc(r.message)}"><span class="resource-glyph">${icon('server')}</span><div><strong>${esc(r.name)}</strong><small>${esc(label)}</small></div><i class="status-dot ${cls}"></i></div>`;}).join('');
+  window.Water4EnergyWorkflow?.setResources(resources);
   if($('#resource-cards'))$('#resource-cards').innerHTML=resources.map(r=>{const [cls,label]=resourceState(r);return `<article class="resource-card ${r.planned?'planned':''}"><div class="resource-card-header">${icon('server')}<span class="tag"><i class="status-dot ${cls}"></i>${esc(label)}</span></div><h2>${esc(r.name)}</h2><div class="facility">${r.planned?'FUTURE ADAPTER':'COMPUTE CONNECTION IN VISTA'}</div><p>${esc(r.message)}</p><div class="tag">${r.planned?'Adapter to be added':'Optional compute · file-based demo first'}</div></article>`;}).join('');
 }
 function showSettings() {
@@ -211,7 +245,7 @@ function currentStudy() { return state.liveStudy; }
 function renderResults() {
   $('#results-panel').classList.remove('has-live-study');
   $('#results-panel').classList.toggle('has-live-artifacts',!!state.liveFiles.length);
-  $('#results-description').textContent='Files displayed in the selected conversation. Case figures are available in Results Library with separate April 2019 source checks.';
+  $('#results-description').textContent=isAprilContext()?'Files displayed in this TVA case conversation. April source checks are separate.':'Files displayed in the selected project conversation.';
   $('#result-mode-label').textContent=state.liveFiles.length?`${state.liveFiles.length} displayed file${state.liveFiles.length===1?'':'s'}`:'Conversation files';
   $('#chart-site-tabs').innerHTML='';$('#result-site').innerHTML='';
   $('#result-site').closest('.chart-site-picker').hidden=true;
@@ -234,24 +268,26 @@ async function ensureSession(title) {
   state.sessionId=session.id;state.lastSeq=0;rememberSession();return session.id;
 }
 async function sendLive(prompt) {
-  if(state.demoCase && state.status?.version && state.status.version!==state.demoCase.version){addMessage('system',`This tab is served by Workbench ${state.status.version}. Open the v${state.demoCase.version} launcher and use its printed local address before starting this demo.`,{error:true});return;}
-  if(!state.status?.project_found){addMessage('system','Open VISTA and connect the correct TVA project in Connection settings before sending a live message.',{error:true});showSettings();return;}
+  if(state.demoCase && state.status?.version && state.status.version!==WORKBENCH_VERSION){addMessage('system',`This tab is served by Workbench ${state.status.version}. Open the v${WORKBENCH_VERSION} launcher and use its printed local address before starting this conversation.`,{error:true});return;}
+  if(!state.status?.project_found){addMessage('system','Open VISTA and connect the project in Connection settings before sending a live message.',{error:true});showSettings();return;}
   if(state.busy)return;
-  TVAHypothesisGuide.beginTurn();
+  if(isAprilContext())TVAHypothesisGuide.beginTurn();
   addMessage('user',prompt);setBusy(true,'Contacting VISTA');setStage(0);state.lastSeq=0;
+  const sendRevision=state.contextRevision;
   try {
     await ensureSession(prompt);
     await watchStream(projectUrl('/agent/run'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_prompt:prompt,stream:true,chat_session_id:state.sessionId})});
   } catch(error) {
+    if(sendRevision!==state.contextRevision)return;
     addMessage('system',`${error.message} If VISTA accepted the turn, it may still be running. Reopen this conversation to check or reconnect.`,{error:true});
-    addActivity('Connection interrupted',error.message);setBusy(false,'Connection interrupted');TVAHypothesisGuide.finishTurn('interrupted');
+    addActivity('Connection interrupted',error.message);setBusy(false,'Connection interrupted');if(isAprilContext())TVAHypothesisGuide.finishTurn('interrupted');
   }
 }
 async function watchStream(url,options={}) {
   const streamContext=liveContext();
-  state.stream=new AbortController();let finished=false,bodyNode=null,parts=new Map(),lastIndex=null;
-  const response=await fetch(url,{...options,signal:state.stream.signal});
-  if(response.status===204){state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);await renderFiles();return;}
+  const controller=new AbortController();state.stream=controller;let finished=false,bodyNode=null,parts=new Map(),lastIndex=null;
+  const response=await fetch(url,{...options,signal:controller.signal});
+  if(response.status===204){if(!isLiveContext(streamContext))return;state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);await renderFiles();return;}
   if(!response.ok){let data;try{data=await response.json();}catch{};throw new Error(typeof data?.detail==='string'?data.detail:`VISTA request failed (${response.status}).`);}
   if(!response.body)throw new Error('This browser does not support streaming responses.');
   const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
@@ -272,7 +308,7 @@ async function watchStream(url,options={}) {
     let event;try{event=JSON.parse(data.join('\n'));}catch{return;}
     type=event.event_kind || type;
     if(!isLiveContext(streamContext))return;
-    TVAHypothesisGuide.handleEvent(type,event);
+    if(isAprilContext())TVAHypothesisGuide.handleEvent(type,event);
     if(['function_tool_result','run_finished'].includes(type))queueLiveArtifacts();
     if(type==='run_started'){addActivity('VISTA turn started','Backend-owned execution; conversation saved by VISTA.');setBusy(true,'Agent working');setStage(0);}
     else if(type==='part_start' && event.part?.part_kind==='text') {lastIndex=event.index;parts.set(event.index,event.part.content || '');outputText();}
@@ -314,9 +350,10 @@ async function watchStream(url,options={}) {
     }
     if(buffer.trim())await eventReceived(buffer);
     if(!finished)throw new Error('The event stream ended before VISTA reported completion.');
+    if(!isLiveContext(streamContext))return;
     await loadSession(state.sessionId,false);
-    await renderFiles();
-  } finally {bodyNode?.classList.remove('stream-cursor');state.stream=null;}
+    if(isLiveContext(streamContext))await renderFiles();
+  } finally {bodyNode?.classList.remove('stream-cursor');if(state.stream===controller)state.stream=null;}
 }
 function messagesFromHistory(session) {
   const history=Array.isArray(session.message_history)?session.message_history:[];
@@ -337,40 +374,42 @@ async function loadSession(id,reconnect=false) {
   const scope=liveContext();
   try {
     const session=await api(projectUrl(`/chat-session?chat_session_id=${encodeURIComponent(id)}`));
-    if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;
+    if(state.sessionId!==id || !isLiveContext(scope))return;
     state.sessionId=id;rememberSession();
     const messages=messagesFromHistory(session);
     if(messages.length){$('#chat-messages').replaceChildren();messages.forEach(m=>addMessage(m.role,m.text));}
     else showWelcome();
-    if(reconnect){resetActivity();TVAHypothesisGuide.resetConversation();for(const entry of session.run_events || []){
+    if(reconnect){resetActivity();if(isAprilContext())TVAHypothesisGuide.resetConversation();for(const entry of session.run_events || []){
       const data=entry.data || {};
-      TVAHypothesisGuide.handleEvent(data.event_kind || entry.event,data);
+      if(isAprilContext())TVAHypothesisGuide.handleEvent(data.event_kind || entry.event,data);
       if(entry.event==='log')addActivity(data.area || 'VISTA',data.message || '');
       else if(entry.event==='function_tool_call'||entry.event==='function_tool_result')addActivity(`${entry.event==='function_tool_call'?'Tool call':'Tool returned'} · ${data.part?.tool_name || 'Scientific tool'}`,'Saved VISTA activity.','tool',data.part);
       else if(entry.event==='run_finished')addActivity(`Agent turn ${data.state || 'ended'}`,'Saved VISTA turn state; inspect outputs for job evidence.');
     }}
     await loadLiveArtifacts();
-    if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;
+    if(state.sessionId!==id || !isLiveContext(scope))return;
     if(reconnect && ['working','needs_you'].includes(session.run_status)) {
       setBusy(true,'Reconnecting');state.lastSeq=0;
-      watchStream(projectUrl(`/chat-sessions/${id}/run/events?after=0`)).catch(error=>{addMessage('system',error.message,{error:true});setBusy(false,'Disconnected');TVAHypothesisGuide.finishTurn('disconnected');});
+      watchStream(projectUrl(`/chat-sessions/${id}/run/events?after=0`)).catch(error=>{if(!isLiveContext(scope))return;addMessage('system',error.message,{error:true});setBusy(false,'Disconnected');if(isAprilContext())TVAHypothesisGuide.finishTurn('disconnected');});
     }
-  } catch(error){if(state.sessionId!==id || scope.project!==state.config.project || scope.backend!==state.config.backend_url)return;clearLiveConversation();state.sessionId=null;rememberSession();addMessage('system',`Could not open that VISTA conversation: ${error.message}`,{error:true});}
+  } catch(error){if(state.sessionId!==id || !isLiveContext(scope))return;clearLiveConversation();state.sessionId=null;rememberSession();addMessage('system',`Could not open that VISTA conversation: ${error.message}`,{error:true});}
 }
 async function newConversation() {
   if(state.busy)return;
   clearLiveConversation();state.sessionId=null;rememberSession();state.history=[];state.liveFiles=[];state.liveStudy=null;
   resetActivity();showWelcome();renderResults();switchView('workspace');toast('A new conversation will be created when you send your first message.');
 }
-async function renderHistory() {
-  $('#history-list').innerHTML='<div id="live-history"><div class="empty-state">Loading VISTA conversations…</div></div>';
-  if(!state.status?.project_found){$('#live-history').innerHTML='<div class="empty-state">Connect VISTA to view this laptop’s TVA conversations.</div>';return;}
-  try {
+async function renderHistory(){
+  $('#history-list').innerHTML='<div id="live-history"><div class="empty-state">Loading project conversations…</div></div>';
+  if(!state.status?.project_found){$('#live-history').innerHTML='<div class="empty-state">Connect VISTA to view this laptop’s project conversations.</div>';return;}
+  try{
     const sessions=await api(projectUrl('/chat-sessions'));
-    $('#live-history').innerHTML=sessions.length?sessions.sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).map(s=>`<button class="history-card" data-session="${esc(s.id)}">${icon('file')}<div><h3>${esc(s.title || 'TVA conversation')}</h3><p>${esc(new Date(s.updated_at).toLocaleString())}</p></div><span class="tag">VISTA</span>${icon('arrow')}</button>`).join(''):'<div class="empty-state">No conversations yet. Send a message to begin.</div>';
-    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}clearLiveConversation();state.liveFiles=[];state.liveStudy=null;state.history=[];resetActivity();state.sessionId=el.dataset.session;state.lastSeq=0;await loadSession(state.sessionId,true);switchView('workspace');}));
+    const button=(session,context,label)=>`<button type="button" class="text-button" data-session="${esc(session.id)}" data-session-context="${context}">${label}</button>`;
+    $('#live-history').innerHTML=sessions.length?sessions.sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).map(session=>{const context=sessionContext(session.id);return `<article class="history-card"><div><h3>${esc(session.title||'Project conversation')}</h3><p>${esc(new Date(session.updated_at).toLocaleString())}</p><div class="history-context-actions">${context?button(session,context,context==='tva'?'Open TVA case conversation ↗':'Open HEADWATER conversation ↗'):`<span>Choose context to open:</span>${button(session,'headwater','HEADWATER development')}${button(session,'tva','TVA · 16–22 April 2019')}`}</div></div></article>`;}).join(''):'<div class="empty-state">No project conversations yet. Send a message to begin.</div>';
+    $$('#live-history [data-session]').forEach(el=>el.addEventListener('click',async()=>{if(state.busy){toast('Finish the current turn first.');return;}if(!selectContext(el.dataset.sessionContext,{restore:false}))return;clearLiveConversation();state.liveFiles=[];state.liveStudy=null;state.history=[];resetActivity();state.sessionId=el.dataset.session;state.lastSeq=0;rememberSession();const scope=liveContext();await loadSession(state.sessionId,true);if(isLiveContext(scope))switchView('workspace');}));
   }catch(error){$('#live-history').innerHTML=`<div class="empty-state">${esc(error.message)}</div>`;}
 }
+
 function fileRow(name,detail,url,label='Download') {return `<div class="file-row">${icon('file')}<div><strong>${esc(name)}</strong><small>${esc(detail)}</small></div><a href="${esc(url)}" download>${label}${icon('down')}</a></div>`;}
 async function renderFiles() {
   return TVAResultsLibrary.render({projectFound:state.status?.project_found,project:state.config.project,api,projectUrl,fileUrl,showDetails,toast});
@@ -387,8 +426,8 @@ async function uploadFiles(files) {
   }catch(error){toast(`Upload failed: ${error.message}`);}
 }
 let liveRefresher=null,livePollTimer=null;
-function liveContext(){return {project:state.config.project,backend:state.config.backend_url,session:state.sessionId};}
-function isLiveContext(scope){return scope.project===state.config.project && scope.backend===state.config.backend_url && scope.session===state.sessionId;}
+function liveContext(){return {project:state.config.project,backend:state.config.backend_url,session:state.sessionId,activeContext:state.activeContext,contextRevision:state.contextRevision};}
+function isLiveContext(scope){return scope.project===state.config.project && scope.backend===state.config.backend_url && scope.session===state.sessionId && scope.activeContext===state.activeContext && scope.contextRevision===state.contextRevision;}
 function clearLiveConversation(clearCase=false){
   liveRefresher?.invalidate();
   if(livePollTimer){clearTimeout(livePollTimer);livePollTimer=null;}
@@ -401,14 +440,14 @@ function artifactRefresher(){
     read:async scope=>{
       const base='/api/vista/projects/'+encodeURIComponent(scope.project);
       const [files,outputs]=await Promise.all([api(base+'/chat-sessions/'+encodeURIComponent(scope.session)+'/displayed-files'),api(base+'/outputs')]);
-      if(isLiveContext(scope))await refreshDemo();
+      if(isLiveContext(scope)&&isAprilContext())await refreshDemo();
       return {files:Array.isArray(files)?files:[],outputs:Array.isArray(outputs)?outputs:[]};
     },
     apply:(result,scope)=>{
       state.liveFiles=result.files;state.liveStudy=null;renderResults();
-      TVAHypothesisGuide.setConversationFigures(TVALiveLabSync.displayedFigures(result.files,result.outputs,scope.project));
+      if(isAprilContext())TVAHypothesisGuide.setConversationFigures(TVALiveLabSync.displayedFigures(result.files,result.outputs,scope.project));
     },
-    onError:()=>{state.liveFiles=[];state.liveStudy=null;renderResults();TVAHypothesisGuide.setConversationFigures([]);}
+    onError:()=>{state.liveFiles=[];state.liveStudy=null;renderResults();if(isAprilContext())TVAHypothesisGuide.setConversationFigures([]);}
   });
   return liveRefresher;
 }
@@ -511,17 +550,20 @@ async function resolveElicitation(action) {
 }
 async function exportBrief() {
   const button=$('#export-report');button.disabled=true;
+  const reportScope=liveContext();
   try {
     if(!state.sessionId||!state.history.length){toast('Start a conversation before exporting its brief.');return;}
-    const report=await api(projectUrl('/reports/generate'),{method:'POST',body:JSON.stringify({chat_session_id:state.sessionId,message_history:state.history,hint:'Write a concise evidence-grounded brief for the TVA hypothesis-lab demo, issued 15 April 2019 for 16–22 April 2019. Cite actual files and skill calls. Distinguish frozen 9×9 temperature/precipitation, observed ERA5 surface runoff, unavailable HEADWATER runoff forecast, and frozen Trial 0 downscaling. Include a dam readout only if an explicit reservoir, agreed rule and matching source artifact exist. Report missing evidence. Do not invent scores, new training, RiverWare, river temperature, releases or plant MW.'})});
-    download((report.slug_suggestion || 'tva-live-brief')+'.md',`# ${report.title}\n\n${report.summary || ''}\n\n${report.body || ''}`,'text/markdown');toast('VISTA report draft downloaded. Review it before presenting.');
+    const report=await api(projectUrl('/reports/generate'),{method:'POST',body:JSON.stringify({chat_session_id:state.sessionId,message_history:state.history,hint:isAprilContext()?'Write a concise evidence-grounded brief for the TVA hypothesis-lab demo, issued 15 April 2019 for 16–22 April 2019. Cite actual files and skill calls. Distinguish frozen 9×9 temperature/precipitation, observed ERA5 surface runoff, unavailable HEADWATER runoff forecast, and frozen Trial 0 downscaling. Include a dam readout only if an explicit reservoir, agreed rule and matching source artifact exist. Report missing evidence. Do not invent scores, new training, RiverWare, river temperature, releases or plant MW.':'Write a concise Water4Energy HEADWATER development brief from this conversation. Cite actual saved sources, distinguish H100 training from Lux run names, retain the comparison phrase the 1979–2017 week already in the example files, and report missing evidence. Do not invent scores or submit jobs.'})});
+    if(!isLiveContext(reportScope))return;
+    download((report.slug_suggestion || 'water4energy-brief')+'.md',`# ${report.title}\n\n${report.summary || ''}\n\n${report.body || ''}`,'text/markdown');toast('VISTA report draft downloaded. Review it before presenting.');
   }catch(error){toast(`Could not export brief: ${error.message}`);}finally{button.disabled=false;}
 }
 
 
 // Bind once. All execution actions originate in explicit user interaction.
+$('#active-context').addEventListener('change',event=>selectContext(event.target.value));
 $$('.nav-item').forEach(el=>el.addEventListener('click',()=>switchView(el.dataset.view)));
-$('.brand').addEventListener('click',event=>{event.preventDefault();switchView('introduction');});
+$('.brand').addEventListener('click',event=>{event.preventDefault();switchView('development');});
 $('#skills-topbar').addEventListener('click',()=>switchView('skills'));
 $('#skills-refresh').addEventListener('click',async()=>{await refreshSkills();await refreshKnowledge();await refreshDemo();});
 $('#demo-setup-button').addEventListener('click',showSettings);
@@ -534,7 +576,7 @@ $$('[data-close-dialog]').forEach(el=>el.addEventListener('click',()=>el.closest
 $('#settings-form').addEventListener('submit',async event=>{
   event.preventDefault();if(state.busy){$('#settings-status').textContent='Finish or stop the current turn before changing connections.';return;}
   const button=event.submitter;button.disabled=true;
-  try{state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;clearLiveConversation(true);TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
+  try{state.contextRevision++;state.drafts={};state.config=await api('/api/config',{method:'POST',body:JSON.stringify({backend_url:$('#backend-url').value.trim(),project:$('#project-name').value.trim()})});state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.status=null;state.skills=null;state.knowledge=null;state.demoEvidence=null;clearLiveConversation(true);TVAHypothesisDemo.reset();await refreshDemo();$('#skill-count').textContent='—';$('#skills-topbar-count').textContent='—';$('#settings-status').textContent='Checking VISTA…';await refreshConnection();resetActivity();showWelcome();renderResults();toast('Local connection saved.');}
   catch(error){$('#settings-status').textContent=error.message;}finally{button.disabled=false;}
 });
 $('#activity-toggle').addEventListener('click',()=>{const log=$('#activity-log');log.hidden=!log.hidden;$('#activity-toggle').setAttribute('aria-expanded',String(!log.hidden));});
@@ -552,7 +594,7 @@ $('#stop-button').addEventListener('click',async()=>{
   try{await api(projectUrl(`/chat-sessions/${state.sessionId}/run/stop`),{method:'POST',body:'{}'});toast('Stop requested for the agent turn. Submitted cluster jobs must be checked separately.');}
   catch(error){toast(error.message);}
 });
-function chooseUpload(){if(!state.status?.project_found){toast('Open VISTA and connect your TVA project first.');showSettings();return;}$('#upload-input').click();}
+function chooseUpload(){if(!state.status?.project_found){toast('Open VISTA and connect your project first.');showSettings();return;}$('#upload-input').click();}
 $('#attach-button').addEventListener('click',chooseUpload);
 $('#upload-input').addEventListener('change',async event=>{await uploadFiles(event.target.files);event.target.value='';});
 $('#reload-files').addEventListener('click',renderFiles);
@@ -561,13 +603,16 @@ $('#elicitation-decline').addEventListener('click',()=>resolveElicitation('decli
 $('#elicitation-dialog').addEventListener('cancel',event=>{event.preventDefault();toast('Accept or decline this VISTA request so the workflow can continue.');});
 
 async function init() {
-  renderResources();showWelcome();renderResults();renderDemoStatus();
+  renderResources();renderResults();renderDemoStatus();
   try {
     const [geo,config,network,demoCase,prompts]=await Promise.all([api('/data/geo.json'),api('/api/config'),api('/data/network.json'),api('/data/demo-case.json'),api('/data/prompts.json')]);
     state.geo=geo;state.config=config;state.network=network;state.demoCase=demoCase;state.prompts=prompts.prompts;
-    TVAHypothesisDemo.init({caseDefinition:demoCase,api,projectUrl,fileUrl,preparePrompt:prepareDemoPrompt,showDetails,toast});
+    TVAHypothesisDemo.init({caseDefinition:demoCase,api,projectUrl,fileUrl,preparePrompt:prepareAprilPrompt,showDetails,toast});
     TVAHypothesisGuide.init({caseDefinition:demoCase,prompts:state.prompts,preparePrompt:prepareDemoPrompt,usePrompt,showFigures:openCaseFigures,showDetails,overviewOpen:false});
-    TVACaseJourney.init({caseDefinition:demoCase,prompts:state.prompts,guide:TVAHypothesisGuide,preparePrompt:prepareDemoPrompt,navigate:switchView});
+    Water4EnergyWorkflow.init({navigate:switchView,prepareQuestion:prepareProjectPrompt});
+    TVACaseJourney.init({caseDefinition:demoCase,prompts:state.prompts,guide:TVAHypothesisGuide,preparePrompt:prepareAprilPrompt,prepareProjectPrompt,methodRequest:id=>Water4EnergyWorkflow.methodRequest(id),openCase:openTVACase,navigate:switchView});
+    updateContextUI();
+    api('/api/workbench-assets').then(assets=>Water4EnergyWorkflow.setAssets(assets)).catch(()=>{});
     TVAComposerResize.init();
     TVALiteratureLibrary.init({api,preparePrompt:prepareDemoPrompt,showDetails,toast});
     renderPromptLibrary();renderSkills();renderSiteContext();renderMap();renderResults();showWelcome();

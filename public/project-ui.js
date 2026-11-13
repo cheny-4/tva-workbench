@@ -32,6 +32,7 @@ function renderPromptHints() {
 // Retained name for the existing app initialization; no separate library view.
 function renderPromptLibrary() {renderPromptHints();}
 function usePrompt(id) {
+  if(typeof isAprilContext==='function'&&!isAprilContext()){toast('Open the TVA case to prepare an April question.');return;}
   if(state.busy){toast('Finish the current turn before preparing another question.');return;}
   const prompt=state.prompts.find(item=>item.id===id);if(!prompt || typeof prompt.livePrompt!=='string')return;
   prepareDemoPrompt(prompt.livePrompt);
