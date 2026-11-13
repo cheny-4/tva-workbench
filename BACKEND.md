@@ -1,4 +1,4 @@
-# Local VISTA adapter · v0.14.0
+# Local VISTA adapter · v0.14.1
 
 The combined launcher and the HTTP wrapper have separate responsibilities:
 
@@ -51,7 +51,7 @@ The six April guided questions and original catalog remain intact. Their dates a
 
 ## Browser API contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.14.0",instance_id,connection_id}`.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.14.1",instance_id,connection_id}`.
 - `GET /api/config`: `{backend_url,project}`. `POST`/`PUT` accepts only those two fields.
 - `GET /api/status`: connection/project availability, loaded skill names and read-only resource status. Results are cached for 15 seconds; `?fresh=1` bypasses the wrapper cache. A connection or facility badge does not validate a science result or job environment.
 - `GET /api/skills`: selected-project declarations/details and distinct loaded count. A missing/unavailable project returns `count:null`, an empty connected project returns `count:0`. `?fresh=1` refreshes the cache; unrelated global skills are not exposed.
@@ -99,7 +99,7 @@ The local media endpoint recognizes these files under `public/assets/`:
 
 The player requires both video and captions, has controls/captions enabled, and does not autoplay. The April score frame remains empty until an approved raster is supplied; it stays inside the Score details. Dali supplies these media and the voiceover. The numerical four-week comparison is independent of that April image slot.
 
-The interface/setup version is **0.14.0**. The case definition's embedded `0.12.1` is retained case metadata. The April prompts, hypothesis-step logic, case contract and ORNL/Genesis marks remain preserved.
+The interface/setup version is **0.14.1**. The case definition's embedded `0.12.1` is retained case metadata. The April prompts, hypothesis-step logic, case contract and ORNL/Genesis marks remain preserved.
 
 Run the checks below and see [VERIFICATION.md](VERIFICATION.md) for final automated/live results and their scope:
 
@@ -108,3 +108,5 @@ python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s backend/tests -v
 node --test tests/*.cjs
 ```
+
+The v0.14.1 interface/package patch adds the VISTA GitHub attribution link. Its backend project, skill files and saved evidence retain the v0.14.0 bytes. A matching v0.14.0 backend is reused directly; no skill migration is needed.

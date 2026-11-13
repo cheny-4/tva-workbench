@@ -1,4 +1,4 @@
-# Water4Energy workbench · v0.14.0
+# Water4Energy workbench · v0.14.1
 
 The **Water4Energy workbench** opens on **HEADWATER development**: a guided explanation of one recorded weather-model development example. **TVA · 16–22 April 2019** remains one selectable case inside the project. The product name stays Water4Energy workbench on every screen.
 
@@ -6,7 +6,7 @@ The **Water4Energy workbench** opens on **HEADWATER development**: a guided expl
 
 ## Launch the combined package
 
-1. Extract **Water4Energy-Workbench-v0.14.0-All-in-One-Mac.zip** into a writable folder.
+1. Extract **Water4Energy-Workbench-v0.14.1-All-in-One-Mac.zip** into a writable folder.
 2. Double-click **Start TVA Workbench.command** inside `TVA-Workbench`.
 3. Keep Terminal and VISTA open while using the page.
 
@@ -94,7 +94,7 @@ The exact original Trial 0 scorer command remains unavailable and is reported as
 
 ## Sources, versions and development
 
-This revision builds on [Dali's 12 November action list](https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md) and the supplied development discussion. Pinned source commits and SHA-256 receipts accompany the backend readers. The original April catalog, case definition, evidence schema and partner marks are retained. The embedded `0.12.1` in `demo-case.json` is case metadata; the independent interface/setup version is **0.14.0**.
+This revision builds on [Dali's 12 November action list](https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md) and the supplied development discussion. Pinned source commits and SHA-256 receipts accompany the backend readers. The original April catalog, case definition, evidence schema and partner marks are retained. The embedded `0.12.1` in `demo-case.json` is case metadata; the independent interface/setup version is **0.14.1**.
 
 | Tag | Interface |
 | --- | --- |
@@ -115,6 +115,7 @@ This revision builds on [Dali's 12 November action list](https://github.com/dali
 | v0.13.2 | Source-bound answer briefs, stable evidence replay, figure following/history fixes, and one combined setup package |
 
 | v0.14.0 | Plain-language HEADWATER recorded cycle, dated history, context-specific questions and corrected review artifacts |
+| v0.14.1 | Clickable VISTA GitHub credit in the combined Mac package |
 
 Earlier versions remain in Git history at `https://github.com/cheny-4/tva-workbench.git`. ORNL and Genesis marks are retained.
 
@@ -131,3 +132,5 @@ node --test tests/*.cjs
 Node is needed only for developer checks. Build the complete ZIP with `python3 tools/build_release.py --output /path/to/output`. See [BACKEND.md](BACKEND.md), [VISTA_SETUP.md](VISTA_SETUP.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BRANDING.md](BRANDING.md) and [DATA_NOTES.md](DATA_NOTES.md) for technical contracts and source notes.
 
 Guided sent requests show the question first, with the complete instructions under **Request details**. An unreadable tool-protocol response is shown as an unavailable answer with **Prepare question again**; retry still requires a person to press Send. The response is not replaced by a fabricated result.
+
+The **Powered by VISTA** credit opens [VISTA’s GitHub repository](https://github.com/Genesis-VISTA/vista) in a new tab. v0.14.1 retains the v0.14.0 backend payload without a skill migration.

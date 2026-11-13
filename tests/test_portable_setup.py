@@ -616,12 +616,12 @@ class PortableSetupTests(unittest.TestCase):
         self.assertEqual(report['upgraded_from'], '0.13.2')
         self.assertEqual(report['upgrade_sources'], ['0.13.2'])
         self.assertEqual(self.fake.project['id'], original_id)
-        self.assertEqual(report['interface_version'], '0.14.0')
+        self.assertEqual(report['interface_version'], self.module.VERSION)
         for name, data in original_outputs.items():
             self.assertEqual(self.fake.outputs[name], data)
         replacements = [data for method, path, data in self.fake.requests if path.endswith('/skills/from-output')]
         self.assertEqual(len(replacements), 8)
-        self.assertTrue(all(data['folder'].startswith('w4e-v0140-') for data in replacements))
+        self.assertTrue(all(data['folder'].startswith('w4e-v' + self.module.VERSION.replace('.', '') + '-') for data in replacements))
         backups = list((self.root / '.local/upgrade-backups').glob('v0132-*/original-skills.zip'))
         self.assertEqual(len(backups), 1)
         with ZipFile(backups[0]) as archive:

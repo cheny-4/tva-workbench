@@ -1,5 +1,5 @@
 Water4Energy workbench — combined Mac package 1
-Interface v0.14.0
+Interface v0.14.1
 
 Send this single ZIP to Dali. There is no second setup download.
 
@@ -33,7 +33,7 @@ launcher prints and opens another local port. Use the printed address rather
 than an older saved browser tab. Ctrl+C stops the workbench; VISTA stays under
 its own application's control. Reopening this same package resumes setup safely.
 
-Included: v0.14.0 interface; ORNL/Genesis marks; eight saved-evidence adapters
+Included: v0.14.1 interface; ORNL/Genesis marks; eight saved-evidence adapters
 with pinned source snapshots and provenance; eight lead documents; original
 saved evidence plus versioned answer readouts; integrity manifest; and one Mac
 launcher.
@@ -69,3 +69,6 @@ Troubleshooting
   Verified upgrades keep the original project configuration and complete skill
   files in .local/upgrade-backups. This backup contains no model credentials.
   Do not include .local when forwarding a package you have already launched.
+
+Package update v0.14.1: Powered by VISTA links to the VISTA GitHub repository.
+The backend setup and saved scientific evidence are unchanged from v0.14.0.

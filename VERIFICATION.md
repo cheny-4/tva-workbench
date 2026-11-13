@@ -1,3 +1,7 @@
+# v0.14.1 package update
+
+This patch adds a clickable **Powered by VISTA** link to `https://github.com/Genesis-VISTA/vista`, opening a new tab with `noopener noreferrer`. The combined Mac ZIP contains that link and consistent interface/setup version labels. The complete backend payload is byte-identical to v0.14.0, so its science validation below remains applicable and an existing matching backend is reused without migration. Package integrity, launcher permissions, local-state exclusions and extracted-launch checks are repeated for this ZIP.
+
 # v0.14.0 verification
 
 Validation completed on 13 November 2026. This release makes the recorded HEADWATER workflow easier to follow, fixes development-context answers and artifact provenance, and retains the April case contract. No training, new scientific inference/scoring, dataset download, flag mutation or HPC submission was performed.
