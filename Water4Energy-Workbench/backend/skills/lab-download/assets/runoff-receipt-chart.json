@@ -1,0 +1,15 @@
+{
+  "kind": "derived_observation_receipt_summary",
+  "figure": "w4e-april-runoff-receipt.png",
+  "figure_sha256": "ad97eb40caaf651ab29cf16c7640a50eadb72c8a580bc1ebdcd68ec6ebb96458",
+  "receipt_sha256": "666793dcff76424c9dcf65542dcf0c5e68c5e487b4beb40ffef84388c443b499",
+  "receipt_repo_path": "HEADWATER/hypothesis_lab/runs/20261102_sro_sample/receipt.json",
+  "receipt_commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+  "valley_week_mm": 7.364,
+  "case": {
+    "start": "2019-04-16",
+    "end": "2019-04-22",
+    "issued": "2019-04-15"
+  },
+  "origin": "Existing workbench receipt chart rendered once from the committed ERA5 valley receipt. No spatial arrays, forecast, or new scientific calculation."
+}

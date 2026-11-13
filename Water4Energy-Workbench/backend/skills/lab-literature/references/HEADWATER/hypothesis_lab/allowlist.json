@@ -1,0 +1,50 @@
+{
+  "description": "Paths the hypothesis lab may read. Relative to HEADWATER root.",
+  "score_sources": [
+    "docs/INPUT_RUN_COMPARISON.json",
+    "docs/INPUT_RUN_COMPARISON.md",
+    "docs/INPUT_VARIABLE_BRIEF_20261013.md",
+    "docs/SEASONAL_FIT.md",
+    "docs/V1_RESULT_PLAIN.md"
+  ],
+  "notes": [
+    "docs/NEXT_INPUTS.md",
+    "docs/JULY2019_SOUTHEAST_DEPARTURE.md",
+    "docs/INPUT_VARIABLE_DISCUSSION_20261013.md",
+    "docs/TRAINING_DATA_DESIGN.md",
+    "docs/HIGH_IMPACT_EVENTS.md",
+    "docs/DET_V1_MAP_DEMONSTRATION.md",
+    "docs/DET_V1_INPUTS.md",
+    "docs/ERA5_WB2_DOWNLOAD_PLAN.md",
+    "docs/WB2_TRAINING_SAMPLES.md",
+    "docs/FRONTIER_CONTINUE.md",
+    "docs/EXPERIMENT_SUMMARY_20261023.md",
+    "docs/RESLIM_VALLEY_REPORT_20261022.md",
+    "docs/SPRING_SET_PURPOSE.md",
+    "docs/GPU_PARALLEL_NOTE_20261022.md",
+    "docs/PARALLEL_QUEUE_20261024.md",
+    "docs/TEMPORAL_ATTENTION_AND_LEAD_INDEX.md",
+    "hypothesis_lab/runs/20261026_wave_scores/FINDINGS.md",
+    "docs/PARALLEL_BOARD.md",
+    "hypothesis_lab/board.json"
+  ],
+  "literature": [
+    "docs/literature/catalog.csv",
+    "docs/literature/bibliography.bib",
+    "docs/literature/README.md",
+    "docs/literature/download_manifest.csv",
+    "docs/literature/pdfs/"
+  ],
+  "run_dirs_when_present": [
+    "runs/det_v1/",
+    "runs/det_v2_oni/",
+    "runs/det_v2_gulf/",
+    "runs/det_v2_ps/"
+  ],
+  "policy": {
+    "numbers_only_from_files": true,
+    "train_requires_human_flag": true,
+    "no_live_web_literature_v1": true,
+    "blocks_reproposal_enforced": true
+  }
+}

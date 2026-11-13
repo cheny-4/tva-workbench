@@ -1,0 +1,187 @@
+{
+  "extracted": "2026-10-24",
+  "host": "ccsi-gpu-node1",
+  "note": "Means are the four 2019 issue weeks. Taken from each run's heldout_2019_scores.json. That file is gitignored; this slice is the ledger copy.",
+  "runs": [
+    {
+      "id": "det_v2_soil_k3",
+      "folder": "runs/det_v2_soil_k3",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Soil CNN with a 3x3 first convolution; second convolution stays 1x1",
+      "added": ["kernel_3"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": [
+        "runs/det_v2_soil_k3/heldout_2019_scores.json",
+        "docs/EXPERIMENT_SUMMARY_20261023.md"
+      ],
+      "best_epoch": 400,
+      "conclusion": "Four-week valley temperature 0.796 K. April 0.863 K beats the historical week. January worsens to 0.737 K. Valley precipitation 0.0303 m.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.601,
+        "temperature_valley_rmse_mean": 0.7957,
+        "precip_valley_rmse_mean": 0.0303,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 0.7371, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.0213},
+          "2019-04-15": {"temperature_valley_rmse": 0.863, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0349},
+          "2019-07-15": {"temperature_valley_rmse": 1.1744, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0409},
+          "2019-10-15": {"temperature_valley_rmse": 0.4085, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0242}
+        }
+      }
+    },
+    {
+      "id": "det_v2_soil_k9",
+      "folder": "runs/det_v2_soil_k9",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Soil CNN with a 9x9 first convolution; second convolution stays 1x1",
+      "added": ["kernel_9"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": [
+        "runs/det_v2_soil_k9/heldout_2019_scores.json",
+        "docs/EXPERIMENT_SUMMARY_20261023.md"
+      ],
+      "best_epoch": 398,
+      "conclusion": "Best four-week valley temperature so far, 0.767 K. January 0.597 K and April 0.828 K. July 1.260 K is behind the historical week. Valley precipitation 0.0301 m, still on the reference.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.598,
+        "temperature_valley_rmse_mean": 0.7668,
+        "precip_valley_rmse_mean": 0.0301,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 0.5969, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.0198},
+          "2019-04-15": {"temperature_valley_rmse": 0.8282, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0373},
+          "2019-07-15": {"temperature_valley_rmse": 1.2597, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0408},
+          "2019-10-15": {"temperature_valley_rmse": 0.3825, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0225}
+        }
+      }
+    },
+    {
+      "id": "det_v2_reslim",
+      "folder": "runs/det_v2_reslim",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Reslim trunk, patch 6, global residual loss, on the soil files",
+      "added": ["reslim_patch_6"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": [
+        "runs/det_v2_reslim/heldout_2019_scores.json",
+        "docs/RESLIM_VALLEY_REPORT_20261022.md"
+      ],
+      "best_epoch": 12,
+      "conclusion": "Global 2019 temperature 1.525 K beats the 1x1 soil CNN. Valley mean 1.015 K loses. January 0.848 K and October 0.847 K are the gap.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5245,
+        "temperature_valley_rmse_mean": 1.0154,
+        "precip_valley_rmse_mean": 0.03,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 0.8482, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.0236},
+          "2019-04-15": {"temperature_valley_rmse": 1.176, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0318},
+          "2019-07-15": {"temperature_valley_rmse": 1.1907, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0401},
+          "2019-10-15": {"temperature_valley_rmse": 0.8467, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0244}
+        }
+      }
+    },
+    {
+      "id": "det_v2_reslim_valley",
+      "folder": "runs/det_v2_reslim_valley",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Reslim patch 6 with valley temperature weight 1; epoch chosen on 2018 valley RMSE",
+      "added": ["valley_temperature_weight_1"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": ["runs/det_v2_reslim_valley/heldout_2019_scores.json"],
+      "best_epoch": 2,
+      "conclusion": "April valley temperature 0.710 K beats the historical week. Four-week mean 0.916 K still loses to the soil CNN. Kept epoch 2 of 22.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.6773,
+        "temperature_valley_rmse_mean": 0.9156,
+        "precip_valley_rmse_mean": 0.0332,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 1.0078, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.024},
+          "2019-04-15": {"temperature_valley_rmse": 0.7102, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0364},
+          "2019-07-15": {"temperature_valley_rmse": 1.2147, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0458},
+          "2019-10-15": {"temperature_valley_rmse": 0.7297, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0268}
+        }
+      }
+    },
+    {
+      "id": "det_v2_reslim_valley01",
+      "folder": "runs/det_v2_reslim_valley01",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Reslim patch 6 with valley temperature and precipitation weight 0.1",
+      "added": ["valley_score_weight_0.1"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": ["runs/det_v2_reslim_valley01/heldout_2019_scores.json"],
+      "best_epoch": 28,
+      "conclusion": "Four-week valley temperature 2.128 K. Three weeks are about 2.5 K. Retired.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5218,
+        "temperature_valley_rmse_mean": 2.1279,
+        "precip_valley_rmse_mean": 0.0327,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 2.7272, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.03},
+          "2019-04-15": {"temperature_valley_rmse": 2.6572, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0369},
+          "2019-07-15": {"temperature_valley_rmse": 2.5036, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0373},
+          "2019-10-15": {"temperature_valley_rmse": 0.6237, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0266}
+        }
+      }
+    },
+    {
+      "id": "det_v2_reslim_patch2",
+      "folder": "runs/det_v2_reslim_patch2",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Reslim trunk, patch 2, same width and global loss as det_v2_reslim",
+      "added": ["reslim_patch_2"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": [
+        "runs/det_v2_reslim_patch2/heldout_2019_scores.json",
+        "docs/EXPERIMENT_SUMMARY_20261023.md"
+      ],
+      "best_epoch": 10,
+      "conclusion": "Valley temperature mean 1.124 K, worse than patch 6. Valley precipitation 0.0283 m is the best rain mean. April rain moves off the reference and still misses the observed streak.",
+      "notes": "Followed by det_v2_reslim_patch2_soilresid."
+    },
+    {
+      "id": "det_v2_reslim_patch2_soilresid",
+      "folder": "runs/det_v2_reslim_patch2_soilresid",
+      "status": "scored",
+      "hypothesis_status": "already_tested",
+      "blocks_reproposal": true,
+      "intervention": "Patch-2 Reslim residual also sees root-zone soil and the static maps",
+      "added": ["soil_residual"],
+      "season_mask": "all_four_months",
+      "examples": "headwater_examples_v1_soil",
+      "score_refs": [
+        "runs/det_v2_reslim_patch2_soilresid/heldout_2019_scores.json",
+        "docs/EXPERIMENT_SUMMARY_20261023.md"
+      ],
+      "best_epoch": 13,
+      "conclusion": "Valley temperature mean 0.955 K. April 0.904 K and July 1.153 K beat the historical week. January 1.103 K is worse. Misses the 9x9 bar, so Reslim temperature variants stop.",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5035,
+        "temperature_valley_rmse_mean": 0.9547,
+        "precip_valley_rmse_mean": 0.0305,
+        "weeks": {
+          "2019-01-15": {"temperature_valley_rmse": 1.1029, "climatology_valley_rmse": 0.6688, "precip_valley_rmse": 0.0229},
+          "2019-04-15": {"temperature_valley_rmse": 0.9039, "climatology_valley_rmse": 1.0903, "precip_valley_rmse": 0.0319},
+          "2019-07-15": {"temperature_valley_rmse": 1.1533, "climatology_valley_rmse": 1.2109, "precip_valley_rmse": 0.0404},
+          "2019-10-15": {"temperature_valley_rmse": 0.6586, "climatology_valley_rmse": 0.475, "precip_valley_rmse": 0.0267}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "run_id": "20261106_second_model",
+  "role": "critic",
+  "date": "2026-11-06",
+  "prior": "Read independently: hypothesis_lab/experiment_ledger.json, runs/temporal_reslim_farm/metrics.json and heldout_2019_scores.json, runs/det_v2_soil_k9/heldout_2019_scores.json, runs/det_v2_reslim_valley and runs/det_v2_reslim_valley01 (metrics.json, heldout_2019_scores.json), hypothesis_lab/runs/20261103_next_set/gefs_week_score.json and gefs_temp_offset.json, hypothesis_lab/runs/20261102_event_departure/analog_grid.json, figures/departure_sort/departure_sort_2018_2019.json, docs/ISSUED_FORECAST_AND_RESLIM_20261106.md, docs/DEPARTURE_PATHS_20261106.md, docs/DEPARTURE_SORT_20261106.md, docs/TEMPORAL_RESLIM_FARM_COMPUTE_20261105.md, scripts/train_temporal_farm.py, and lux/launch_temporal_farm_valley07.sh. Note: experiment_ledger.json was last updated 2026-10-26 and does not yet include the temporal_reslim or temporal_reslim_farm runs.",
+  "novelty_check": {
+    "result": "pass",
+    "reasons": [
+      "E_training_extreme_fit_read, E_departure_ratio_existing_predictions, E_attention_perturbation_read, and E_gefs_days_8_14_score are read-only diagnostics or hindcast evaluations; none repeats a blocked ledger training intervention.",
+      "E_valley_fraction_07 states an explicit delta from ledger-blocked det_v2_reslim_valley (weight 1.0 on valley T, 145 files) and det_v2_reslim_valley01 (unnormalized 1.0 global + 0.1 valley T + 0.1 valley P, 145 files, global epoch selector): it applies a convex 0.3 global / 0.7 mean(valley T, valley P) standardized residual MSE on the 1,976-file weekly farm using the 56-week 2018 valley T RMSE selector, and the PI has already launched it (runs/temporal_reslim_farm_valley07, Lux job 394366 / 394375).",
+      "E_gefs_input_minimal states an explicit delta from prior hindcast scoring and mimicry rules: GEFSv12 issue-time ensemble mean and spread enter as causal predictors in a gated 1-degree residual branch predicting ERA5 residuals. However, the Proposer's 4-calendar-date version (~72 training mornings) is statistically underpowered and placed on do_not_run unless built on the full weekly 2000-2017 farm dates."
+    ]
+  },
+  "unverified_numbers": [
+    {
+      "cited_value": "75 mornings at roughly 5 MB per member per variable",
+      "location": "experiments.json (E_gefs_input_minimal.data_cost) and proposer_notes.md",
+      "issue": "Not found in any repository source file, documentation, or script. In hypothesis_lab/runs/20261103_next_set/gefs_temp_offset.json, 2000-2017 has 67 training issue dates (72 minus 5 missing January examples: 2001, 2005, 2009, 2013, 2017) plus 8 held-out 2018-2019 dates = 75 total dates, which appears to be from the Proposer's prompt rather than a verified repository file, and runs/gefs_reforecast_cache is empty on disk."
+    },
+    {
+      "cited_value": "Unweighted component MSEs (global vs valley T vs valley P)",
+      "location": "experiments.json (E_valley_fraction_07.magnitude_note)",
+      "issue": "Proposer correctly notes existing metrics.json files do not log the unweighted decomposition, and scripts/train_temporal_farm.py only logs the combined train_loss and val_loss. Independent PI measurement on 10 training ready files with a zero-residual prediction yields global MSE ~1.04 and valley MSE ~1.51."
+    }
+  ],
+  "verified_numbers_note": "All other cited scores were verified against source files: temporal_reslim_farm kept epoch 26/46, 2018 56-week valley T RMSE 2.4259 K, train_loss 1.0881 -> 0.8232 -> 0.7836, val_loss 0.9775 (ep 26) -> 0.9518 (ep 46), 2019 four-issue valley T RMSE 1.1957 K (2.1511, 0.7707, 0.8946, 0.9666 K), 2019 4-issue valley precip RMSE (22.97, 40.82, 37.77, 23.26 mm), departure ratios Apr T 0.6516 / P 0.1282 and Jul T 0.6724 / P 0.1722, full-year 2018/2019 T 2.42/2.32 K vs ref 2.61/2.63 K and P 24.2/21.5 mm vs ref 24.5/23.3 mm; det_v2_soil_k9 0.7668 K (0.5969, 0.8282, 1.2597, 0.3825 K) and Apr precip RMSE 0.0373 m (24.7 mm mean vs 24.4 mm climate and 55.9 mm obs); det_v2_reslim_valley ep 2/22, train 3.2805, val 2.9200, 2018 valley T 2.4515 K, 2019 mean 0.9156 K (Apr 0.7102 K); det_v2_reslim_valley01 ep 28/48, train 0.8847, val 1.2707, 2019 mean 2.1279 K; GEFS 2019 raw T 1.7929 K, offset-corrected 1.0465 K (offsets +1.52, +3.37, +1.55, +2.33 K), Apr 2019 rain mean 38.37 mm (range 23.32-49.31 mm); analog_grid.json 2019-04-15 8-neighbor precip means -8.03 to +4.15 mm; departure_sort_2018_2019.json 2019-04-15 p_label 'already_in_condition' (+26.37 mm prior 14d, +31.45 mm obs week, -3.55 mm model week) and hit counts 4/48 T and 7/72 P.",
+  "grades": [
+    {
+      "hypothesis_id": "H_local_path_and_loss_dilution",
+      "grade": "supported",
+      "notes": "Supported by ledger and architecture, though coupled with conditional-mean shrinkage. The valley is 40 of 64,800 cells (~0.06% of global area-weighted loss), day tokens pool 24 channels at 6-degree patches before spatial mixing, and the 1-degree 3x3 week residual reads only last-week T and P (not root-zone soil). However, det_v2_reslim_patch2 (1.124 K) and det_v2_reslim_patch2_soilresid (0.9547 K) already showed that finer patches and adding soil to the local residual still lose to the 9x9 CNN (0.7668 K) and leave rain near reference (0.0305 m). Architecture alone does not create storm precursors absent from the condition."
+    },
+    {
+      "hypothesis_id": "H_conditional_mean_predictability",
+      "grade": "supported",
+      "notes": "Strongly supported for precipitation and synoptic reversals by hypothesis_lab/runs/20261102_event_departure/analog_grid.json and figures/departure_sort/departure_sort_2018_2019.json. Across 1979-2017, 14-day valley state analogs carry only 8/62 temperature events and 8/74 rain events. For 2019-04-15 (+31.45 mm observed), the 8 nearest training analogs across 7-, 14-, 30-, and 90-day windows average -8.03 to +4.15 mm. Under MSE, when the 90-day condition does not separate extreme successors from ordinary weeks, the Bayes-optimal conditional expectation collapses to reference_train, and expanding from 145 to 1,976 correlated weekly files tightens shrinkage around the mean (1.135 K -> 1.196 K). There is NO contradiction between the departure sort's 'already_in_condition' label (+26.37 mm prior fortnight) and the analog result (-8 to +4 mm): 'already_in_condition' only records that the prior 14 days had the same sign (>14.3 mm), whereas analog_grid shows that wet April fortnights in 1979-2017 are followed on average by normal/slightly dry weeks (-8.03 mm cross-date, -3.30 mm same-date), which is why the farm predicted -3.55 mm."
+    },
+    {
+      "hypothesis_id": "H_temporal_pooling_erases_short_signal",
+      "grade": "underdetermined",
+      "notes": "Mechanistically plausible that a single shared query over 90 days x 24 channels dilutes short precursors, but contradicted as the primary explanation for April 2019 rain. First, on the 9x9 CNN, causal 7-day and 15-day daily filters (det_v2_soil_k9_daily7 at 1.082 K / 0.0381 m Apr rain; det_v2_soil_k9_daily15 at 0.8995 K / 0.0371 m Apr rain) already lost to simple 90-day + 7-day averaging (0.7668 K). Second, the Proposer misinterprets 'already_in_condition' on 2019-04-15 as proof of a usable predictive signal erased by temporal pooling; in reality, 14-day analogs had negative mean subsequent rain (-8.03 mm), so preserving the 14-day wet signal still predicts near-zero or negative rain departure."
+    },
+    {
+      "hypothesis_id": "H_extreme_effective_sample",
+      "grade": "supported",
+      "notes": "Supported by the farm expansion result (145 four-date files at 1.135 K vs 1,976 weekly files at 1.196 K) and season pooling across all 52 calendar weeks. Every-seventh-day sampling adds autocorrelation and seasonal regime mixing while extreme events with separable precursors remain sparse in any season-sign-magnitude bin."
+    },
+    {
+      "hypothesis_id": "H_epoch_selection_not_primary",
+      "grade": "supported",
+      "notes": "Supported by runs/temporal_reslim_farm/metrics.json: 2018 56-week valley T RMSE is 2.4259 K at epoch 26 and remains trapped in a narrow band (2.426-2.451 K) from epoch 20 to epoch 46 while global val_loss drops from 0.997 to 0.952. However, selecting checkpoints on all 56 weeks of 2018 introduces a season-pooling confounder when the gate is evaluated on the 4 milder seasonal issue dates (where the farm scored 2.57 K in 2018 vs 2.37 K climate and 2.26 K for 9x9)."
+    },
+    {
+      "hypothesis_id": "H_normalization_not_primary",
+      "grade": "supported",
+      "notes": "Supported by scripts/train_temporal_farm.py and docs/TEMPORAL_RESLIM_FARM_COMPUTE_20261105.md. Per-channel standardization puts T and P residuals on unit variance globally, and float16 quantization error on condition channels is <=0.027 std. Crucially, the PI's zero-residual measurement on 10 ready files shows valley standardized MSE (~1.51) is actually larger than global standardized MSE (~1.04), proving valley errors are not suppressed by unit scaling."
+    },
+    {
+      "hypothesis_id": "H_nonstationarity_secondary",
+      "grade": "supported",
+      "notes": "Supported. A 1979-2017 climatological trend shift cannot explain synoptic-scale precipitation misses (+31.5 mm in April 2019) or opposite-sign weekly errors within 2018 and 2019."
+    },
+    {
+      "hypothesis_id": "H_valley_fraction_07",
+      "grade": "underdetermined",
+      "notes": "Currently running in runs/temporal_reslim_farm_valley07 (Lux job 394366 / 394375; epoch 1 train_loss 1.612, val_loss 2.015, 2018 valley T RMSE 2.632 K). With global MSE ~1.04 and valley MSE ~1.51 on zero-residual predictions, the 0.7 valley term contributes 0.7*1.51 = 1.057 vs 0.3*1.04 = 0.312 for the globe (77% of the initial objective and ~5400x higher per-cell weight in the 40-cell valley). The Proposer's expectation that this run will move individual weeks but fail the joint 0.7668 K + 40.2 mm gate is well-founded: (1) 4-GPU DDP averages 4 weekly files per step at the same lr=1e-4 (1/4 the optimizer updates per epoch compared to 1-GPU temporal_reslim_farm), (2) forcing 77% of the gradient through 6-degree patch tokens and a 3x3 T/P-only local residual risks fast memorization of the 40 valley cells on training weeks and early stopping on 2018 (as in det_v2_reslim_valley keeping epoch 2), and (3) loss reweighting cannot supply initial-state storm information absent from the 90-day condition. Also note a flaw in Proposer's protocol: scripts/train_temporal_farm.py does NOT log the three unweighted MSE components separately."
+    },
+    {
+      "hypothesis_id": "H_gefs_as_causal_input",
+      "grade": "underdetermined",
+      "notes": "Physically well-motivated for days 1-7 rain because 00 UTC GEFSv12 carries the synoptic initial-value state missing from 90-day ERA5 regressions (April 2019 ensemble mean 38.37 mm, wet member 49.31 mm vs 24.41 mm climate). However, two severe flaws affect the Proposer's design and gates: (1) Sample size: the Proposer's 4-calendar-date protocol has only 67 available training mornings in 2000-2017 (or ~72 with all 4 dates), which is far too small to fit even a gated 1-degree spatial conv branch over 4 maps without severe overfitting; the weekly 2000-2017 farm set (~936 mornings, ~1,040 through 2019, ~50 GB) is required if any neural branch is trained. (2) Realistic ceiling vs gate: the Proposer sets a 40.2 mm April 2019 rain pass gate while passing only the ensemble mean (38.37 mm) and spread (std ~8.6 mm) as inputs. A MSE-trained residual branch shrinks toward the conditional expectation and is bounded near the GEFS ensemble mean (38.4 mm) unless it learns a systematic positive multiplicative bias or nonlinear spread-to-tail mapping across storms. Expecting an MSE network fed a 38.4 mm mean to clear 40.2 mm while simultaneously fixing GEFS's 1.047 K offset-corrected temperature error down to <=0.7668 K on all four weeks is nearly a setup for automatic falsification."
+    }
+  ],
+  "do_not_run": [
+    "E_gefs_input_minimal_four_dates_only",
+    "E_gefs_joint_trunk_with_1979_1999_era_mask"
+  ],
+  "kill_tests": [
+    {
+      "experiment_id": "E_training_extreme_fit_read",
+      "kills_the_claim_if": "On 1979-2017 training event weeks (|T dep| > 2 K or |P dep| > 10 mm), the kept epoch-26 checkpoint achieves median model_valley_departure_rms / observed_valley_departure_rms >= 0.5 with correct sign on >= 50% of events while 2018-2019 stays at 4/48 T and 7/72 P.",
+      "then": "Kills H_local_path_and_loss_dilution as the primary cause of departure collapse (proving the 6-degree trunk and global loss can represent and fit large valley departures in-sample, shifting blame to generalization/overfitting). Conversely, if training events without 14-day precursors collapse while training events with strong, non-canceling analogs also collapse in-sample, capacity/path dilution is confirmed; note that in-sample underfitting alone does NOT falsify H_conditional_mean_predictability unless separated by analog separability (using analog_grid / k-NN successor variance on the training set)."
+    },
+    {
+      "experiment_id": "E_valley_fraction_07",
+      "kills_the_claim_if": "runs/temporal_reslim_farm_valley07 (Lux job 394366 / 394375) finishes with 2019 four-issue valley temperature mean > 0.7668 K, OR any 2019 issue week worse than det_v2_soil_k9 (0.5969, 0.8282, 1.2597, 0.3825 K), OR 16-22 April 2019 valley rain < 40.2 mm (or 2018 56-week valley T RMSE fails to beat 2.4259 K).",
+      "then": "Permanently kills all loss-reweighting variants on TemporalSpatialReslim (H_valley_fraction_07 and any other global/valley convex weight). Do not run 0.5, 0.9, or channel-specific valley weights on this trunk."
+    },
+    {
+      "experiment_id": "E_gefs_days_8_14_score",
+      "kills_the_claim_if": "Across the eight 2018-2019 issue mornings, the GEFSv12 days 8-14 ensemble-mean valley precipitation RMSE and bias-corrected temperature RMSE do not beat the 1979-2017 date-specific days 8-14 climatology on both 2018 and 2019.",
+      "then": "Kills extending GEFSv12 inputs beyond day 7. Fix the forecast horizon boundary at day 7."
+    },
+    {
+      "experiment_id": "E_gefs_input_minimal",
+      "kills_the_claim_if": "Trained with a frozen trunk on the weekly 2000-2017 farm dates (~936 mornings, not the underpowered 67-morning 4-date subset) and selected on 2018, the model fails to reach <= 0.7668 K on the 2019 four-issue valley temperature mean (with no week worse than det_v2_soil_k9), OR fails to beat the raw GEFSv12 ensemble-mean rain benchmark (38.37 mm on 2019-04-15 and lower 4-week valley precip RMSE than both 9x9 at 0.0301 m and raw GEFS mean).",
+      "then": "Kills neural fusion of GEFSv12 into HEADWATER. Keep the non-neural operational split already established in docs/ISSUED_FORECAST_AND_RESLIM_20261106.md: det_v2_soil_k9 for days 1-7 temperature and the five raw GEFSv12 member totals for days 1-7 precipitation."
+    }
+  ],
+  "bottom_line": "On (a), the temporal-spatial Reslim collapses on large 2018 and 2019 departures for two compounded reasons: first, an irreducible conditional-mean limit under MSE where 90-day ERA5 conditions do not distinguish extreme successors from ordinary weeks (proven by the analog grid showing 2019-04-15's 8 nearest 14-day training analogs averaged -8.03 mm despite the prior fortnight being wet, so there is no contradiction with 'already_in_condition' and more weekly files simply tighten predictions around the climate reference); second, a structural resolution bottleneck where 6-degree patch tokens, single-query 90-day pooling, and a 3x3 local residual lacking root-zone soil prevent cell-level valley temperature adjustments that the 9x9 soil CNN handles locally. On (b), the already-launched 0.7 valley / 0.3 global run (runs/temporal_reslim_farm_valley07, where the valley term supplies ~77% of the initial gradient because zero-residual valley MSE is ~1.51 vs ~1.04 global, and 4-GPU DDP halves the per-epoch step count by 4x at lr=1e-4) will likely overfit the 40 valley cells early and move individual weeks, but it cannot invent missing storm precursors and will fail the joint 0.7668 K temperature and 40.2 mm April rain gates—which should permanently close loss-weighting experiments. On (c), GEFSv12 is the only physically sound way to inject issue-morning synoptic storm information for days 1-7, but the Proposer's 4-calendar-date subset (~67-72 training mornings) is far too small to train even a lightweight 1-degree spatial branch without overfitting (the full ~936-morning 2000-2017 weekly farm set is required), and under MSE an input branch fed the GEFS ensemble mean (38.4 mm on April 2019) has a realistic ceiling near 38.4 mm rather than the 49.3 mm wettest member or the 40.2 mm gate unless it learns a reliable spread-driven tail shift without letting GEFS's 1.047 K temperature bias degrade the 0.767 K 9x9 temperature benchmark."
+}

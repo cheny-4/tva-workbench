@@ -1,19 +1,31 @@
-# Hypothesis-lab walkthrough
+# Water4Energy workflow · v0.15.0
 
-This version follows [Dali's 2 November2026 TVA plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md) and the HEADWATER [lab README](https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/README.md) and [runtime](https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/RUNTIME.md).
+The project remains **Water4Energy workbench** on every screen. It uses one VISTA project, **Water4Energy-TVA-agent-loop**, the existing launcher filenames and ORNL/Genesis marks. This revision selectively incorporates Dali's supplied workbench content while retaining the verified local runtime, combined setup and April contract.
 
-The loop is ledger-first: read what was scored/closed/blocked; let the Proposer identify an open gap; let the Critic check novelty and evidence; let the Referee select a protocol; retain human approval before training; return scored evidence to the ledger. This interface prepares requests and displays source artifacts; a clicked card does not establish that the roles ran or that an experiment passed.
+## Three contexts, one conversation layout
 
-The scientific case is one issued week,16–22April2019. Temperature/precipitation come from existing frozen9×9 evidence; runoff is an ERA5 observation with the forecast unavailable; the Trial0 downscale comparison was already scored. Native VISTA forum/debate orchestration is a separate feature and is not assumed by these skill contracts.
+**HEADWATER development** remains the first view. The recorded question is whether soil information and a local neighborhood can improve a weekly weather estimate. Five development steps connect question, documented inputs, specific change, recorded execution and score. A separate Downscaling example introduces monthly local refinement.
 
-The core skills, KB lead sources and artifact schema are documented in [VISTA_SETUP.md](VISTA_SETUP.md). Project/skill/index readiness and file metadata are read from VISTA. Missing components remain visible. Dam readout stays optional and last; choosing a background study location never enables or selects a dam policy.
+**Hypothesis lab · 24 October 2026** follows one completed cycle: ledger → proposer → critic → referee → human gate → result back to the ledger. Its six original records are pinned under `HEADWATER/hypothesis_lab/runs/20261024_track_review/`. The proposal adds soil/static information to a Reslim correction. Its measured four-week error of 0.955 K and January error of 1.103 K miss the primary stopping tests. The direction stops; the 9×9 soil model remains the valley model. The pack requires human acceptance but provides no separate acceptance receipt. This is a historical cycle, not a claim about the current selected November brief or an independently verified scheduler date.
 
-The earlier broad LSTM-to-economics pipeline remains project context in prior Git versions, rather than a claim of execution in this walkthrough. No training, download, scientific agent run or HPC submission was performed to author this interface.
+**TVA · 16–22 April 2019**, issued 15 April, remains the separate case. Its six questions, guarded prompt catalog, hypothesis guide, case metadata, schema, verified narratives and 32 original evidence files are protected. The network retains 54 study locations and its 12-headwater grouping. A marker does not choose an operational reservoir/rule.
 
-## Method, decision context and case use
+Conversation stays on the left while the selected page or evidence uses the right. Each context has a separate draft/session association. Busy turns block context switching; asynchronous checks reject old context/session results. Prepared questions are editable and require manual Send. The composer height is adjustable. Successful file displays drive figure following, including repeat displays; manual inspection pauses it.
 
-v0.12.0 separates the teaching surface from the conversation. Hypothesis lab introduces the loop and the frozen April evidence. Its selection state is independent of the live guide; selecting a role does not imply that an agent ran. TVA Case Lab prepares explicit guarded questions, then waits for the user to Send. A closed workflow reference remains available beside evidence, and History is a secondary Case Lab control.
+## Scientific distinctions
 
-TVA network introduces four decision questions without prescribing a release or filling rule. General flood-storage, flow, energy-water, navigation and water-quality context was checked against TVA's [Managing the Tennessee River for Multiple Benefits](https://www.tva.com/environment/managing-the-river) and [How TVA Manages Water Levels](https://www.tva.com/Environment/Lake-Levels/How-TVA-Manages-Water-Levels) on 9 November 2026. The Norris cold-water concern and spring fill/hold entry point follow the project's [15 September briefing](https://github.com/daliwang/water4energy_projectPlan/blob/main/TVA_Task3_Briefing_Summary_20260915.md) and [2 November demo plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md), read from the previously supplied local source copies.
+The H100/CCSI `det_v2_soil_k9` comparison is temperature error across four 2019 weeks: about 0.77°C versus 0.86°C for **the 1979–2017 week already in the example files**. These are errors, not actual temperatures, an April-only score or proof that soil information alone caused the improvement. Some weeks and rainfall remain weak. Lux lists run names separately.
 
-These context summaries contain no operating thresholds, live reservoir measurements, new simulation or plant-level MW values. Normandy/Norris readout still requires an agreed rule and matching source artifact. Browsing the wider study network does not change that contract.
+Dali's five supplied PNGs have pinned hashes and scopes. Three show four saved weeks; temperature is air temperature, and precipitation is weekly totals in mm. They do not show the October soil-residual result. The two refinement maps cover all 30 days of April 2019, 1° to 1/24° (about 4 km), with monthly mean and daily 95th percentile. Temperature is daily maximum temperature; precipitation is mm/day.
+
+Monthly refinement is distinct from the protected weekly Trial 0 comparison, its 0.25° output and 730-day standardized aggregate score. Neither establishes a HEADWATER-to-downscaler handoff. Original arrays and figure-generating calculations are not bundled. The runoff summary is observed ERA5, not forecast runoff, a spatial map or reservoir inflow.
+
+The original HEADWATER answer narratives remain unchanged. Its November pack contains several proposals without an established selected current brief. The historical 2 November board and supplied 12 November off flags remain distinct; no saved status authorizes a new run. Later completed April persistence/spring scores supersede older pending language. The exact original Trial 0 scorer remains missing, and the optional dam skill needs an agreed reservoir/rule.
+
+## Sources and execution
+
+Sources are pinned to HEADWATER `5ea54ac4dd817ab38c82284331974d6668afde09` and Dali's supplied workbench `d0199a817ddbfa0fbf65c9e81d9fcc53081611ee`, alongside the original April provenance. The registry contains 69 source records; the frozen legacy registry retains its original 57 records. Nine source/guide documents are indexed.
+
+Guided requests select a matching context/profile, quote a source-checked answer and display returned files through actual tool calls. Reading a saved proposal, critique or referee record does not run that role. No current brief, approval, command or coupled pipeline is invented. Unreadable raw provider tool framing becomes an unavailable answer with a draft-only manual retry.
+
+Dali supplies video/captions, approved home-score image and voiceover separately. The local media gate stays limited to the named nonempty MP4/VTT/PNG/JPG paths, requires captions for video and never autoplays. Package creation and setup run no science job. Live acceptance checks initiate only saved-reader conversations; their actual outcomes and limitations belong in [VERIFICATION.md](VERIFICATION.md).

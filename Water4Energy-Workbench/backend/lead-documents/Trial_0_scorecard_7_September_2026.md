@@ -1,0 +1,89 @@
+# Trial 0 scorecard · 7 September 2026
+
+Original JSON rendered for indexing. Aggregate test split, not an April-only score.
+
+```json
+{
+  "ckpt": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/model/runs/run_20260907_220510_trial0_unet/last.pt",
+  "pack": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/trainingData/processed/daily_image_trial0",
+  "y_nc": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/trainingData/processed/daily_image_trial0/samples_SE025deg_Y_v0.nc",
+  "split": "test",
+  "n": 730,
+  "device": "cuda",
+  "tva_bbox": {
+    "west": -90.5,
+    "east": -81.0,
+    "south": 34.0,
+    "north": 37.8,
+    "n_cells": 624,
+    "note": "G1 lon/lat bbox; tva_boundary.shp not on this host"
+  },
+  "persistence": "yesterday y_std on packed calendar (lag-1); pack has no missing days",
+  "metric_space": "standardized (y_std / x_std)",
+  "scores": {
+    "unet": {
+      "rmse": 0.18799709248103944,
+      "tva_rmse": 0.1666677165092453,
+      "pattern_corr": 0.9706646939475934,
+      "rmse_t2m": 0.08529234327350045,
+      "tva_rmse_t2m": 0.07032182510149826,
+      "pattern_corr_t2m": 0.9825457417235923,
+      "rmse_tp": 0.3117148441387112,
+      "tva_rmse_tp": 0.2781672801710711,
+      "pattern_corr_tp": 0.9320779657305861,
+      "rmse_msl": 0.039847113652909556,
+      "tva_rmse_msl": 0.031814907446693706,
+      "pattern_corr_msl": 0.9973703743886014
+    },
+    "bilinear": {
+      "rmse": 0.20447576065624656,
+      "tva_rmse": 0.1731618640172792,
+      "pattern_corr": 0.9673416268349708,
+      "rmse_t2m": 0.08693919069941308,
+      "tva_rmse_t2m": 0.07037312279049834,
+      "pattern_corr_t2m": 0.9823256496592812,
+      "rmse_tp": 0.3410172119342331,
+      "tva_rmse_tp": 0.28986613774069614,
+      "pattern_corr_tp": 0.9221352474159815,
+      "rmse_msl": 0.03974730648717249,
+      "tva_rmse_msl": 0.03131036936577638,
+      "pattern_corr_msl": 0.9975639834296495
+    },
+    "persistence": {
+      "rmse": 1.0987682078257381,
+      "tva_rmse": 1.1115302094771984,
+      "pattern_corr": 0.41131044830920965,
+      "rmse_t2m": 0.7639135534416439,
+      "tva_rmse_t2m": 0.7754427180733776,
+      "pattern_corr_t2m": 0.5650041470904367,
+      "rmse_tp": 1.465058463155446,
+      "tva_rmse_tp": 1.4848930824437983,
+      "pattern_corr_tp": 0.22563733120543775,
+      "rmse_msl": 0.9444122542568548,
+      "tva_rmse_msl": 0.9488305140744585,
+      "pattern_corr_msl": 0.4432898666317546
+    }
+  },
+  "wet_day": {
+    "index_in_split": 473,
+    "date": "2019-04-19",
+    "tva_mean_tp_mm": 38.35702896118164,
+    "se_mean_tp_mm": 19.38059425354004
+  },
+  "dry_day": {
+    "index_in_split": 18,
+    "date": "2018-01-19",
+    "tva_mean_tp_mm": 0.0,
+    "se_mean_tp_mm": 0.0031903760973364115
+  },
+  "figures": {
+    "wet_dry_tp_board": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/Experiment/figures/trial0_test_wet_dry_tp.png",
+    "wet_tp": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/Experiment/figures/trial0_test_wet_2019-04-19_tp.png",
+    "dry_tp": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/Experiment/figures/trial0_test_dry_2018-01-19_tp.png",
+    "wet_t2m": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/Experiment/figures/trial0_test_wet_2019-04-19_t2m.png",
+    "dry_t2m": "/mnt/proj-shared/VASTdata/7xw/Water4Energy/Experiment/figures/trial0_test_dry_2018-01-19_t2m.png"
+  },
+  "pass_tp_and_t2m_vs_bilinear": true
+}
+
+```

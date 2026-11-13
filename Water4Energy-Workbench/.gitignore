@@ -9,3 +9,9 @@ __pycache__/
 venv/
 *.log
 *.zip
+!backend/evidence.zip
+!backend/migrations/v0131-original-files.zip
+
+!backend/migrations/v0132-original-files.zip
+
+!backend/migrations/v0140-original-files.zip

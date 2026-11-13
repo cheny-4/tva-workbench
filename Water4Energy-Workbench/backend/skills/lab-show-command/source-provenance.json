@@ -1,0 +1,623 @@
+[
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/README.md",
+    "blob_sha": "cdba8d38d7b04302a04d7616892da9a7daede19f",
+    "sha256": "09b308ac4131d58a9e1b9d7a25c5ec3ab0e8a867b6a7db2d43c7ea5e324d43c8",
+    "size": 2513,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/README.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/RUNTIME.md",
+    "blob_sha": "b8610bd0a6b6e2b99f3bdbcd0b6eb795600dda63",
+    "sha256": "8521cfe39d0a8afea98ccc922df6e767319a7cc88efab3248976a918185060b6",
+    "size": 5396,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/RUNTIME.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/STATUS.md",
+    "blob_sha": "2d68f44f9e358a04564019d94ddb8f640e0d1a3b",
+    "sha256": "8baee2160af4308c20d77140dfe4137beb3ff74f601ab986dbb82d1b5615a0fc",
+    "size": 8224,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/STATUS.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/experiment_ledger.json",
+    "blob_sha": "5456c41cea5b8d267fb10068751ac4ad6eaf5c64",
+    "sha256": "d376eb31ad30813d33d6cad15efc5d87bc02978924595278349970e93bf50ec0",
+    "size": 35422,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/experiment_ledger.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/board.json",
+    "blob_sha": "ff8900447cc2ace056885caf257af68f35ccb900",
+    "sha256": "6bd8010cae10728a5f2c1e34436032e286fdee1718afbf1d4c0aaabb971f33b4",
+    "size": 19951,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/board.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/allowlist.json",
+    "blob_sha": "5a86372d5714f45f2fd702040d750579c8987e39",
+    "sha256": "9898fef7e0a8d485f0c5c1391fc154f65dedbb7124bb845a138bab062a27ba98",
+    "size": 1550,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/allowlist.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/scripts/board.py",
+    "blob_sha": "a5a9638753193daa0c6a5b0640f539ce0eb24548",
+    "sha256": "b3bd5483a85c6a8b9581dde80f54ed0509805bf33edd7f38be31944ebfc6f0ea",
+    "size": 7818,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/scripts/board.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/charges/four_week_departure_v1.md",
+    "blob_sha": "f6cd79e58b716b742da7e0d2c333edf6ef8f365a",
+    "sha256": "c8cb70a6700236982fb047da8228554dd004ec5ffef6dcead935341bb232c19a",
+    "size": 1598,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/charges/four_week_departure_v1.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/prompts/proposer.md",
+    "blob_sha": "ac8086f96a3187df53109d67bf08fefa9b31e093",
+    "sha256": "8ce57924e52444bea7c33478b6bb5a62d541f652ebe005cb692150bafb7c70c4",
+    "size": 1268,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/prompts/proposer.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/prompts/critic.md",
+    "blob_sha": "54f9e766b1b80d1e046a04836b8363fdae75709b",
+    "sha256": "efb8fa1c5ed28d6899af01f896486df9a69ccfb39704c83916e11871e2c2b27a",
+    "size": 889,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/prompts/critic.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/prompts/referee.md",
+    "blob_sha": "228b890eeaacfcd909dfe90ff221f1702b4a1c14",
+    "sha256": "de35b0117e50df11f7d1ff3f2fea36a5badc3479dbc9b4ce932f03de98c7e9c0",
+    "size": 683,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/prompts/referee.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/README.md",
+    "blob_sha": "9f3d85178dd88805a75545a61b3d3284986b908f",
+    "sha256": "d74163831482a0966a421ec82e5a31b641e3d91615a2fcc8f37634d93a8e17c7",
+    "size": 1569,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/README.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/ledger.load.md",
+    "blob_sha": "5a6844ec630dcc83c119090869a15a57d1e5439e",
+    "sha256": "a0f39f7cca31138b7395380688acfc1fbc4d0312623fa33da2e227d1f862f7a6",
+    "size": 664,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/ledger.load.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/board.status.md",
+    "blob_sha": "6fdf620fef588000af43dbf1d0641cd09cc2428a",
+    "sha256": "08bb37b5b56e21341fda58f72bc49cea85525036261d93e90d1c282536d7a08b",
+    "size": 1010,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/board.status.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/lit.catalog.md",
+    "blob_sha": "f1a94b523667737913435dcfc6fffd60ced8e737",
+    "sha256": "46e5a10f97a80f40cfddec6b10c910fe0c676c110798307c43a28e69975b6509",
+    "size": 399,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/lit.catalog.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/lit.cite_extend.md",
+    "blob_sha": "1d2c29c58a78bde0e68f7106beedfdfe510f9828",
+    "sha256": "dde199214d790af90b3808ce19a0667331702c2a077f2694ce4fa44a002ac470",
+    "size": 1826,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/lit.cite_extend.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/skills/lit.pdf_extract.md",
+    "blob_sha": "d95f6196f7718ffc87135a2d28ad8ad78549bc6b",
+    "sha256": "a692bb9c51cc0809aa8fa88c3ab53e767147f6c0309e925e0e98c525b1514df1",
+    "size": 474,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/skills/lit.pdf_extract.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/TVA_AGENT_DEMO_PLAN_20261102.md",
+    "blob_sha": "5a4fef6f35795221ba0e99d71ff03935fc06534c",
+    "sha256": "43c795a02185113b85e8faab1aac92314b4841a8a04e6fccc6a6c55b0353d165",
+    "size": 7780,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/TVA_AGENT_DEMO_PLAN_20261102.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/INPUT_RUN_COMPARISON.json",
+    "blob_sha": "4196205c4462d23132a76a3cd9245559fadd4834",
+    "sha256": "594b63332c7eaf839dff3147442e08b0463e3fc911fdb7cc586bf3ec001d3aa3",
+    "size": 9557,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/INPUT_RUN_COMPARISON.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/INPUT_RUN_COMPARISON.md",
+    "blob_sha": "4612804a8b6c7780d1d61a383dae56688183d085",
+    "sha256": "77c0b8dba1dab8c0b12414443ddf0aa13e4617c03984815915f1ea249295a95f",
+    "size": 9225,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/INPUT_RUN_COMPARISON.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/PARALLEL_BOARD.md",
+    "blob_sha": "27b41fb51ad91572c51220a4a79d11bf78e54686",
+    "sha256": "5fd1b623f8473f3fb0183b53d6a9c00f2291e8cbe1908f0e82abfa9bb755cef0",
+    "size": 5382,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/PARALLEL_BOARD.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/NEXT_INPUTS.md",
+    "blob_sha": "65a4bf012d3468ebd2bdf63a1f1aa14bb625f99b",
+    "sha256": "b01c48cc7072deda5d0be4cb4b8391778b532370ac36f0bec0d0a24392454ecc",
+    "size": 12297,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/NEXT_INPUTS.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/FRONTIER_DATASET_AGENT.md",
+    "blob_sha": "a3411468f3413a4c944d624f185b8f4e18fe55a3",
+    "sha256": "184221a9482a320e744e91fa655c0e1ebc50df29663553a49f348dd8c5950b09",
+    "size": 13616,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/FRONTIER_DATASET_AGENT.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/DATA_PREP_PLAN_20261021.md",
+    "blob_sha": "4f2662ac56f8ed11c23224180a2592d77188fa59",
+    "sha256": "fbc7f0da00ac8b3ef84b6485ebd102a8c908baee4e2f07109f317e4aa3aa90b9",
+    "size": 10069,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/DATA_PREP_PLAN_20261021.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "lux/README.md",
+    "blob_sha": "ddec84969a2a664e3a3821686ddabc67073394d9",
+    "sha256": "66c1b4454ab5d009007bf3c69ad19039f0cd0465ce686d39f136e2c73521c25f",
+    "size": 3780,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/lux/README.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "lux/train_k9.sh",
+    "blob_sha": "9ab243a7fa4bcdf248a606c0c1e429497ef2343a",
+    "sha256": "b2a054a92c1da4335e3c28694e0cf1dd3c8e4107c36412b5618711173e3c3df3",
+    "size": 1839,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/lux/train_k9.sh"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/literature/README.md",
+    "blob_sha": "b290f9ff9069613b6d6643824a19ab9ddaecd44e",
+    "sha256": "b8511afc4ba39581fb5d65bb83cb618e07735409a5ed13c85b22de59d5c09ba8",
+    "size": 11057,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/literature/README.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/literature/catalog.csv",
+    "blob_sha": "f66f73f7f3d48c9867fbad0f83a9c68eab0648b3",
+    "sha256": "f0f2ba7e846fcaae675e2f2e67ce7fd983f320f23a8f79e4096d41ac6d8983b8",
+    "size": 3320,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/literature/catalog.csv"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/literature/download_manifest.csv",
+    "blob_sha": "eee0c3278de0737365f89bb4508747123e748bfd",
+    "sha256": "baa1d7806c4ac85e7578a6e94dca9f96bfe86bd4acd3a9224424a1783d4e0cd7",
+    "size": 4884,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/literature/download_manifest.csv"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/literature/DOWNLOAD.md",
+    "blob_sha": "45bcec2d15c059919327c82396836f7d7241309e",
+    "sha256": "193e4d88f05226c4842ef80b1a1f70f049c2e1b4621971624565a9016c0466ab",
+    "size": 3240,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/literature/DOWNLOAD.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/literature/MISSING_PDFS.md",
+    "blob_sha": "0c4630c221c76614ecc20c44b2162dcfaa4ed4d3",
+    "sha256": "c35e1369b79cea3686ecd63c29f7b293f81182dd722d50c51f1931d8f34269bd",
+    "size": 816,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/literature/MISSING_PDFS.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/PROPOSER_BRIEF.md",
+    "blob_sha": "effd8ad3eb04f1638c798d55f3e2e747345921e6",
+    "sha256": "ce4a9ca1855eea2cd551b2adc7f5892e9d1c52399ec1f83b6725b9d8c382d127",
+    "size": 1691,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/PROPOSER_BRIEF.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/april_map_notes.md",
+    "blob_sha": "0da04ae0b05ce61068ac3885d6183c29f1df2f57",
+    "sha256": "52dba6d8dea2fe3e46882e9c0c41a8996e9e6d813416aca0755bfcfad611b314",
+    "size": 3831,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/april_map_notes.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/april_score_slice.json",
+    "blob_sha": "6b00d08a2fe0a6000057fc53711fb54efcaea887",
+    "sha256": "6c3b7d591c8116d203ddff733610a392d2d4cf6ecad2ebd218f021c390133c92",
+    "size": 2703,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/april_score_slice.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/critique.md",
+    "blob_sha": "c2b4048496f9ab2d082dc9a05417e8eb4b6c1b53",
+    "sha256": "ba77342a10bdbc5a83fab8737786cdfed31fae6b35a3f1477ee3559502502781",
+    "size": 1010,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/critique.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/critique.json",
+    "blob_sha": "830bd68ee57f6d583c6816283ec0232ae36e9989",
+    "sha256": "733fb1785d66e1f3f492de4be14bd20b5beda8ae5d249754a36140d6124709ae",
+    "size": 3460,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/critique.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/experiments.json",
+    "blob_sha": "147af13c6c27e0bb180c74f88e2835dabc72ec24",
+    "sha256": "c533abc9c232a7386ad03e5b1c8ec3cc011bca85c4d339dbc9523b540ad73a02",
+    "size": 3735,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/experiments.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261018_iter1_april/referee_brief.md",
+    "blob_sha": "125acb64783db0e4597786c42ba5430202c8f922",
+    "sha256": "e011c9252bed2e5172540beb47a1c6ae99ea08041cf9a3cc78292bde04831aa3",
+    "size": 3667,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261018_iter1_april/referee_brief.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261102_sro_sample/receipt.json",
+    "blob_sha": "ce55f6de6e74aca726632050ce436c919b9deca2",
+    "sha256": "666793dcff76424c9dcf65542dcf0c5e68c5e487b4beb40ffef84388c443b499",
+    "size": 1338,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261102_sro_sample/receipt.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "figures/april2019_temporal_reslim/tva_t2m_20190415_reference_obs_k9_reslim_temporal.png",
+    "blob_sha": "468e57c4ab6db17058f2107ea856540cbddc4054",
+    "sha256": "a0e7d429c493f20d13cd070d47412f8b5f2f63ead54578327b2d2abea28e7241",
+    "size": 88834,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/figures/april2019_temporal_reslim/tva_t2m_20190415_reference_obs_k9_reslim_temporal.png"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "figures/april2019_temporal_reslim/tva_precip_20190415_reference_obs_k9_reslim_temporal.png",
+    "blob_sha": "bc3e859ff34dc4fcb6671e5b84144ae5284a9d58",
+    "sha256": "72483ee0f7f1f8e4783a9763325b9d63af8b322bc47dd93874bf160c1606fa8a",
+    "size": 87199,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/figures/april2019_temporal_reslim/tva_precip_20190415_reference_obs_k9_reslim_temporal.png"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "scripts/plot_april2019_temporal_reslim.py",
+    "blob_sha": "6e15905843a366c0b6ddddc5560ba1bc18f8b7d4",
+    "sha256": "f62a865a29c724d80083421b03a08268a13a1fc39d4c46a0cb0e588550bcef3b",
+    "size": 5116,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/scripts/plot_april2019_temporal_reslim.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "scripts/plot_obs_target_comparison.py",
+    "blob_sha": "08bb8075374d379ac22580ca81fe7551343843e6",
+    "sha256": "e7edcf8b83dcca8b05f99b0d1325a9e23d1e1b15a89ddf1191f482ca4422c52b",
+    "size": 9648,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/scripts/plot_obs_target_comparison.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "scripts/insert_sro_into_sample.py",
+    "blob_sha": "5ba10cdf472ac5da48fae0a6e0ad08115a2cc229",
+    "sha256": "ce7cace224605ea8264dc2f65548f7e764667d7f0d6b9daa3eede334ef885998",
+    "size": 5780,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/scripts/insert_sro_into_sample.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "headwater/week_month.py",
+    "blob_sha": "f408109dffade55562301a9a993e5b63345934d6",
+    "sha256": "91c714f04eac17fc9a23f1fc2aac9262d6e5e131daef01a16fedaa8c9d9f0e19",
+    "size": 2676,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/headwater/week_month.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "headwater/sro_daily.py",
+    "blob_sha": "b0084469e8aca08410ecb309b282ea7bb97a80bc",
+    "sha256": "21a86a23b7b940a08f25b6e33ab805c31b7a9b26f8f79335958a25060d0d2092",
+    "size": 4874,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/headwater/sro_daily.py"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "docs/WEEK_MONTH_SEASON_20261104.md",
+    "blob_sha": "caefa5bbe5958dad09ca88140e21effb547f6cf2",
+    "sha256": "17365afe6760d623af268888749d2e5e4bdbc1c4e1f42271b8797918c5d8010d",
+    "size": 4608,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/WEEK_MONTH_SEASON_20261104.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261106_second_model/hypotheses.json",
+    "blob_sha": "051d8b1802dcc5cad44b1f4ab142d82063e446ce",
+    "sha256": "651ed8b431abd56e848f7bb39aaa0f2cceab8323c0f88b83216febb2f445930b",
+    "size": 14049,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/hypotheses.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261106_second_model/experiments.json",
+    "blob_sha": "c8e107c62ad49c58407c55b2aa4efd6fc7d9aa13",
+    "sha256": "f66d8b42799891e16604d50444666e5c503b2d539787439a5262c4585c1a6def",
+    "size": 14489,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/experiments.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261106_second_model/critique.json",
+    "blob_sha": "d5e99694173ea951cafa254fa991d683403a62e9",
+    "sha256": "7d9c4e2c3d5cd32e4dfd6c23012437ac3cf1ee2695563f13720abd56b239cab2",
+    "size": 16944,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/critique.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261106_second_model/referee_brief.md",
+    "blob_sha": "844a2f0ed481b7d760a1d8000d12e268636833a2",
+    "sha256": "958713dc40947f25856fc0c4a7de7be42f441c4aecf24bfb94999071f5fb722e",
+    "size": 3742,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/referee_brief.md"
+  },
+  {
+    "repo": "water4energy_experiment",
+    "commit": "ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5",
+    "path": "Trial0_run_20260907_220510_scorecard_ext.json",
+    "blob_sha": "55a9f4cac1dc83cf0ad6c27b1dcb96431a8c2417",
+    "sha256": "dcd5b78fefd324bd9459c9e440cf3316c19d6666d2fea03d5bd2234f104319c3",
+    "size": 3198,
+    "url": "https://github.com/daliwang/water4energy_experiment/blob/ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5/Trial0_run_20260907_220510_scorecard_ext.json"
+  },
+  {
+    "repo": "water4energy_experiment",
+    "commit": "ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5",
+    "path": "figures/trial0_test_scorecard_ext.json",
+    "blob_sha": "55a9f4cac1dc83cf0ad6c27b1dcb96431a8c2417",
+    "sha256": "dcd5b78fefd324bd9459c9e440cf3316c19d6666d2fea03d5bd2234f104319c3",
+    "size": 3198,
+    "url": "https://github.com/daliwang/water4energy_experiment/blob/ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5/figures/trial0_test_scorecard_ext.json"
+  },
+  {
+    "repo": "water4energy_experiment",
+    "commit": "ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5",
+    "path": "figures/trial0_test_wet_2019-04-19_t2m.png",
+    "blob_sha": "7264d2a2078821af822ba16fc8d3c172e7709db4",
+    "sha256": "76aca0fd6567ec881579ef74ff388db50ec8d117951f34791bb039f95ae96681",
+    "size": 86107,
+    "url": "https://github.com/daliwang/water4energy_experiment/blob/ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5/figures/trial0_test_wet_2019-04-19_t2m.png"
+  },
+  {
+    "repo": "water4energy_experiment",
+    "commit": "ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5",
+    "path": "figures/trial0_test_wet_2019-04-19_tp.png",
+    "blob_sha": "1f187839f1a80cae69f357427c7c33fb6018a6eb",
+    "sha256": "1f4beaf885f8b88565607565d86ad3dcea0bbaffb029feb464119a0192bc7eb7",
+    "size": 87551,
+    "url": "https://github.com/daliwang/water4energy_experiment/blob/ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5/figures/trial0_test_wet_2019-04-19_tp.png"
+  },
+  {
+    "repo": "water4energy_projectPlan",
+    "commit": "d0d5f4fbd12ab4517fafa552e759611678867ac0",
+    "path": "TVA_Task3_Briefing_Summary_20260915.md",
+    "blob_sha": "f9910bf67e3ba6cb6a32d4b52b77bdd674a869c3",
+    "sha256": "a5a15c94ed249963bd78be3e86f40fad4e46e4a9cc363dc778aeac160b8f291f",
+    "size": 6510,
+    "url": "https://github.com/daliwang/water4energy_projectPlan/blob/d0d5f4fbd12ab4517fafa552e759611678867ac0/TVA_Task3_Briefing_Summary_20260915.md"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d9c185da04bb72e51414c72c4004447cd38292ee",
+    "path": "Water4Energy_Workbench_Actions_20261112.md",
+    "blob_sha": "a25c696fede65ad52b2912077c0723385d7d55de",
+    "sha256": "eed64f33d3e07937512fc272eea8d2c23b88389ef18daf8948afb4e916dc887e",
+    "size": 12910,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md",
+    "blob_sha": "68e99ded96689e59b44dab4b36ba346f9d6b0afa",
+    "sha256": "c71458796351881229d801ed85e8b67f1cdc75f8722f5287bb30e2ea29d2fcdd",
+    "size": 689,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/RESIDUAL_RESULT.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/critique.json",
+    "blob_sha": "102dfa9d023ccb244be1d83efbc9875558ccdfd6",
+    "sha256": "0f22da927547cee31ff8a1574942cb22a8db8b64c114a6ff97c8b6dab203805d",
+    "size": 3453,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/critique.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/experiments.json",
+    "blob_sha": "6ecd53b8273d17401d7778b513a3a15500292bf0",
+    "sha256": "dd1c62ef5ed2da911e527142d5065f6aecc2566189dcae880765220449bac633",
+    "size": 2604,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/experiments.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/hypotheses.json",
+    "blob_sha": "5a27245700ea06b54804ab4c44ada741ebcbc280",
+    "sha256": "2e91e1fb99bae0c3d1998194af0bc76411652d9a9148a59ab35992ae86865fd5",
+    "size": 6706,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/hypotheses.json"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/referee_brief.md",
+    "blob_sha": "b3a31ae94832c1fa963811eba735ff2a40c69b6e",
+    "sha256": "0a805723601890f29e2411efdc30d5376919170194147f5a7dd3482bb82656c1",
+    "size": 3427,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/referee_brief.md"
+  },
+  {
+    "repo": "HEADWATER",
+    "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+    "path": "hypothesis_lab/runs/20261024_track_review/score_slice.json",
+    "blob_sha": "1496f15a32374bd7746a7086b12e90f50e74acd3",
+    "sha256": "8fb3ad47bff73f99714f325879a3c58ad09b951c7960a9534a125fb202adfaa5",
+    "size": 9541,
+    "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261024_track_review/score_slice.json"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy_workbench.md",
+    "blob_sha": "ffb654ffdcfac10f7065ed9e08a076855e62619b",
+    "sha256": "fc8b462c339f8e6d9aa2d758b86e06258228b52d5d40847c1a0d22ad5d518702",
+    "size": 12593,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy_workbench.md"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png",
+    "blob_sha": "28591f04fd41255cb564ab42e07a111a29c6226a",
+    "sha256": "dc9a509ccc806f0849aec85cbac1efd360bd13d43e8df5bb5356d73a8fc65c37",
+    "size": 500225,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/tva_t2m_2019_reslim.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png",
+    "blob_sha": "70cfd7d83a12c759765c55024554da05a17ad917",
+    "sha256": "ba0f188af002812c584a7ccea80830ddfc980c6461fc1a39b48914aa53e7c894",
+    "size": 504574,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/tva_precip_2019_reslim.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/valley_temperature_2019.png",
+    "blob_sha": "12caf33784fbf2550abe80aac7ec215dc1cc33a1",
+    "sha256": "5e7266f43b59db7ea7738603011875ce6dc57c0f745fcd4112dcd2e2ef2e7e73",
+    "size": 493275,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/valley_temperature_2019.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png",
+    "blob_sha": "683284871d1e2d064284486ad3a299f73b454072",
+    "sha256": "bf428289b997f11050951470f42c97c6afe3d871566974adb2d224884e391e97",
+    "size": 639561,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/april_2019_tmax_refine.png"
+  },
+  {
+    "repo": "water4energy_SC26Demo",
+    "commit": "d0199a817ddbfa0fbf65c9e81d9fcc53081611ee",
+    "path": "Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png",
+    "blob_sha": "17c1ca604a004974f07f6d27b5ba779b0c1bf4c1",
+    "sha256": "5307f90f25af6e7741aa2a4f021e52e48cdbaf825694923c488d2ea4bb86470d",
+    "size": 723567,
+    "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench/public/assets/april_2019_prcp_refine.png"
+  }
+]

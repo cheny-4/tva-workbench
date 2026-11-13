@@ -1,0 +1,42 @@
+{
+  "written_at": "2026-11-03T14:21:38Z",
+  "sample": "/lustre/orion/geo172/proj-shared/water4energy/trainingData/headwater_examples_week_month_sample",
+  "sro_1deg": "/lustre/orion/geo172/proj-shared/water4energy/trainingData/sro_1deg_daily",
+  "units": "meters in the file; valley means below are millimeters",
+  "runoff_reference_years": "1980-2017",
+  "temperature_precipitation_reference_years": "1979-2017",
+  "files": [
+    {
+      "file": "example_train_20160415.npz",
+      "issue": "2016-04-15",
+      "valley_week_mm": 0.186,
+      "valley_week_climate_mm": 1.739,
+      "valley_month_mm": 5.355,
+      "valley_month_climate_mm": 9.497
+    },
+    {
+      "file": "example_train_20161015.npz",
+      "issue": "2016-10-15",
+      "valley_week_mm": 0.113,
+      "valley_week_climate_mm": 0.746,
+      "valley_month_mm": 0.164,
+      "valley_month_climate_mm": 5.014
+    },
+    {
+      "file": "example_val_20180415.npz",
+      "issue": "2018-04-15",
+      "valley_week_mm": 4.817,
+      "valley_week_climate_mm": 1.739,
+      "valley_month_mm": 10.456,
+      "valley_month_climate_mm": 9.497
+    },
+    {
+      "file": "example_val_20190415.npz",
+      "issue": "2019-04-15",
+      "valley_week_mm": 7.364,
+      "valley_week_climate_mm": 1.739,
+      "valley_month_mm": 15.562,
+      "valley_month_climate_mm": 9.497
+    }
+  ]
+}

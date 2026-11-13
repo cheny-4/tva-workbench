@@ -1,0 +1,288 @@
+{
+  "updated": "2026-10-20",
+  "protocol": {
+    "stage_1": "One added field per run, each compared with det_v1. Every run is kept.",
+    "stage_2": "Combinations after the single-field rows exist. A new folder for each combination.",
+    "fit_years": "1979-2017",
+    "stop_year": "2018",
+    "report_year": "2019",
+    "score": "Valley 2 m temperature RMSE on the four 2019 weeks. Lower is closer to the observed week."
+  },
+  "runs": [
+    {
+      "id": "det_v1",
+      "folder": "runs/det_v1",
+      "added": [],
+      "status": "done",
+      "best_epoch": 400,
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.6017,
+        "temperature_anomaly_correlation_mean": 0.146,
+        "temperature_valley_rmse_mean": 0.9301,
+        "precip_valley_rmse_mean": 0.0306,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.6234,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.444,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.2063,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.4469,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      }
+    },
+    {
+      "id": "det_v2_oni",
+      "folder": "runs/det_v2_oni",
+      "added": [
+        "oni"
+      ],
+      "not_read": [
+        "gulf_sst_anomaly"
+      ],
+      "status": "done",
+      "best_epoch": 400,
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.591,
+        "temperature_anomaly_correlation_mean": 0.1602,
+        "temperature_valley_rmse_mean": 0.9722,
+        "precip_valley_rmse_mean": 0.0333,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.5838,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.5795,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.1561,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.5695,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "January and July valley temperature moved closer. April moved from 1.44 K to 1.58 K. The four-week valley mean moved from 0.93 K to 0.97 K. Not the base of the next single-field run."
+    },
+    {
+      "id": "det_v2_gulf",
+      "folder": "runs/det_v2_gulf",
+      "added": [
+        "gulf_sst_anomaly"
+      ],
+      "not_read": [
+        "oni"
+      ],
+      "status": "done",
+      "best_epoch": 400,
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5704,
+        "temperature_anomaly_correlation_mean": 0.1618,
+        "temperature_valley_rmse_mean": 0.9849,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.599,
+            "climatology_valley_rmse": 0.669
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.505,
+            "climatology_valley_rmse": 1.09
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.169,
+            "climatology_valley_rmse": 1.211
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.667,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "July valley temperature is 1.17 K, a little closer than det_v1. April is 1.50 K, still behind det_v1. The four-week valley mean is 0.98 K. Global temperature RMSE is 1.57 K. Not the base of the pressure run."
+    },
+    {
+      "id": "det_v2_ps",
+      "folder": "runs/det_v2_ps",
+      "examples": "headwater_examples_v1_ps",
+      "added": [
+        "surface_pressure"
+      ],
+      "not_read": [
+        "oni"
+      ],
+      "status": "done",
+      "best_epoch": 400,
+      "n_condition": 24,
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.6176,
+        "temperature_anomaly_correlation_mean": 0.1149,
+        "temperature_valley_rmse_mean": 0.8794,
+        "precip_valley_rmse_mean": 0.0312,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.617,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.2151,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.154,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.5315,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "Four-week valley temperature moved from 0.93 K to 0.88 K. April moved from 1.44 K to 1.22 K and is still behind the historical week at 1.09 K. October moved from 0.45 K to 0.53 K. Global anomaly correlation fell from 0.15 to 0.11."
+    },
+    {
+      "id": "det_v2_oni_jan",
+      "folder": "runs/det_v2_oni_jan",
+      "added": [
+        "oni"
+      ],
+      "season_mask": "January_only",
+      "status": "done",
+      "best_epoch": 400,
+      "examples": "headwater_examples_v2",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5906,
+        "temperature_anomaly_correlation_mean": 0.1665,
+        "temperature_valley_rmse_mean": 0.9709,
+        "precip_valley_rmse_mean": 0.0315,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.6209,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.5671,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.1789,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.5168,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "January-only ONI. January valley 0.621 K vs det_v1 0.623 K (almost flat). April 1.57 K and October 0.52 K are worse than det_v1. Fails the season-mask pass rule. Does not replace det_v1 or det_v2_ps.",
+      "pass_rule": {
+        "rule": "Closer valley T on the on-month; other three months no worse than det_v1",
+        "passed": false,
+        "on_month": "2019-01-15",
+        "on_month_delta_vs_det_v1": -0.0025,
+        "off_months_worse": [
+          "2019-04-15",
+          "2019-10-15"
+        ]
+      }
+    },
+    {
+      "id": "det_v2_gulf_jul",
+      "folder": "runs/det_v2_gulf_jul",
+      "added": [
+        "gulf_sst_anomaly"
+      ],
+      "season_mask": "July_only",
+      "status": "done",
+      "best_epoch": 400,
+      "examples": "headwater_examples_v2",
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.5941,
+        "temperature_anomaly_correlation_mean": 0.1521,
+        "temperature_valley_rmse_mean": 0.9508,
+        "precip_valley_rmse_mean": 0.0309,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.658,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.5067,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.1656,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.4727,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "July-only Gulf. July valley 1.166 K vs det_v1 1.206 K (closer). January, April, and October are all worse than det_v1. Fails the season-mask pass rule. Does not replace det_v1 or det_v2_ps.",
+      "pass_rule": {
+        "rule": "Closer valley T on the on-month; other three months no worse than det_v1",
+        "passed": false,
+        "on_month": "2019-07-15",
+        "on_month_delta_vs_det_v1": -0.0407,
+        "off_months_worse": [
+          "2019-01-15",
+          "2019-04-15",
+          "2019-10-15"
+        ]
+      }
+    },
+    {
+      "id": "det_v2_soil",
+      "folder": "runs/det_v2_soil",
+      "examples": "headwater_examples_v1_soil",
+      "added": [
+        "volumetric_soil_water_root_zone"
+      ],
+      "not_read": [
+        "oni"
+      ],
+      "status": "done",
+      "best_epoch": 400,
+      "n_condition": 24,
+      "heldout_2019": {
+        "temperature_rmse_mean": 1.6219,
+        "temperature_anomaly_correlation_mean": 0.1096,
+        "temperature_valley_rmse_mean": 0.8413,
+        "precip_valley_rmse_mean": 0.0299,
+        "weeks": {
+          "2019-01-15": {
+            "temperature_valley_rmse": 0.6169,
+            "climatology_valley_rmse": 0.6688
+          },
+          "2019-04-15": {
+            "temperature_valley_rmse": 1.1506,
+            "climatology_valley_rmse": 1.0903
+          },
+          "2019-07-15": {
+            "temperature_valley_rmse": 1.1651,
+            "climatology_valley_rmse": 1.2109
+          },
+          "2019-10-15": {
+            "temperature_valley_rmse": 0.4326,
+            "climatology_valley_rmse": 0.475
+          }
+        }
+      },
+      "reading": "Four-week valley mean 0.84 K vs det_v1 0.93 K and det_v2_ps 0.88 K. Every 2019 week beats det_v1 on valley 2 m temperature; April moves from 1.44 K to 1.15 K. Strongest stage-1 valley score so far. Global temperature RMSE and anomaly correlation are slightly worse than det_v1."
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "run_id": "20261106_second_model",
+  "authorization": "Protocols only. This proposer run does not train, submit jobs, download data, or edit existing files.",
+  "experiments": [
+    {
+      "id": "E_training_extreme_fit_read",
+      "status": "proposed_new",
+      "kind": "read_only_diagnostic",
+      "priority": 1,
+      "hypotheses": [
+        "H_local_path_and_loss_dilution",
+        "H_conditional_mean_predictability",
+        "H_extreme_effective_sample"
+      ],
+      "question": "Can the kept temporal farm checkpoint reproduce large departures in its own 1979-2017 training years?",
+      "inputs": [
+        "runs/temporal_reslim_farm/checkpoint.pt",
+        "trainingData/headwater_examples_week_month training split",
+        "the unchanged event thresholds already documented: absolute valley temperature departure greater than 2 K or absolute valley precipitation departure greater than 10 mm"
+      ],
+      "protocol": [
+        "Run inference only with the kept epoch-26 checkpoint; do not optimize.",
+        "Select all 1979-2017 event weeks using targets, then score both event and matched quiet weeks.",
+        "For each channel record observed and model valley departure, sign, model_valley_departure_rms / observed_valley_departure_rms, physical RMSE, season, magnitude bin, and whether the last-14-day departure has the same sign.",
+        "Report medians and hit fractions by temperature/rain, magnitude bin, and precursor class. A hit has the observed sign and at least half the observed departure, matching the existing event definition.",
+        "Compare with 2018 and 2019 using the same table. Do not tune thresholds on 2019."
+      ],
+      "discriminator": {
+        "capacity_loss_architecture": "Large training events are also shrunken or wrong-sign.",
+        "predictability_generalization": "Training events are fit in-sample but analogous 2018-2019 events collapse.",
+        "sample_scarcity": "Fit quality degrades strongly in sparsely populated season-sign-magnitude bins."
+      },
+      "pass_or_stop": "This is a diagnostic, not a model gate. If training extremes are underfit, test path/loss before claiming a predictability limit. If they are fit but held-out extremes fail, do not expect loss reweighting alone to solve generalization."
+    },
+    {
+      "id": "E_departure_ratio_existing_predictions",
+      "status": "proposed_new",
+      "kind": "read_only_diagnostic",
+      "priority": 2,
+      "hypotheses": [
+        "H_conditional_mean_predictability",
+        "H_temporal_pooling_erases_short_signal",
+        "H_normalization_not_primary"
+      ],
+      "question": "How strongly does the temporal farm shrink departures already present in scored files?",
+      "inputs": [
+        "runs/temporal_reslim_farm/heldout_2019_scores.json",
+        "existing 2018 scored predictions and examples",
+        "figures/departure_sort/departure_sort_2018_2019.json"
+      ],
+      "protocol": [
+        "Use score_example fields already present: model_valley_departure_rms, observed_valley_departure_rms, and their ratio.",
+        "Sort by observed departure magnitude and compare ratios for already_in_condition, inside_first_week, reversal, after_day_7, and quiet labels.",
+        "Read temperature and precipitation separately; do not average physical units.",
+        "Flag wrong-direction cases where a large observed departure has a model departure of the opposite sign."
+      ],
+      "existing_anchor_values": {
+        "2019-04-15_temperature_valley_departure_ratio": 0.6515650842826403,
+        "2019-04-15_precipitation_valley_departure_ratio": 0.12817806269963478,
+        "2019-07-15_temperature_valley_departure_ratio": 0.6724357764090747,
+        "2019-07-15_precipitation_valley_departure_ratio": 0.1722002801096805,
+        "2019-04-15_observed_rain_departure_mm": 31.45089632067318,
+        "2019-04-15_model_rain_departure_mm": -3.546554552223821,
+        "2019-04-15_departure_sort_label": "already_in_condition"
+      },
+      "falsifier": "If ratios approach one on large, already-in-condition 2018-2019 events and signs are correct, broad conditional-mean collapse is not supported."
+    },
+    {
+      "id": "E_attention_perturbation_read",
+      "status": "proposed_new",
+      "kind": "read_only_diagnostic",
+      "priority": 3,
+      "hypotheses": [
+        "H_temporal_pooling_erases_short_signal",
+        "H_local_path_and_loss_dilution"
+      ],
+      "question": "Is the precursor lost at temporal pooling or later in the spatial/output path?",
+      "inputs": [
+        "runs/temporal_reslim_farm/checkpoint.pt",
+        "selected training, 2018, and 2019 extreme examples"
+      ],
+      "protocol": [
+        "Save last_day_weights for valley, Gulf, and upstream patches.",
+        "Repeat inference after replacing days 1-76 by their training-date mean, then after replacing days 77-90; do not optimize.",
+        "Repeat with only root-zone soil or precipitation on days 77-90 perturbed to its reference-state value.",
+        "Measure changes in valley departure, not only attention weights."
+      ],
+      "discriminator": {
+        "temporal_pooling": "Recent precursor removal changes the relevant patch token but the learned attention had diluted it.",
+        "spatial_or_decoder": "The patch summary responds to the precursor but the valley output does not.",
+        "missing_predictor": "Neither patch summaries nor output responds and no stored-field perturbation separates events."
+      },
+      "falsifier": "The relevant recent days dominate weights and perturbations propagate to a correct valley departure; temporal pooling is then not the bottleneck."
+    },
+    {
+      "id": "E_valley_fraction_07",
+      "status": "proposed_new",
+      "kind": "training_protocol_not_authorized",
+      "priority": 4,
+      "hypotheses": ["H_valley_fraction_07"],
+      "explicit_delta_from_blocked_runs": "Convex 0.3 global / 0.7 two-channel valley objective on the 1,976-week TemporalSpatialReslim farm. Prior det_v2_reslim_valley added valley temperature weight 1 on the older 145-file Reslim; det_v2_reslim_valley01 added 0.1 of each valley channel while retaining full global weight.",
+      "fixed_components": [
+        "TemporalSpatialReslim patch 6, embed 64, depth 4, four heads, keep ratio 0.25",
+        "same 24 fields and per-channel training normalization",
+        "fit 1979-2017; 2018 validation only; 2019 score once",
+        "same optimizer, learning rate, clipping, and patience as temporal_reslim_farm"
+      ],
+      "objective": "0.3 * masked_map_loss(standardized residual map) + 0.7 * (valley_channel_mse(T) + valley_channel_mse(P)) / 2",
+      "magnitude_note": "The components must be logged separately. Existing metrics do not record an exact decomposition. The global-only farm is 0.823 train and 0.977 validation at kept epoch 26. On the older 145-file Reslim, global plus valley-T weight 1 is 3.280 train and 2.920 validation at kept epoch 2, while global plus 0.1*(valley-T+valley-P) is 0.885 train and 1.271 validation at kept epoch 28. These are different runs and cannot be subtracted to invent component MSEs; they show that a valley term is not numerically negligible.",
+      "epoch_rule": "Keep the checkpoint with the lowest mean physical 2018 valley temperature RMSE across all 56 validation weeks, exactly matching the farm selector; break ties by the 2018 composite objective. Do not select on four 2018 dates, April rain, or any 2019 value.",
+      "required_logging": [
+        "global standardized MSE",
+        "valley standardized temperature MSE",
+        "valley standardized precipitation MSE",
+        "weighted objective",
+        "2018 physical valley temperature and precipitation RMSE",
+        "departure ratios by magnitude bin"
+      ],
+      "pass": [
+        "2019 four-issue valley temperature mean at or under 0.7668 K",
+        "no 2019 issue week worse than det_v2_soil_k9: 0.5969, 0.8282, 1.2597, and 0.3825 K for January, April, July, and October",
+        "16-22 April 2019 valley rain at least 40.2 mm, against 55.9 mm observed, 24.4 mm climate, 24.7 mm 9x9, and 20.9 mm temporal farm"
+      ],
+      "kill": "Stop loss-only variants if either the temperature rule or April-rain rule fails. A better April temperature alone is insufficient: det_v2_reslim_valley already reached 0.710 K in April but its four-week mean was 0.916 K.",
+      "expected_result": "Some valley movement, probably at the cost of the globe and with inconsistent issue-week effects. The 6-degree path bottleneck makes a full pass unlikely."
+    },
+    {
+      "id": "E_gefs_input_minimal",
+      "status": "proposed_new",
+      "kind": "training_protocol_not_authorized",
+      "priority": 5,
+      "hypotheses": ["H_gefs_as_causal_input"],
+      "explicit_delta_from_prior": "GEFS is a causal predictor, not a target to mimic and not a post-hoc replacement forecast. The model predicts ERA5 residuals using fixed issue-time ensemble statistics.",
+      "training_rows": "Use only issue dates with GEFSv12 reforecast and HEADWATER examples in 2000-2017. Keep 2018 for epoch selection and 2019 for one final score. Do not fabricate GEFS for 1979-1999.",
+      "forecast_features": [
+        "five-member ensemble-mean week-mean 2 m temperature anomaly relative to reference_train temperature",
+        "five-member ensemble standard deviation of week-mean 2 m temperature",
+        "five-member ensemble-mean seven-day precipitation anomaly relative to reference_train precipitation",
+        "five-member ensemble standard deviation of seven-day precipitation"
+      ],
+      "bias_and_scaling": [
+        "Compute all feature normalization from 2000-2017 only.",
+        "For temperature, either provide the raw ensemble anomaly plus a train-only calendar-date bias channel, or subtract a calendar-date bias fit on 2000-2017. Never fit an offset on 2018 or 2019.",
+        "The existing train-only offsets are +1.52 K January, +3.37 K April, +1.55 K July, and +2.33 K October; corrected 2019 GEFS still scores 1.047 K, so GEFS temperature must remain an input rather than a replacement.",
+        "Do not select the wettest member using the observed target. Mean and spread are available at issue time; hindsight member choice leaks."
+      ],
+      "injection": "Add a gated 1-degree residual branch over the four GEFS fields, with the forecast valid-time maps regridded to the HEADWATER 1-degree grid. Fuse its two-channel correction after the 6-degree week head and alongside the existing local residual. The branch must not rely solely on 6-degree patch tokens. For the minimal isolation test, initialize from the kept temporal farm checkpoint, freeze the temporal-spatial trunk, and fit only the small GEFS branch on 2000-2017.",
+      "missing_year_policy": {
+        "recommended_minimal": "Train the GEFS branch only on 2000-2017 and keep the pre-2000 farm data only in the already-trained frozen trunk.",
+        "alternative_joint_model": "Zero-fill forecast fields for 1979-1999, add an explicit availability mask, and multiply the GEFS branch output by that mask. This preserves old rows for trunk gradients but gives the branch no fake pre-2000 signal.",
+        "warning": "A mask is perfectly confounded with era; do not interpret it as a climate predictor."
+      },
+      "operational_note": "The retrospective archive is GEFSv12 from 2000. Operational data from 2020 onward must be checked for version and field-contract continuity; the early part of 2020 should not be assumed to be operational v12. Score any 2020+ operational period as a distribution-shift test, not as extra training or epoch-selection data.",
+      "leakage_controls": [
+        "Use only the 00 UTC issue forecast and hours available then: temperature at 24-168 h and precipitation accumulations ending by 168 h.",
+        "Fit regridding, bias correction, and normalization without 2018-2019 targets.",
+        "Keep reference_train fixed at 1979-2017.",
+        "Do not use analyses from the target window, observed-member ranking, or a forecast initialized after the issue time.",
+        "Preserve chronological split and score 2019 once."
+      ],
+      "data_cost": "scripts/score_gefs_reforecast.py performs index-guided byte-range fetches from noaa-gefs-retrospective and caches only retained messages. The current charge records 75 mornings at roughly 5 MB per member per variable; extending to every weekly farm date would be a materially larger new data build. The minimal experiment therefore stays on the four calendar issue dates and reuses the cache contract.",
+      "epoch_rule": "Among branch checkpoints, keep the lowest mean 2018 four-issue valley temperature RMSE; break ties by April 2018 rain error, all specified before reading 2019.",
+      "pass": [
+        "2019 four-issue valley temperature mean at or under 0.7668 K",
+        "no issue week worse than the 9x9 values 0.5969, 0.8282, 1.2597, and 0.3825 K",
+        "16-22 April 2019 valley rain at least 40.2 mm"
+      ],
+      "kill": "If April rain remains below 40.2 mm or the temperature gate fails, do not enlarge the branch or fetch weekly GEFS farm inputs. First score days 8-14 without training; extend the forecast-input horizon only if those leads beat their date-specific climate.",
+      "expected_result": "Rain should move for days 1-7 because the issue-time ensemble already moves April from 24.4 mm climate to 38.4 mm mean with a 23.3-49.3 mm spread. Temperature benefit is less certain because all eight scored raw forecasts are cold and the train-only offset does not clear the existing gate."
+    },
+    {
+      "id": "E_gefs_days_8_14_score",
+      "status": "planned_in_docs",
+      "kind": "read_only_score_after_fetch",
+      "priority": 6,
+      "hypotheses": ["H_gefs_as_causal_input"],
+      "question": "Does issue-time dynamical information remain useful in days 8-14?",
+      "protocol": [
+        "Use the same eight 2018-2019 mornings, five members, valley cells, and latitude weights.",
+        "Score days 8-10 from the existing Days:1-10 object and fetch the documented next span for days 11-14.",
+        "Compare member mean and spread with ERA5 and the 1979-2017 climate of days 8-14. Do not fit a network."
+      ],
+      "decision": "If days 8-14 sit near or behind climate, stop GEFS input at day 7. If they consistently beat climate on 2018 and 2019, define a separate lead-specific input and gate before any train."
+    }
+  ]
+}
