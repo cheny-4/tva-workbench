@@ -1,0 +1,10 @@
+{
+  "product": "Water4Energy workbench",
+  "interface_version": "0.13.2",
+  "bundle_revision": 1,
+  "platform": "macOS",
+  "project": "Water4Energy-TVA-agent-loop",
+  "launcher": "Start TVA Workbench.command",
+  "requires": "Installed VISTA; recipient configures own model credentials",
+  "source_tag": "v0.13.2"
+}

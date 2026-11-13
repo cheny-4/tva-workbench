@@ -85,3 +85,11 @@ Four panels are staged in project outputs using the unchanged evidence contract:
 The readers copy saved figures, read records and render the receipt summary locally. They submit no jobs, train no models and do not rerun inference or scoring. Their eight entry points were checked inside VISTA. Chat sending remains manual; the six conversational cold-open answers have not been certified by this setup. The exact original Trial 0 scorer command is not in the staged bundle and is reported missing rather than invented. The optional dam skill remains unloaded pending an agreed reservoir rule. Video, approved home-score map and voiceover remain with Dali.
 
 The replay project allows file reading, local replay code, file display and retrieval tools. It has no HPC submission tools or HPC job definitions. Existing Genesis_Water4Energy project configuration is retained. Local source bundles and VISTA state are not included in the application ZIP or Git repository.
+
+## v0.13.2 combined setup and grounded readouts
+
+The combined release includes the local project setup and pinned replay skills. Start it through **Start TVA Workbench.command**. The original six indexed sources are supplemented by one derived, source-cited answer guide. Recognized v0.13.1 files are verified and backed up before upgrade; unknown local edits or shared global skills are preserved and reported.
+
+The six April questions use compact, explicitly deterministic saved-evidence readouts rather than flooding the model with obsolete and current archive paragraphs together. Full original records and complete versioned inspection JSON remain available. The agent must use actual `display_file` calls for returned figure paths and distinguish original figures, a derived receipt chart, aggregate scores and the selected week. The optional dam gate still requires an agreed reservoir and rule; the exact original Trial 0 scorer command remains unavailable.
+
+The original 24 staged evidence files retain their bytes. Eight versioned readouts supply the corrected scopes and review chronology. Stable copying preserves identical files and mtimes so later evidence reads do not invalidate saved conversation figures. The original April case dates, manifest schema and guarded prompts remain unchanged.

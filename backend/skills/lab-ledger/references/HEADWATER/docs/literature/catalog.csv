@@ -1,0 +1,23 @@
+key,year,short_title,theme,status,project_link,doi
+hersbach2020era5,2020,ERA5 global reanalysis,datasets,seeded,ERA5_WB2_DOWNLOAD_PLAN.md; DET_V1_INPUTS.md,10.1002/qj.3803
+rasp2024weatherbench2,2024,WeatherBench 2,datasets,seeded,ERA5_WB2_DOWNLOAD_PLAN.md; WB2_TRAINING_SAMPLES.md,10.1029/2023MS004019
+munozsabater2021era5land,2021,ERA5-Land,datasets,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.5194/essd-13-4349-2021
+li2011nash,2011,NASH changes and SE summer rain,southeast_circulation,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md; NEXT_INPUTS.md,10.1175/2010JCLI3829.1
+li2012ridge,2012,NASH western ridge positions,southeast_circulation,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md,10.1007/s00382-011-1234-7
+wei2019isv,2019,SE summer rain 10-20 day ISV,southeast_circulation,seeded,JULY2019_SOUTHEAST_DEPARTURE.md; HIGH_IMPACT_EVENTS.md,10.1007/s00382-018-4345-6
+zorzetto2021nash,2021,NASH and daily CONUS summer precip,southeast_circulation,seeded,JULY2019_SOUTHEAST_DEPARTURE.md; HIGH_IMPACT_EVENTS.md,10.1175/JHM-D-20-0242.1
+ropelewski1986enso,1986,ENSO North American precip/temp,enso_winter,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md; INPUT_VARIABLE_BRIEF_20261013.md,10.1175/1520-0493(1986)114<2352:NAPATP>2.0.CO;2
+koster2001memory,2001,Soil moisture memory,land_memory,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.1175/1525-7541(2001)002<0558:SMMICM>2.0.CO;2
+koster2004coupling,2004,Soil moisture-precip coupling regions,land_memory,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md,10.1126/science.1100217
+koster2010glace2,2010,GLACE-2 first results,land_memory,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md; NEXT_INPUTS.md,10.1029/2009GL041677
+koster2010streamflow,2010,Soil moisture and snow streamflow skill,land_memory,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.1038/ngeo944
+koster2011glace2,2011,GLACE-2 soil moisture skill,land_memory,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.1175/2011JHM1365.1
+seneviratne2010review,2010,Soil moisture-climate review,land_memory,in_notes,JULY2019_SOUTHEAST_DEPARTURE.md,10.1016/j.earscirev.2010.02.004
+wood2006west,2006,Western US seasonal hydro test bed,land_memory,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.1175/BAMS-87-12-1699
+lorenz1969predictability,1969,Multi-scale predictability,week_ahead,in_notes,INPUT_VARIABLE_DISCUSSION_20261013.md,10.3402/tellusa.v21i3.10086
+vitart2017s2s,2017,S2S Prediction Project database,week_ahead,seeded,TRAINING_DATA_DESIGN.md; SEASONAL_FIT.md,10.1175/BAMS-D-16-0017.1
+vitart2018extremes,2018,S2S and extreme events,week_ahead; extremes,seeded,HIGH_IMPACT_EVENTS.md,10.1038/s41612-018-0013-0
+tian2017cfsv2,2017,CFSv2 CONUS week-scale skill,week_ahead,seeded,SEASONAL_FIT.md; TRAINING_DATA_DESIGN.md,10.5194/hess-21-1477-2017
+marino2011falsespring,2011,SE false springs 1901-2007,southeast_spring_cold,seeded,hypothesis_lab/runs/20261018_iter1_april/april_map_notes.md; INPUT_VARIABLE_DISCUSSION_20261013.md,10.1088/1748-9326/6/2/024015
+gu2008springfreeze,2008,2007 eastern US spring freeze,southeast_spring_cold,seeded,hypothesis_lab/runs/20261018_iter1_april/april_map_notes.md; INPUT_VARIABLE_DISCUSSION_20261013.md,10.1641/B580311
+noaa2008easterfreeze,2008,Easter Freeze April 2007 assessment,southeast_spring_cold; extremes,seeded,hypothesis_lab/runs/20261018_iter1_april/april_map_notes.md; HIGH_IMPACT_EVENTS.md,

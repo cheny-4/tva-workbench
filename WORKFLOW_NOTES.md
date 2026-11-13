@@ -35,3 +35,9 @@ No dataset job, training, download, scientific agent run, flag mutation or HPC s
 ## v0.13.1 backend compatibility
 
 Current VISTA accepts kebab-case skill names. The eight exact demo aliases are recognized without changing dotted contract labels or the April prompts/guide/schema. Descriptive Markdown filenames identify indexed lead documents. The local replay setup uses original pinned weather/Trial 0 maps and an explicitly labelled ERA5 receipt-summary chart. It is not a new train, inference, re-score or agent conversation. Local VISTA data remains separate from the source package.
+
+## v0.13.2 answer and evidence corrections
+
+Use the current dated source record rather than an older referee sentence when later evidence exists. The April persistence diagnosis and the later spring score are already recorded; a proposed next experiment must state its new change and cannot present completed work as missing. Weekly precipitation totals are not daily rates or RMSE. Trial 0 test-split aggregates and its single displayed wet day have different scopes, and the pinned files do not establish a HEADWATER-to-Trial-0 handoff. The 12 November demo flags are distinct from historical board flags. Without an agreed rule the optional dam panel cannot invent a fill/hold decision.
+
+Figure following now observes successful display identity, including a redisplay of a checked case figure. Source files remain stable across replay, preserving current conversation history. The scientific hypothesis-step logic, April prompts, case metadata and evidence schema remain unchanged.

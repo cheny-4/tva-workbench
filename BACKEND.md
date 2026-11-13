@@ -17,7 +17,7 @@ The wrapper binds only to `127.0.0.1`. It is intended for presenting from the sa
 
 ## Browser contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.13.1",instance_id,connection_id}`. Lightweight instance identification.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.13.2",instance_id,connection_id}`. Lightweight instance identification.
 - `GET /api/config`: `{backend_url,project}`.
 - `GET /api/workbench-assets`: a read-only local-media presence map with optional `video`, `captions` and `scoreMap` keys. It checks only nonempty, nonsymlink files beneath `public/assets/` at the fixed MP4/VTT/PNG/JPG filenames documented below. It does not enumerate arbitrary directories or write a file.
 - `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
@@ -94,3 +94,11 @@ The local-media endpoint recognizes only:
 The player is hidden unless both video and captions are present. It has controls, no autoplay, captions enabled and a six-node-map poster. The score frame stays labelled empty until an approved raster is present. These files were not supplied for this release. The endpoint reports presence, not scientific validity; Dali supplies the video, captions, map and voiceover. No upload/configuration or execution action is attached to these mounts.
 
 The v0.13.1 browser recognizes the exact VISTA kebab-case aliases for the eight dotted demo contracts, including `lab.show_command` → `lab-show-command`. A similarly prefixed or unrelated skill does not count. Lead-source title matching ignores a trailing document extension, permitting meaningful indexed Markdown filenames while still refusing a generic README. Case validation and step logic are unchanged. Backend replay setup is an explicit separate configuration action, never a startup side effect.
+
+## v0.13.2 combined setup and figure following
+
+The one launcher now prepares the included local backend project before starting the wrapper. Setup uses direct, scoped local VISTA API operations, never an LLM turn. The old v0.13.1 global skill upgrade requires exact metadata/body/source hashes, a matching project policy and no other projects sharing those globals; backups stay in ignored `.local/`. New source documents are appended for indexing without deleting existing sources. Unknown local edits or differing evidence are preserved and reported.
+
+Conversation images retain bounded actual display identity and time. Current records deduplicate by filename and sort by display time, so the last successful display selects the right case or conversation card. Repeated refreshes do not steal focus; manual pause and explicit Resume retain their meanings. Missing/changed records are still rejected. The replay readers preserve identical file bytes and mtimes, including the frozen receipt-summary chart, so later evidence reads do not invalidate valid display history.
+
+The v0.13.2 source guide and task-specific tool facts correct the live narration's units, dates, score scopes and review chronology. The exact original Trial 0 scorer command is still unavailable; reporting that limitation is the correct answer. There is no new training, scoring, dataset download or reservoir operation in setup or acceptance testing.

@@ -1,0 +1,65 @@
+{
+  "run_id": "20261018_iter1_april",
+  "experiment_id": "E2_april_Persistence_table",
+  "date": "2026-10-19",
+  "mode": "document_backed_plus_gpu_f1",
+  "note": "F1 on ccsi-gpu-node1. Valley issue-week persistence recomputed from example NPZs via headwater.train.score_example (last-7-day mean of condition channel 0 vs target). Matches heldout persistence fields already stored under runs/det_v2_*.",
+  "sources": [
+    "headwater_examples_v1/example_val_20190415.npz",
+    "headwater_examples_v1/example_val_20180415.npz",
+    "headwater_examples_v2/example_val_20190415.npz",
+    "runs/det_v2_oni/heldout_2019_scores.json",
+    "docs/INPUT_RUN_COMPARISON.json",
+    "docs/SEASONAL_FIT.md",
+    "docs/V1_RESULT_PLAIN.md",
+    "scripts/f1_april_valley_persistence.py",
+    "headwater_examples_v1/example_val_20190415.npz"
+  ],
+  "valley_temperature_rmse_K": {
+    "2019-04-15": {
+      "historical_week": 1.0903,
+      "det_v1": 1.444,
+      "det_v2_oni": 1.5795,
+      "det_v2_gulf": 1.505,
+      "det_v2_ps": 1.2151,
+      "issue_week_persistence": 3.0524,
+      "issue_week_persistence_note": "GPU F1 from headwater_examples_v1: mean of last 7 condition days T2m vs target week.",
+      "map_bias_too_warm_K": {
+        "det_v1": 1.39,
+        "det_v2_oni": 1.53,
+        "det_v2_gulf": 1.45,
+        "det_v2_ps": 1.14,
+        "source": "figures/input_brief/april2019_t2m.png labels"
+      },
+      "persistence_beats_det_v1": false
+    },
+    "2018-04-15": {
+      "role": "stop_year_error_picture_not_untouched_test",
+      "historical_week": 3.7006,
+      "det_v1": 4.23,
+      "issue_week_persistence": 1.8997,
+      "sources": [
+        "headwater_examples_v1/example_val_20180415.npz",
+        "docs/V1_RESULT_PLAIN.md"
+      ],
+      "reading": "Issue week (1.90 K) much better than historical week (3.70 K) and model (4.23 K). Clearest persistence-discarded case.",
+      "issue_week_persistence_source": "headwater_examples_v1/example_val_20180415.npz",
+      "persistence_beats_det_v1": true
+    }
+  },
+  "global_temperature_rmse_K_2019_04_15": {
+    "det_v1_model": 1.62,
+    "issue_week": 1.9976,
+    "historical_week": 1.637,
+    "source": "score_example on example_val_20190415.npz; SEASONAL_FIT rounded issue week to 2.00"
+  },
+  "e2_conclusion": {
+    "H_persistence_discarded": "supported_on_2018_april_valley if persistence < det_v1; 2019_april_valley now scored on GPU; global_2019_april persistence still worse than model per SEASONAL_FIT",
+    "f1_valley_issue_week_K": {
+      "2019-04-15": 3.052364025366967,
+      "2018-04-15": 1.8996811243744
+    },
+    "next_on_gpu": "F2 season-masked det_v2_oni_jan / det_v2_gulf_jul"
+  },
+  "f1_completed_at": "2026-10-19T23:09:30Z"
+}

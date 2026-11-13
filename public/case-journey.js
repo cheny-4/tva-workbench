@@ -11,6 +11,14 @@
     {id:'design',question:'Which open April gap still needs a reviewed test?',hint:'Separate a proposed idea from recorded review and approval.'},
     {id:'commands',question:'Which existing commands would a person need to review before any future run?',hint:'Display command references without executing them.'}
   ].map(Object.freeze));
+  const ANSWER_PROFILES=Object.freeze({
+    ledger:{reader:'lab.ledger',question:'ledger'},
+    realization:{reader:'lab.realize',question:'weather'},
+    downscale:{reader:'downscale.scorecard',question:'downscale'},
+    runoff:{reader:'lab.realize',question:'runoff'},
+    design:{reader:'lab.design',question:'design'},
+    commands:{reader:'lab.show_command',question:'commands'}
+  });
   const PROJECT_LINKS={ledger:'The lab starts from what was already scored.',proposer:'The brief names one change for a reviewed experiment.',critic:'Check for a closed or blocked experiment without a meaningful change.',referee:'Inspect the review and identify evidence that is still missing.',human:'A person picks the experiment and sets the training flag.',evidence:'The score returns to the ledger, and the next brief is written from that ledger.'};
   const PROJECT_COPY={evidence:'Inspect the saved project score and its sources. Return the result to the ledger before writing the next brief.'};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -20,7 +28,14 @@
     if(!question||!guide?.matchesCase(settings.caseDefinition))return null;
     const prompt=(Array.isArray(settings.prompts)?settings.prompts:[]).find(p=>p?.id===id)?.livePrompt;
     if(typeof prompt!=='string'||!prompt.startsWith(HEADER)||!prompt.includes('Do not submit jobs'))return null;
-    return question.question+'\n\n'+prompt;
+    const profile=ANSWER_PROFILES[id];
+    const contract='Saved-evidence answer\n'
+      +'Use only the '+profile.reader+' saved-evidence reader with the '+profile.question+' question profile (--question '+profile.question+'). '
+      +'The case paragraph above supplies background and safety constraints; its broader focus is not a request for supplementary readers. '
+      +'Quote the returned verified_answer exactly, labelled “Saved-evidence answer”. Do not paraphrase or add summaries, tables, explanations or claims about other gaps. '
+      +'Call display_file for every returned display_paths entry, then cite source_paths separately. Do not substitute Markdown image text for display calls. '
+      +'Stop after that verified readout and its citations. If the reader or a required file is unavailable, report what is missing and stop without a substitute answer.';
+    return question.question+'\n\n'+prompt+'\n\n'+contract;
   }
   function welcomeHTML(){
     return `<div class="welcome"><h3>Start with the April evidence</h3><p>Read what was already tested, then inspect the saved figures. Choose a question to put an editable request in the message box.</p><div class="welcome-questions">${QUESTIONS.slice(0,3).map(q=>`<button type="button" data-case-question="${q.id}">${esc(q.question)}<span aria-hidden="true">↗</span></button>`).join('')}</div><p class="welcome-note">Review the request, then Send. Cited files and figures appear on the right.</p><button type="button" class="text-button case-method-link" data-journey-nav="introduction">Open Hypothesis lab ↗</button></div>`;

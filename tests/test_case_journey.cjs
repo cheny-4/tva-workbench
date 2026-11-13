@@ -27,6 +27,27 @@ test('the six case questions retain the catalog case and execution guard',()=>{
   assert.equal(api.questionRequest('ledger',{guide,caseDefinition:{...definition,case:{...definition.case,end:'2019-04-23'}},prompts}),null);
   assert.equal(api.questionRequest('ledger',{guide,caseDefinition:definition,prompts:[{id:'ledger',livePrompt:'Execute a different experiment.'}]}),null);
 });
+test('each editable April question selects one verified reader profile without changing the original catalog guard',()=>{
+  const {api}=fixture();
+  const expected={
+    ledger:['lab.ledger','ledger'],realization:['lab.realize','weather'],
+    downscale:['downscale.scorecard','downscale'],runoff:['lab.realize','runoff'],
+    design:['lab.design','design'],commands:['lab.show_command','commands']
+  };
+  for(const q of api.questions){
+    const text=api.questionRequest(q.id,{guide,caseDefinition:definition,prompts});
+    const [reader,profile]=expected[q.id];
+    const original=prompts.find(prompt=>prompt.id===q.id).livePrompt;
+    assert.ok(text.startsWith(q.question+'\n\n'+original+'\n\nSaved-evidence answer\n'));
+    assert.ok(text.includes('Use only the '+reader+' saved-evidence reader with the '+profile+' question profile (--question '+profile+').'));
+    assert.match(text,/background and safety constraints; its broader focus is not a request for supplementary readers/);
+    assert.match(text,/Quote the returned verified_answer exactly/);
+    assert.match(text,/Do not paraphrase or add summaries, tables, explanations or claims about other gaps/);
+    assert.match(text,/Call display_file for every returned display_paths entry/);
+    assert.match(text,/cite source_paths separately/);
+    assert.match(text,/If the reader or a required file is unavailable, report what is missing and stop/);
+  }
+});
 test('intro exploration is independent from live following and only an explicit Try prepares work',()=>{
   const f=fixture();
   assert.equal(f.nodes.length,6);

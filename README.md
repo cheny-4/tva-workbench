@@ -1,4 +1,4 @@
-# Water4Energy workbench · v0.13.1
+# Water4Energy workbench · v0.13.2
 
 This package is the **Water4Energy project workbench**. It opens on **HEADWATER development**, the workflow the demonstration walks. **TVA · 16–22 April 2019** is one selectable case inside the project. The product name stays Water4Energy workbench on every screen.
 
@@ -6,11 +6,13 @@ This package is the **Water4Energy project workbench**. It opens on **HEADWATER 
 
 ## Launch
 
-Extract the complete **TVA-Workbench-v0.13.1.zip**, then double-click **Start TVA Workbench.command** inside `TVA-Workbench` on macOS. Keep Terminal open. Windows uses **Start TVA Workbench.bat** with Python 3.9+; Linux uses `sh start.sh`. Terminal users can run `python3 server.py`.
+Extract the complete **Water4Energy-Workbench-v0.13.2-All-in-One-Mac.zip**, then double-click **Start TVA Workbench.command** inside `TVA-Workbench`. Keep Terminal and VISTA open. This single launcher starts installed VISTA, imports or upgrades the dedicated project and eight replay skills, indexes the bundled lead documents, stages the saved figures, and opens this exact interface copy. Read **READ ME FIRST.txt** for first-time requirements and troubleshooting.
 
-The folder and launcher filenames are retained. The launcher prints the version, folder and actual local URL. It prefers port 8765; an occupied port makes this copy use an available loopback port without stopping the other process. Opening the same copy again reuses only its validated running instance. Follow its printed URL, since an older tab on port 8765 may belong to a different build. Control+C stops this wrapper; VISTA manages any existing backend work separately.
+Dali needs his own installed VISTA and model credentials. The ZIP contains the interface, backend project setup, pinned source snapshots and saved evidence; account secrets, local databases, chats, raw ERA5 arrays and checkpoints are excluded. No npm or pip commands are needed. Existing VISTA supplies Python; otherwise Python 3.9+ can open the interface for review. Source indexing may take a few minutes.
 
-No npm, pip or frontend build is required. The launcher uses VISTA's bundled Python when available, otherwise Python 3.9+. The supplied development record and method can be inspected before VISTA is connected.
+The launcher prints the actual local URL. If port 8765 is occupied, this copy uses an available loopback port without stopping the other process. Reopening the same copy reuses its validated running instance. Use its printed URL rather than an older browser tab. Ctrl+C stops the wrapper; VISTA stays under its own application's control. The retained Windows/Linux companion entry points call the same setup path; desktop launch verification is performed on macOS.
+
+The v0.13.1 project/skills upgrade is restricted to the known original bytes and policy. It backs up the old owned configuration locally before replacing skill files, refuses unknown edits or shared global skills, and can resume an interrupted upgrade. Matching saved evidence is not rewritten. Missing VISTA or setup errors are explained in Terminal; the interface remains available for design review.
 
 ## The project and its case
 
@@ -76,7 +78,7 @@ Literature library retains the **42-record snapshot checked on 9 November 2026**
 
 Frontier, Lux, H100/CCSI and Odo status are promoted onto the development view as read-only badges. **Connection settings** is still the only place that saves the backend address and project name. The fixed VISTA project ID remains **`Water4Energy-TVA-agent-loop`**, with default backend `http://127.0.0.1:8001`. Current connectivity does not independently validate the supplied scientific record or an inference runtime. Each laptop needs its own VISTA configuration for live conversation.
 
-See [VISTA_SETUP.md](VISTA_SETUP.md) for the existing skill, source and April manifest contract. The protected `prompts.json`, `hypothesis-guide.js`, `demo-case.json` and evidence schema remain byte-identical to v0.12.1. In particular, `demo-case.json` retains its embedded `0.12.1` value as case metadata; the independent workbench/launcher version is **0.13.1**.
+See [VISTA_SETUP.md](VISTA_SETUP.md) for the existing skill, source and April manifest contract. The protected `prompts.json`, `demo-case.json` and evidence schema remain byte-identical to v0.12.1. The hypothesis stage logic is retained; the gallery presentation now follows successful display events for existing case figures as well as new conversation figures. In particular, `demo-case.json` retains its embedded `0.12.1` value as case metadata; the independent workbench/launcher version is **0.13.2**.
 
 The wrapper binds to loopback. Ignored `.local/` holds saved backend/project and validated launch identity; browser state keeps context-specific drafts while the page is open, and local storage remembers session/context associations. VISTA owns conversations, artifacts and credentials. UI stage selection and question preparation never send messages, execute training or submit jobs. A person controls Send and any later execution.
 
@@ -100,6 +102,7 @@ This revision follows [Dali's 12 November action list](https://github.com/daliwa
 | v0.12.1 | Remove the introduction footer and two technical source/readiness disclosures |
 | v0.13.0 | Water4Energy project identity, HEADWATER development home and context-switched TVA case |
 | v0.13.1 | Current VISTA skill-name and indexed-document compatibility; connected replay setup |
+| v0.13.2 | Source-bound answer briefs, stable evidence replay, figure following/history fixes, and one combined setup package |
 
 Earlier versions remain in Git history. Clone `https://github.com/cheny-4/tva-workbench.git` or download the runnable release. GitHub hosts source; Python and VISTA run on the laptop. ORNL and Genesis marks are retained.
 
@@ -109,13 +112,18 @@ The app uses vanilla HTML/CSS/JavaScript and a Python standard-library adapter. 
 
 ```sh
 python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s backend/tests -v
 node --test tests/*.cjs
 ```
 
-The v0.13.1 suite has 41 Python and 106 JavaScript checks. Node is needed only for developer checks. Release archives exclude `.git/`, `.local/`, credentials and caches. See [VERIFICATION.md](VERIFICATION.md), [BACKEND.md](BACKEND.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BRANDING.md](BRANDING.md) and [DATA_NOTES.md](DATA_NOTES.md).
+Run the Python, JavaScript and backend reader checks listed in [VERIFICATION.md](VERIFICATION.md). Node is needed only for developer checks. Release archives exclude `.git/`, `.local/`, credentials and caches. See [VERIFICATION.md](VERIFICATION.md), [BACKEND.md](BACKEND.md), [WORKFLOW_NOTES.md](WORKFLOW_NOTES.md), [BRANDING.md](BRANDING.md) and [DATA_NOTES.md](DATA_NOTES.md).
 
-## Configured local replay
+## Source-bound agent answers and stable evidence
 
-The local setup performed on 12 November creates the dedicated `Water4Energy-TVA-agent-loop` project, eight file-backed replay skills, one Ready index with six lead sources, and four metadata-checked April panels. VISTA skill names use kebab case (`lab-ledger`, `lab-show-command`, `downscale-scorecard`); the workbench recognizes their exact dotted contract IDs. Descriptive indexed Markdown filenames identify the six lead documents. Loaded checks do not represent a completed agent conversation or scientific re-score.
+The included backend setup creates or upgrades `Water4Energy-TVA-agent-loop`, eight file-backed replay skills and a source index containing the original six lead documents plus a derived, source-cited demo answer guide. The guide separates April values from aggregate scores, distinguishes dated board/review records, and explicitly identifies missing evidence. Each demo question uses a concise, deterministic saved-evidence readout with source citations; the full archived records remain available for inspection. The live VISTA agent reads and explains that readout. The frontend does not intercept the conversation or substitute a reply, and a saved readout is not a newly completed experiment or review.
 
-The weather and Trial 0 images are original pinned repository files. Runoff is a clearly labelled valley-summary chart from the committed ERA5 receipt, not a spatial map or a forecast. Original arrays/checkpoints are not supplied. The local VISTA data and private source bundles are separate from this application ZIP; another laptop needs its own import and source staging. See [VISTA_SETUP.md](VISTA_SETUP.md).
+Weather and Trial 0 images are original pinned repository files. The runoff figure is the saved, clearly labelled valley-summary chart derived from the committed ERA5 receipt. Replay readers verify source hashes and preserve byte-identical outputs and their timestamps; they do not redraw that chart or restamp the figure files. Contract/source JSON and case dates retain their original scope. The exact original Trial 0 scorer command remains absent and must be reported as unavailable. The optional dam skill remains uninstalled until an agreed reservoir/rule exists.
+
+Successful `display_file` records select their corresponding evidence card, including figures already in the case gallery. Manual review pauses following; Resume follows the latest actual display. Changed/missing records are still excluded. Stable replay prevents valid saved conversation figures from becoming stale merely because another question reads the same evidence.
+
+Build the complete ZIP from this repository with `python3 tools/build_release.py --output /path/to/output`. The archive includes its file manifest and uses only the recipient's own local VISTA API. Source snapshots carry their original pinned commits and SHA-256 receipts.

@@ -1,0 +1,186 @@
+{
+  "$schema": "../../schema/hypothesis_pack.schema.json",
+  "run_id": "20261106_second_model",
+  "charge": "Explain temporal-spatial Reslim departure collapse; assess a 0.7 valley objective and GEFSv12 forecasts as inputs. No training is authorized in this run.",
+  "hypotheses": [
+    {
+      "id": "H_local_path_and_loss_dilution",
+      "status": "partially_tested",
+      "claim": "The leading mechanism is a structural objective-path mismatch: the global loss gives the roughly 40-cell valley about 0.06% of the map objective, while the 6-degree token and patch decoder prevent root-zone soil and short local precursors from making an independent 1-degree valley correction.",
+      "seasons": ["all"],
+      "mechanism": "Each day is compressed to a 6-degree patch token; one-query temporal pooling reduces 90 days to one vector before patch mixing; the decoder paints a patch template. The only 1-degree week path reads last-week temperature and precipitation through a 3x3 residual, not soil. A globally useful correction can therefore coexist with a poor valley correction.",
+      "citations": [
+        "docs/ISSUED_FORECAST_AND_RESLIM_20261106.md",
+        "docs/RESLIM_VALLEY_REPORT_20261022.md",
+        "headwater/temporal_reslim.py",
+        "scripts/train_temporal_farm.py"
+      ],
+      "ledger_refs": [
+        "det_v2_reslim",
+        "det_v2_reslim_valley",
+        "det_v2_reslim_valley01",
+        "det_v2_reslim_patch2",
+        "det_v2_reslim_patch2_soilresid",
+        "runs/temporal_reslim_farm/metrics.json"
+      ],
+      "predicted_signature": "On extreme 1979-2017 training weeks, the kept temporal checkpoint has low model_valley_departure_rms / observed_valley_departure_rms even in-sample, especially for precipitation and for events whose precursor is local. A 1-degree forecast branch changes the ratio more than merely increasing the valley weight.",
+      "falsifier": "The kept temporal checkpoint reproduces large 1979-2017 valley departures in-sample, with the correct sign and at least half the observed departure on most selected extremes, while failing only on 2018-2019. That would move the explanation from capacity/loss/path to generalization or predictability.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_conditional_mean_predictability",
+      "status": "partially_tested",
+      "claim": "For some large weeks, MSE is correctly estimating an ordinary conditional mean because the 90-day ERA5 condition does not distinguish the future event; more examples then tighten the forecast around the reference rather than recover the tail.",
+      "seasons": ["all"],
+      "mechanism": "Squared error estimates a conditional mean. If extreme successors are rare or not separable in the stored condition, opposing outcomes average toward reference_train. This is a predictability/generalization mechanism only if the model can fit comparable training extremes.",
+      "citations": [
+        "docs/DEPARTURE_PATHS_20261106.md",
+        "docs/LARGE_DEPARTURE_DISCUSSION_20261103.md",
+        "docs/DIFFUSION_AND_FOUR_WEEK_DECISION_20261106.md"
+      ],
+      "ledger_refs": [
+        "april_cold_week_mechanism",
+        "runs/temporal_reslim_farm/heldout_2019_scores.json",
+        "hypothesis_lab/runs/20261102_event_departure/analog_grid.json"
+      ],
+      "predicted_signature": "Training extremes can be reproduced in-sample, but held-out extremes with ordinary analogs collapse. For 16-22 April 2019 rain, the eight nearest training successors remain only -8 to +4 mm from climate against an observed +31.5 mm departure.",
+      "falsifier": "Large held-out misses are already signaled by close training analogs or the last 14 condition days, and the same checkpoint still cannot reproduce analogous training events. That pattern favors objective or architecture failure, not an irreducible conditional mean.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_temporal_pooling_erases_short_signal",
+      "status": "partially_tested",
+      "claim": "The one-query day attention can erase short, field-specific precursors because it pools all 24 fields at a patch into one day token and collapses time before any spatial interaction.",
+      "seasons": ["all"],
+      "mechanism": "A common temporal weight at each patch must serve temperature, moisture, wind, rain, and soil simultaneously. A short Gulf or valley signal can be diluted before it is communicated spatially. April 2019 is especially diagnostic because the departure sort labels its rain as already in the condition, yet the temporal farm predicts a -3.55 mm departure against an observed +31.45 mm.",
+      "citations": [
+        "headwater/temporal_reslim.py",
+        "docs/TEMPORAL_SPATIAL_RESLIM_REPORT_20261104.md",
+        "figures/departure_sort/departure_sort_2018_2019.json"
+      ],
+      "ledger_refs": [
+        "daily_90_order",
+        "det_v2_soil_k9_daily7",
+        "det_v2_soil_k9_daily15",
+        "runs/temporal_reslim_farm/heldout_2019_scores.json"
+      ],
+      "predicted_signature": "Missed weeks with a strong last-14-day sign have diffuse or misplaced last_day_weights, and masking older days or reading field-specific recent summaries changes predictions materially without changing spatial capacity.",
+      "falsifier": "Day weights concentrate on the precursor interval and perturbing that interval changes the forecast in the observed direction, while the final 1-degree output still collapses. That would isolate the spatial decoder or loss rather than temporal pooling.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_extreme_effective_sample",
+      "status": "partially_tested",
+      "claim": "The 1,976-file farm is large in weeks but small in conditionally comparable extremes, so ordinary weeks dominate gradient updates.",
+      "seasons": ["all"],
+      "mechanism": "Every-seventh-day sampling supplies many correlated ordinary weeks. Extreme successor counts, not file count, determine whether the regression learns a departure. Expanding from 145 four-date files to 1,976 files changed the four-week valley score from 1.135 K to 1.196 K rather than improving it.",
+      "citations": [
+        "docs/ISSUED_FORECAST_AND_RESLIM_20261106.md",
+        "docs/EVENT_DEPARTURE_PLAN_20261102.md"
+      ],
+      "ledger_refs": [
+        "runs/temporal_reslim_farm/metrics.json",
+        "runs/temporal_reslim_farm/heldout_2019_scores.json"
+      ],
+      "predicted_signature": "Training departure-ratio error increases as event frequency falls, and errors are concentrated in sparsely represented season-sign-magnitude bins even after controlling for condition similarity.",
+      "falsifier": "Numerous conditionally similar training extremes exist and are still underfit in-sample; that favors path, capacity, or optimization rather than sample scarcity.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_epoch_selection_not_primary",
+      "status": "partially_tested",
+      "claim": "Epoch selection contributes variance but is not the primary cause of collapse.",
+      "seasons": ["all"],
+      "mechanism": "The farm kept epoch 26 at 2.426 K over 56 validation weeks while global validation loss continued from 0.977 at epoch 26 to 0.952 at epoch 46. The valley score was nearly flat after epoch 22, so changing the selector alone is unlikely to create large departures.",
+      "citations": [
+        "runs/temporal_reslim_farm/metrics.json",
+        "docs/TEMPORAL_RESLIM_FARM_COMPUTE_20261105.md"
+      ],
+      "ledger_refs": [
+        "runs/temporal_reslim_farm/metrics.json",
+        "det_v2_reslim_valley",
+        "det_v2_reslim_valley01"
+      ],
+      "predicted_signature": "Rescoring saved late checkpoints changes ordinary-week RMSE modestly but does not substantially raise departure ratios on 2018 extremes.",
+      "falsifier": "A pre-2019 checkpoint selected by a prespecified 2018 departure criterion both reconstructs 2018 extremes and clears the 2019 0.767 K gate without hurting any issue week.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_normalization_not_primary",
+      "status": "partially_tested",
+      "claim": "Target standardization is unlikely to be the leading cause, although heavy-tailed precipitation can still make standardized MSE favor frequent moderate residuals.",
+      "seasons": ["all"],
+      "mechanism": "Temperature and precipitation residuals are standardized per channel before masked_map_loss averages their squared errors, so raw physical units do not directly suppress rain. The remaining risk is distribution shape: one standard deviation does not balance tail frequency or sign.",
+      "citations": [
+        "scripts/train_temporal_farm.py",
+        "headwater/model.py",
+        "docs/TEMPORAL_RESLIM_FARM_COMPUTE_20261105.md"
+      ],
+      "ledger_refs": [
+        "runs/temporal_reslim_farm/metrics.json",
+        "det_v2_reslim_valley01"
+      ],
+      "predicted_signature": "Per-channel standardized training errors are comparable in central scale, but precipitation departure ratio falls with target magnitude. Robust or quantile diagnostics reveal tail compression without a gross scale mismatch.",
+      "falsifier": "A read of stored normalization and residual quantiles shows a coding or scale error, clipping, non-finite tail, or a many-fold unintended imbalance between standardized temperature and precipitation losses.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_nonstationarity_secondary",
+      "status": "partially_tested",
+      "claim": "A 1979-2017 reference trend mismatch may explain some warm or cold departures, but it cannot be the main explanation for event-scale rain collapse.",
+      "seasons": ["all"],
+      "mechanism": "A fixed reference can turn trend into a residual the model must learn, while calendar-date and static channels may not identify year. This can matter for temperature, but not the April 2019 storm structure by itself.",
+      "citations": [
+        "docs/YEAR_VALLEY_2019_20261105.md",
+        "docs/DEPARTURE_PATHS_20261106.md"
+      ],
+      "ledger_refs": [
+        "runs/temporal_reslim_farm/heldout_2019_scores.json"
+      ],
+      "predicted_signature": "Errors have a monotone year dependence and detrending training residuals reduces held-out temperature bias, while precipitation extremes remain missed.",
+      "falsifier": "Training-year residuals and errors show no year dependence, or the same collapse occurs within detrended year blocks and for precipitation.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_valley_fraction_07",
+      "status": "proposed_new",
+      "claim": "A convex 0.7 valley / 0.3 global objective should move valley means more than the current farm loss, but is unlikely by itself to clear the gate because prior added valley terms changed individual weeks without repairing the 6-degree local path.",
+      "seasons": ["all"],
+      "mechanism": "Use exactly 0.3*global_map_mse + 0.7*(valley_temperature_mse + valley_precipitation_mse)/2 on standardized residuals. Unlike det_v2_reslim_valley, this is a normalized convex mixture and includes rain; unlike det_v2_reslim_valley01, it does not add 0.1 of each valley channel on top of a full global term. The delta is also the 1,976-week temporal farm rather than the 145-file older Reslim.",
+      "citations": [
+        "headwater/train.py",
+        "headwater/model.py",
+        "docs/RESLIM_VALLEY_REPORT_20261022.md"
+      ],
+      "ledger_refs": [
+        "det_v2_reslim_valley",
+        "det_v2_reslim_valley01",
+        "runs/temporal_reslim_farm/metrics.json"
+      ],
+      "predicted_signature": "Valley departure ratios rise, April temperature or rain may move, and global validation loss worsens relative to the global-only farm. Gains are inconsistent across January, April, July, and October if the patch bottleneck remains decisive.",
+      "falsifier": "With the same trunk, split, normalization, and epoch rule, the run reaches at most 0.767 K on the four 2019 weeks, has no issue week worse than the 9x9, and reaches at least 40.2 mm for April 2019 rain. Failure of either gate kills loss-only continuation.",
+      "blocks_reproposal": false
+    },
+    {
+      "id": "H_gefs_as_causal_input",
+      "status": "proposed_new",
+      "claim": "GEFS ensemble statistics should add causal issue-time information for days 1-7, especially rain, if injected through a 1-degree residual branch; skill at days 8-14 is uncertain and must be scored before extending the design.",
+      "seasons": ["all"],
+      "mechanism": "GEFS is initialized on the issue morning and carries forecast-state information absent from a regression on the prior 90 days. On 16-22 April 2019 its five-member rain mean is 38.4 mm and range is 23.3-49.3 mm, versus 24.4 mm climate, 24.7 mm 9x9, 20.9 mm temporal farm, and 55.9 mm observed. Ensemble mean and spread of week temperature and precipitation anomalies enter a gated 1-degree branch, not only 6-degree tokens.",
+      "citations": [
+        "docs/GEFS_SCORE_READING_20261104.md",
+        "scripts/score_gefs_reforecast.py",
+        "hypothesis_lab/runs/20261103_next_set/gefs_week_score.json",
+        "hypothesis_lab/runs/20261103_next_set/gefs_temp_offset.json"
+      ],
+      "ledger_refs": [
+        "april_cold_week_mechanism",
+        "hypothesis_lab/runs/20261103_next_set/gefs_week_score.json",
+        "hypothesis_lab/runs/20261103_next_set/gefs_temp_offset.json"
+      ],
+      "predicted_signature": "The GEFS branch moves April rain away from reference and raises rain departure ratio. Temperature needs train-only bias handling because raw GEFS is 1.793 K and a per-date 2000-2017 offset is still 1.047 K, both above the 0.767 K gate.",
+      "falsifier": "A leakage-safe 2000-2017 fit with 2018 epoch selection does not improve 2019 over the 9x9 gate, or April rain remains below 40.2 mm; days 8-14 staying near climate also falsifies extending the input beyond day 7.",
+      "blocks_reproposal": false
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "run_id": "20261018_iter1_april",
+  "role": "critic",
+  "date": "2026-10-18",
+  "prior": "PI approved Proposer shortlist and authorized E1",
+  "novelty_check": {
+    "result": "pass",
+    "reasons": [
+      "No experiment re-proposes ONI/Gulf/ps all-month training without a delta.",
+      "explicitly_rejected in experiments.json matches blocks_reproposal ledger rows.",
+      "E1/E2 are diagnostics; E3 is a documented spring-date cut, not a scored ablation replay."
+    ]
+  },
+  "grades": [
+    {
+      "hypothesis_id": "H_april_sets_mean",
+      "grade": "supported",
+      "notes": "Ledger + april2019_t2m.png: obs valley -0.97 K; det_v1 error 1.44 K."
+    },
+    {
+      "hypothesis_id": "H_indexes_hurt_april",
+      "grade": "supported",
+      "notes": "COMPARISON.json and maps: oni 1.58 / gulf 1.50 vs det_v1 1.44; warm biases larger."
+    },
+    {
+      "hypothesis_id": "H_ps_helps_april_not_enough",
+      "grade": "supported",
+      "notes": "ps 1.22 K and +1.14 K warm bias; still above clim 1.09 K; precip still too dry."
+    },
+    {
+      "hypothesis_id": "H_persistence_discarded",
+      "grade": "underdetermined",
+      "notes": "Strong on Apr 2018 in V1_RESULT_PLAIN; 2019 figures lack issue-week panel. Needs E2."
+    },
+    {
+      "hypothesis_id": "H_april_not_july_physics",
+      "grade": "supported",
+      "notes": "In-valley cold/wet miss; not Gulf-south July pattern."
+    },
+    {
+      "hypothesis_id": "H_spring_week_vs_season",
+      "grade": "underdetermined",
+      "notes": "Plausible; no new evidence until E3. Do not block E1/E2."
+    },
+    {
+      "hypothesis_id": "H_april_needs_trunk_or_land_not_index",
+      "grade": "supported",
+      "notes": "Consistent with scored ablations + maps; still a program claim, not a completed experiment."
+    },
+    {
+      "hypothesis_id": "G_april_literature_thin",
+      "grade": "supported",
+      "notes": "catalog.csv has no April-specific SE cold-week theme link; augmenter after E2 is fine."
+    }
+  ],
+  "do_not_run": [
+    "X_oni_gulf_all_months_again",
+    "X_850z_for_april_first",
+    "X_train_soil_snow_now",
+    "E3_spring_issue_dates_until_PI",
+    "E4_collection_until_PI"
+  ],
+  "kill_tests": [
+    {
+      "hypothesis_id": "H_persistence_discarded",
+      "kill_if": "E2 shows issue-week valley RMSE is not better than det_v1 on both Apr 2018 and Apr 2019."
+    },
+    {
+      "hypothesis_id": "H_spring_week_vs_season",
+      "kill_if": "E3 shows 15 Mar / 1 Apr / 1 May 2018–2019 all beat or match historical week under the same recipe while only 16–22 Apr fails — then reframe as single-week reporting, not spring physics."
+    },
+    {
+      "hypothesis_id": "H_april_needs_trunk_or_land_not_index",
+      "kill_if": "An April-only global index (new, not blocks_reproposal replay) beats det_v2_ps April valley RMSE and beats the historical week."
+    }
+  ],
+  "confounders": [
+    "1x1 trunk shrinkage vs missing field — both compatible with warm/flat forecasts; maps alone do not separate them.",
+    "2018 is stop-year — use as error picture, not untouched test (already noted in BRIEF).",
+    "Precip wet band may be a different mechanism than temperature cold pool; do not assume one field fixes both."
+  ],
+  "recommendation": {
+    "allow": ["E1_april_map_diagnosis"],
+    "next_after_E1": "E2_april_Persistence_table on train host when PI ready",
+    "hold": ["E3_spring_issue_dates", "E4_collection_april_papers", "any training"]
+  }
+}

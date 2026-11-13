@@ -1,0 +1,67 @@
+Water4Energy workbench — combined Mac package 1
+Interface v0.13.2
+
+Send this single ZIP to Dali. There is no second setup download.
+
+1. Extract the complete ZIP into a writable folder on the Mac.
+2. Double-click Start TVA Workbench.command inside TVA-Workbench.
+3. Keep Terminal and VISTA open while using the workbench.
+
+The first launch opens installed VISTA, imports the Water4Energy project and its
+eight replay skills, uploads/indexes the six original source documents plus the
+source-grounded demo answer guide, loads the saved April
+figures, and opens the webpage. Indexing may take a few minutes. Later launches
+verify and reuse matching items; they do not create duplicate projects or
+overwrite different existing projects, skills, or results. Recognized v0.13.1
+demo installations are upgraded automatically after verification and a local
+backup. Locally edited or shared skills are preserved and reported for review.
+
+For live chat, Dali needs VISTA installed and his own model/provider credentials
+configured in VISTA Settings. An existing VISTA installation supplies Python;
+otherwise Python 3.9+ is required to open the interface. No npm or pip commands
+are needed. VISTA itself is a separate application and is not redistributed in
+this ZIP. If VISTA is missing or setup needs attention, Terminal explains the
+next step and the webpage still opens for design review. Correct the issue and
+run the same launcher again.
+
+VISTA normally uses http://127.0.0.1:8001. For a nonstandard VISTA installation,
+Terminal users can set W4E_VISTA_INSTALL to its package directory and/or run:
+python3 launch_workbench.py --backend-url http://127.0.0.1:8001
+
+The browser opens this exact extracted copy. If port 8765 is occupied, the
+launcher prints and opens another local port. Use the printed address rather
+than an older saved browser tab. Ctrl+C stops the workbench; VISTA stays under
+its own application's control. Reopening this same package resumes setup safely.
+
+Included: v0.13.2 interface; ORNL/Genesis marks; eight saved-evidence adapters
+with pinned source snapshots and provenance; seven lead documents; original
+saved evidence plus versioned answer readouts; integrity manifest; and one Mac
+launcher.
+Excluded: account secrets, Yang's VISTA database/settings, chats, local UUIDs,
+raw ERA5 arrays, checkpoints, and cluster credentials. No GitHub login is needed
+to import the included snapshots. The literature catalog links to papers; paper
+PDFs themselves are not included.
+
+Setup uses local VISTA API operations and verified standard-library file
+checks/copies in the project sandbox. It sends no agent prompt and starts no training,
+new scientific inference/scoring, data download, or HPC job. The optional dam
+skill remains absent until a reservoir and agreed rule are supplied.
+
+This version supplies explicit source facts and metric scopes for the six demo
+questions, and repairs figure following and stable replay file writes. Review
+live answers alongside their cited evidence. The saved figures retain their original
+scope: April weather, observed ERA5 receipt summary (no runoff forecast), and
+frozen Trial 0 maps with aggregate test-split scores. Dali's video, voiceover and
+approved home-score image are still supplied separately when available.
+
+Troubleshooting
+- If macOS blocks the command, use Finder's Open action and the approval flow
+  allowed by your institution. The Terminal equivalent is:
+  sh "Start TVA Workbench.command"
+- If an existing project/skill/result differs, the launcher preserves it and
+  reports the conflict. Review it in VISTA before deciding how to proceed.
+- If source indexing is not ready, keep VISTA open and rerun after it finishes.
+- Setup records only non-secret readiness counts in .local/setup-receipt.json.
+  Verified upgrades keep the original project configuration and complete skill
+  files in .local/upgrade-backups. This backup contains no model credentials.
+  Do not include .local when forwarding a package you have already launched.

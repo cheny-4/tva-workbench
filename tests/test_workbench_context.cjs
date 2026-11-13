@@ -46,10 +46,10 @@ test('the TVA study network remains a case view with its 54 locations and April 
  assert.match(network,/id="network-roster"/);
 });
 
-test('the April contract, prompts, hypothesis logic and original brand artwork are unchanged',()=>{
+test('the April contract, prompts, stage logic and original brand artwork retain their approved identities',()=>{
  const protectedFiles={
   'public/data/prompts.json':'b15e19fe323b6d5d5bbf8563ac76bfdd9dc973e6be6f189345480e319ac6f205',
-  'public/hypothesis-guide.js':'e3caabe6df1b5d51a949fded72cac29e921ff0016bb36eddcd33042578e568b5',
+  'public/hypothesis-guide.js':'7d5fc18d199a0daeae035dd2c684b46d3027832d58395524fb06e84348a3af51',
   'public/data/demo-case.json':'c5f87d18e2185f9f912f77f96beea6016c2b8a894823fa183a95e2ec5823daa1',
   'public/data/demo-evidence.schema.json':'de79d330e941953d99f620e53c0dfba0be09a0c760c3105200adbae5c78ce572',
   'public/assets/brand/ornl-logo.svg':'60ff1b82680f04daf6095b4e931f2390bd12292189410aa3404c8d1ba33a8efe',
@@ -104,8 +104,8 @@ test('the current shell accepts its version while the unchanged April contract r
  const start=app.indexOf('function renderDemoStatus()'),end=app.indexOf('async function refreshDemo',start);
  assert.ok(start>=0&&end>start);
  const line={dataset:{},textContent:''},badge={textContent:''};
- const state={status:{version:'0.13.1',connected:true,project_found:true},demoCase:JSON.parse(read('public/data/demo-case.json')),skills:null,knowledge:null,activeContext:'headwater'};
- const context=vm.createContext({state,WORKBENCH_VERSION:'0.13.1',isAprilContext:()=>false,$:selector=>selector==='#demo-status-line'?line:selector==='#case-figures-status'?badge:null});
+ const state={status:{version:'0.13.2',connected:true,project_found:true},demoCase:JSON.parse(read('public/data/demo-case.json')),skills:null,knowledge:null,activeContext:'headwater'};
+ const context=vm.createContext({state,WORKBENCH_VERSION:'0.13.2',isAprilContext:()=>false,$:selector=>selector==='#demo-status-line'?line:selector==='#case-figures-status'?badge:null});
  vm.runInContext(app.slice(start,end),context);context.renderDemoStatus();
  assert.equal(line.dataset.state,'connected');
  assert.match(line.textContent,/Water4Energy project/);
@@ -117,10 +117,10 @@ test('the connection hint clears when VISTA has the eight kebab-case skills and 
  const start=app.indexOf('function renderDemoStatus()'),end=app.indexOf('async function refreshDemo',start);
  const line={dataset:{},textContent:''};
  const definition=JSON.parse(read('public/data/demo-case.json'));
- const state={status:{version:'0.13.1',connected:true,project_found:true},demoCase:definition,
+ const state={status:{version:'0.13.2',connected:true,project_found:true},demoCase:definition,
   skills:{project_found:true,count:8,skills:definition.requiredSkills.map(skill=>({name:skill.id.replace(/[._]/g,'-')}))},
   knowledge:{project_found:true,all_ready:true}};
- const context=vm.createContext({state,WORKBENCH_VERSION:'0.13.1',isAprilContext:()=>true,$:selector=>selector==='#demo-status-line'?line:null});
+ const context=vm.createContext({state,WORKBENCH_VERSION:'0.13.2',isAprilContext:()=>true,$:selector=>selector==='#demo-status-line'?line:null});
  vm.runInContext(app.slice(start,end),context);context.renderDemoStatus();
  assert.equal(line.textContent,'Connected to the April case project.');
  state.skills.skills.pop();context.renderDemoStatus();

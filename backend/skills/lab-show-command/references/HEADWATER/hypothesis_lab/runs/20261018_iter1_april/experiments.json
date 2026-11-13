@@ -1,0 +1,84 @@
+{
+  "run_id": "20261018_iter1_april",
+  "focus": "april_cold_week_mechanism",
+  "experiments": [
+    {
+      "id": "E1_april_map_diagnosis",
+      "status": "proposed_diagnostic",
+      "priority": 1,
+      "hypothesis_ids": ["H_persistence_discarded", "H_april_sets_mean"],
+      "title": "Inspect April 2018/2019 valley maps already produced",
+      "host": "Mac or any host with prediction files / published figures",
+      "protocol": [
+        "Read figures/input_brief/april2019_t2m.png and april2019_precip.png (already in repo).",
+        "If available, load runs/det_v1/prediction_val_* for 2018-04-15 and 2019-04-15 (not in git; on train host).",
+        "Record for each week: is valley too warm vs obs? Does issue-week field already show the cold?",
+        "Write april_map_notes.md in this run directory — no training."
+      ],
+      "success_criterion": "Written note classifying warm-bias vs flat vs other for Apr 2018 and Apr 2019.",
+      "blocks_reproposal_ok": true,
+      "requires_human_gate": true
+    },
+    {
+      "id": "E2_april_ Persistence_table",
+      "status": "proposed_diagnostic",
+      "priority": 2,
+      "hypothesis_ids": ["H_persistence_discarded"],
+      "title": "Tabulate issue-week vs model vs historical week for April only",
+      "host": "GPU cluster or Frontier where check_scores / predictions exist",
+      "protocol": [
+        "From existing score JSON or recompute from predictions: valley T RMSE for issue week, det_v1, det_v2_ps, climatology on 2018-04-15 and 2019-04-15.",
+        "Do not retrain. Append numbers only from files into april_score_slice.json."
+      ],
+      "success_criterion": "Table exists with file-backed numbers; confirms or rejects that issue week beats the model on both Aprils.",
+      "requires_human_gate": true
+    },
+    {
+      "id": "E3_spring_issue_dates",
+      "status": "proposed_data_cut",
+      "priority": 3,
+      "hypothesis_ids": ["H_spring_week_vs_season"],
+      "title": "Cut 15 Mar / 1 Apr / 1 May examples (after E1)",
+      "host": "Frontier (example builder + ERA5 access)",
+      "protocol": [
+        "Only if E1 suggests the miss may be season-wide or PI wants the ambiguity resolved.",
+        "Build additional issue dates whose target week stays in one month (TRAINING_DATA_DESIGN).",
+        "Score with frozen det_v1 recipe or document that a retrain is required — PI chooses.",
+        "Compare valley T vs historical week on 2018–2019 for those dates."
+      ],
+      "success_criterion": "Clear statement: 16–22 Apr-only vs spring-wide miss.",
+      "requires_human_gate": true,
+      "depends_on": ["E1_april_map_diagnosis"]
+    },
+    {
+      "id": "E4_collection_april_papers",
+      "status": "proposed_collection",
+      "priority": 4,
+      "hypothesis_ids": ["G_april_literature_thin"],
+      "title": "Collection augmenter: propose 2–3 April/SE cold-week papers",
+      "host": "Mac",
+      "protocol": [
+        "After E1 notes exist, run collection.augment propose-only.",
+        "Human approves keys before catalog/PDF ingest.",
+        "No web dump into pdfs/ without gate."
+      ],
+      "success_criterion": "Approved catalog rows linked to april_cold_week_mechanism.",
+      "requires_human_gate": true,
+      "depends_on": ["E1_april_map_diagnosis"]
+    }
+  ],
+  "explicitly_rejected": [
+    {
+      "id": "X_oni_gulf_all_months_again",
+      "reason": "blocks_reproposal on det_v2_oni and det_v2_gulf; April already worse"
+    },
+    {
+      "id": "X_850z_for_april_first",
+      "reason": "H_april_not_july_physics; July gap stays July-first"
+    },
+    {
+      "id": "X_train_soil_snow_now",
+      "reason": "Soil deferred until headwater_examples_v1_soil ready; snow parked"
+    }
+  ]
+}

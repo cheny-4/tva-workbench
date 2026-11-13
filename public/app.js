@@ -1,5 +1,5 @@
 'use strict';
-const WORKBENCH_VERSION='0.13.1';
+const WORKBENCH_VERSION='0.13.2';
 
 // No external services or frontend dependencies. Live calls stay behind server.py.
 const $ = (selector) => document.querySelector(selector);
