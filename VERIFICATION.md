@@ -1,3 +1,7 @@
+# v0.15.1 documentation update
+
+The README and first-use guide use neutral, reader-facing wording. Interface/package labels identify this patch; backend payload, pinned source snapshots, reader narratives and scientific figures retain the v0.15.0 hashes. Package integrity and extracted-launch checks are repeated. The science validation record below remains applicable.
+
 # v0.15.0 verification
 
 This revision selectively integrates Dali's October-cycle content and five supplied figures, retains persistent left-side conversation, and separates HEADWATER development, the 24 October Hypothesis lab and the April TVA case. No science job, new inference/scoring, data download or approval-flag change was performed by setup or acceptance checks.

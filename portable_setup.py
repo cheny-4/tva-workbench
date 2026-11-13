@@ -17,7 +17,7 @@ PROJECT = 'Water4Energy-TVA-agent-loop'
 SLUG = 'water4energy-tva-demo-2019'
 SKILLS = {'lab-literature', 'lab-download', 'lab-ledger', 'lab-board',
           'lab-design', 'lab-show-command', 'lab-realize', 'downscale-scorecard'}
-VERSION = '0.15.0'
+VERSION = '0.15.1'
 
 
 class SetupError(RuntimeError):

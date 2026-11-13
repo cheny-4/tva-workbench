@@ -1,4 +1,4 @@
-# Local VISTA adapter · v0.15.0
+# Local VISTA adapter · v0.15.1
 
 `launch_workbench.py` verifies the complete package, opens installed VISTA, prepares the dedicated project and starts the interface. `server.py` serves `public/` and proxies an allowlist of routes to that local project; running it directly skips setup. `backend/replay.py` and its eight skill copies read pinned records and stage saved outputs. Setup uses direct API operations, never an LLM turn.
 
@@ -33,3 +33,5 @@ The package contains five supplied PNGs, not their generating arrays. Their scop
 The UI remembers drafts/sessions separately for HEADWATER, the October example and TVA. Context revision checks protect streaming, saved-session loads, reports and artifact refreshes from stale responses. Actual display identity drives evidence following; unchanged figures stay stable. Raw unexecuted provider tool framing is treated as an unavailable answer, with an editable manual retry and no automatic resend.
 
 Selecting a node or preparing a draft runs nothing. Send initiates an agent conversation, not a science job. The installed project has no HPC submission tools or job definitions. Saved scripts/commands are evidence only. The exact original Trial 0 scorer is absent; optional dam output requires a supplied reservoir/rule. Model credentials, local VISTA state and `.local/` are excluded from the ZIP. See [VERIFICATION.md](VERIFICATION.md) for actual checks and remaining limitations.
+
+Interface/package v0.15.1 updates the README wording. The v0.15.0 backend payload and source-checked science evidence retain their exact bytes.

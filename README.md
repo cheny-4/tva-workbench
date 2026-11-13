@@ -1,4 +1,4 @@
-# Water4Energy workbench · v0.15.0
+# Water4Energy workbench · v0.15.1
 
 A project workbench for showing how recorded weather-model research informs water and energy questions. It opens on **HEADWATER development**, keeps conversation on the left, and puts the selected explanation or evidence on the right. VISTA supplies the agent, project storage and model connection.
 
@@ -6,11 +6,11 @@ A project workbench for showing how recorded weather-model research informs wate
 
 ## Launch one combined package
 
-1. Extract **Water4Energy-Workbench-v0.15.0-All-in-One-Mac.zip** into a writable folder.
+1. Extract **Water4Energy-Workbench-v0.15.1-All-in-One-Mac.zip** into a writable folder.
 2. Double-click **Start TVA Workbench.command** inside `TVA-Workbench`.
 3. Keep Terminal and VISTA open. Use the local address printed by this launcher.
 
-Dali needs **installed VISTA and his own model/provider credentials in VISTA Settings**. No separate setup bundle, GitHub login, npm or pip command is required. The launcher opens installed VISTA if needed, prepares eight saved-evidence skills and nine indexed documents, verifies the saved April evidence, and opens this interface copy. Indexing can take a few minutes. Python 3.9+ is required; VISTA normally supplies it.
+Live chat requires **VISTA installed and your own model/provider credentials configured in VISTA Settings**. No separate setup bundle, GitHub login, npm or pip command is required. The launcher opens installed VISTA if needed, prepares eight saved-evidence skills and nine indexed documents, verifies the saved April evidence, and opens this interface copy. Indexing can take a few minutes. Python 3.9+ is required; VISTA normally supplies it.
 
 An occupied port uses another available local port without stopping the existing process. Reopening the same extracted copy reuses its verified instance. Ctrl+C stops the workbench; VISTA remains under its own application's control. If backend setup needs attention, the interface can still open for design review. See **READ ME FIRST.txt**.
 
@@ -32,7 +32,7 @@ The October example uses six original saved files from `20261024_track_review`, 
 
 ## Keep the figures' scopes clear
 
-Dali's five supplied PNGs retain their source bytes and pinned provenance:
+The five supplied PNGs retain their source bytes and pinned provenance:
 
 - Three comparison figures show four saved 2019 weeks. Their temperature maps show air temperatures; precipitation is weekly totals in mm. They do not depict the October soil-residual experiment.
 - Two monthly refinement figures cover **all 30 days of April 2019**, at **1° to 1/24° (about 4 km)**. Rows show monthly mean and daily 95th percentile. Temperature is daily maximum temperature; precipitation is **mm/day**.
@@ -51,13 +51,13 @@ The six April guided questions, original guarded prompt catalog, case/evidence c
 
 All contexts use the single VISTA project **`Water4Energy-TVA-agent-loop`**. The default backend is `http://127.0.0.1:8001`. The ninth indexed guide explains the October cycle and monthly figures; the eight earlier documents stay unchanged.
 
-The optional dam skill remains absent until an agreed reservoir and fill/hold rule exist. The exact original Trial 0 scorer command remains unavailable. Dali's video/captions, approved home-score image and voiceover remain separately supplied content. Saved readers do not create a new experiment, review, score or execution approval. An unreadable provider response is shown as unavailable; preparing a retry still requires manual Send.
+The optional dam skill remains absent until an agreed reservoir and fill/hold rule exist. The exact original Trial 0 scorer command remains unavailable. The demonstration video/captions, approved home-score image and voiceover remain separately supplied content. Saved readers do not create a new experiment, review, score or execution approval. An unreadable provider response is shown as unavailable; preparing a retry still requires manual Send.
 
 ## Package and developer notes
 
 The ZIP includes the interface, ORNL/Genesis marks, one launcher, setup code, pinned sources, eight adapters, nine lead documents and saved evidence. It excludes `.local/`, credentials, VISTA databases, chats, local project IDs, raw ERA5 arrays and checkpoints. Do not forward a previously launched folder's `.local/` directory.
 
-This selectively integrates [Dali's workbench content](https://github.com/daliwang/water4energy_SC26Demo/tree/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench) while retaining the combined runtime and source contracts. The UI is vanilla HTML/CSS/JavaScript with a Python standard-library wrapper. The **Powered by VISTA** credit links to [VISTA's repository](https://github.com/Genesis-VISTA/vista). Launcher filenames and project identity remain unchanged. The embedded `0.12.1` in the April case definition is historical case metadata, independent of interface version 0.15.0.
+This selectively integrates [the upstream workbench content](https://github.com/daliwang/water4energy_SC26Demo/tree/d0199a817ddbfa0fbf65c9e81d9fcc53081611ee/Water4Energy-Workbench) while retaining the combined runtime and source contracts. The UI is vanilla HTML/CSS/JavaScript with a Python standard-library wrapper. The **Powered by VISTA** credit links to [VISTA's repository](https://github.com/Genesis-VISTA/vista). Launcher filenames and project identity remain unchanged. The embedded `0.12.1` in the April case definition is historical case metadata, independent of interface version 0.15.1.
 
 ```sh
 python3 -m unittest discover -s tests -v

@@ -104,8 +104,8 @@ test('the current shell accepts its version while the unchanged April contract r
  const start=app.indexOf('function renderDemoStatus()'),end=app.indexOf('async function refreshDemo',start);
  assert.ok(start>=0&&end>start);
  const line={dataset:{},textContent:''},badge={textContent:''};
- const state={status:{version:'0.15.0',connected:true,project_found:true},demoCase:JSON.parse(read('public/data/demo-case.json')),skills:null,knowledge:null,activeContext:'headwater'};
- const context=vm.createContext({state,WORKBENCH_VERSION:'0.15.0',isAprilContext:()=>false,$:selector=>selector==='#demo-status-line'?line:selector==='#case-figures-status'?badge:null});
+ const state={status:{version:'0.15.1',connected:true,project_found:true},demoCase:JSON.parse(read('public/data/demo-case.json')),skills:null,knowledge:null,activeContext:'headwater'};
+ const context=vm.createContext({state,WORKBENCH_VERSION:'0.15.1',isAprilContext:()=>false,$:selector=>selector==='#demo-status-line'?line:selector==='#case-figures-status'?badge:null});
  vm.runInContext(app.slice(start,end),context);context.renderDemoStatus();
  assert.equal(line.dataset.state,'connected');
  assert.match(line.textContent,/Water4Energy project/);
@@ -117,10 +117,10 @@ test('the connection hint clears when VISTA has the eight kebab-case skills and 
  const start=app.indexOf('function renderDemoStatus()'),end=app.indexOf('async function refreshDemo',start);
  const line={dataset:{},textContent:''};
  const definition=JSON.parse(read('public/data/demo-case.json'));
- const state={status:{version:'0.15.0',connected:true,project_found:true},demoCase:definition,
+ const state={status:{version:'0.15.1',connected:true,project_found:true},demoCase:definition,
   skills:{project_found:true,count:8,skills:definition.requiredSkills.map(skill=>({name:skill.id.replace(/[._]/g,'-')}))},
   knowledge:{project_found:true,all_ready:true}};
- const context=vm.createContext({state,WORKBENCH_VERSION:'0.15.0',isAprilContext:()=>true,$:selector=>selector==='#demo-status-line'?line:null});
+ const context=vm.createContext({state,WORKBENCH_VERSION:'0.15.1',isAprilContext:()=>true,$:selector=>selector==='#demo-status-line'?line:null});
  vm.runInContext(app.slice(start,end),context);context.renderDemoStatus();
  assert.equal(line.textContent,'Connected to the April case project.');
  state.skills.skills.pop();context.renderDemoStatus();

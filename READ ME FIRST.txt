@@ -1,13 +1,13 @@
 Water4Energy workbench — combined Mac package 1
-Interface v0.15.0
+Interface v0.15.1
 
-Send this single ZIP to Dali. There is no second setup download.
+Share this single ZIP. There is no second setup download.
 
 1. Extract the complete ZIP into a writable folder on the Mac.
 2. Double-click Start TVA Workbench.command inside TVA-Workbench.
 3. Keep Terminal and VISTA open. Use the local address printed by this copy.
 
-Dali needs VISTA installed and his own model/provider credentials configured in
+Live chat requires VISTA installed and your own model/provider credentials in
 VISTA Settings. VISTA normally supplies Python; otherwise Python 3.9+ is needed.
 No GitHub login, npm or pip commands are required. VISTA itself is a separate
 application and is not redistributed in this ZIP.
@@ -52,7 +52,7 @@ Setup sends no agent prompt and starts no training, scientific inference,
 scoring, download or HPC job. A saved board state is not execution permission.
 The optional dam skill still needs an agreed reservoir/rule. The exact original
 Trial 0 scorer remains missing. Review live answers with their cited evidence;
-free-form model behavior and a first launch on Dali's separate laptop are not
+free-form model behavior and a first launch on another laptop are not
 certified by local tests. Unreadable responses offer a draft-only manual retry.
 
 Troubleshooting
