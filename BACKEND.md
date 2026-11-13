@@ -1,104 +1,110 @@
-# Local VISTA adapter
+# Local VISTA adapter · v0.14.0
 
-`server.py` uses only the Python 3.9+ standard library. It serves `public/` and proxies an explicit set of requests to one selected project on an already-running local VISTA backend. It does not start VISTA, install software, read credentials, or run an agent on startup.
+The combined launcher and the HTTP wrapper have separate responsibilities:
 
-## Start
+- **`launch_workbench.py`** verifies the package, opens installed VISTA if needed, prepares the dedicated project/skills/source index and saved evidence, then starts the interface.
+- **`server.py`** serves `public/` and proxies an allowlist of routes to one local VISTA project. It uses only Python 3.9+ standard-library modules. Running it directly skips backend setup.
+- **`backend/replay.py`** and its skill copies read pinned saved records, validate source hashes and write context-specific inspection files. They do not train, score, download datasets, submit jobs or change approval flags.
 
-- macOS: double-click **Start TVA Workbench.command**. It uses VISTA's bundled Python when available, otherwise an installed Python 3.
-- Windows: double-click **Start TVA Workbench.bat** with Python 3.9+ installed.
-- Linux: run `./start.sh` with Python 3.9+ installed.
-- Terminal: `python3 server.py --no-browser --port 8765`.
+Setup uses direct local API operations and verified file checks/copies, not an LLM turn. A stage click or prepared question does not start an agent. The person presses **Send** for a conversation turn.
 
-Open VISTA separately for live mode. The default backend is `http://127.0.0.1:8001` and the project is `Water4Energy-TVA-agent-loop`. Change these in the application's Connection dialog or use `--backend-url` and `--project`. Optional environment variables: `TVA_PORT`, `TVA_VISTA_URL`, `TVA_PROJECT`.
+## Launch and configuration
 
-Keep the launcher terminal open while using the app. Ctrl+C stops the wrapper. If a VISTA agent turn has started, closing its webpage or stopping this wrapper does not cancel that turn; use the live Stop action or VISTA itself. Reopening the launcher reuses only the same folder/version/connection identified by its health endpoint. Other occupied preferred ports fall back to an OS-assigned loopback port; the printed URL is authoritative.
+On macOS, extract the complete package and double-click **Start TVA Workbench.command**. Keep Terminal and VISTA open. The recipient needs installed VISTA and their own model credentials; the ZIP contains no account secrets or VISTA database. The retained Windows/Linux entry points use the same setup path; desktop launch verification is performed on macOS.
 
-The wrapper binds only to `127.0.0.1`. It is intended for presenting from the same laptop, not remote hosting or a shared multi-user server.
+The combined launcher accepts `--backend-url`, `--port`, `--no-browser`, `--no-start-vista`, `--setup-only` and `--setup-timeout`. `TVA_VISTA_URL` can supply the backend address, and `W4E_VISTA_INSTALL` can identify a nonstandard VISTA package directory. The launcher pins the dedicated project name **`Water4Energy-TVA-agent-loop`**.
 
-## Browser contract
+For wrapper-only development, run `python3 server.py --no-browser --port 8765`. Its `--backend-url`/`--project` options and `TVA_PORT`, `TVA_VISTA_URL`, `TVA_PROJECT` variables configure that process. Connection settings saves only a backend address and project name in `.local/config.json`; no token/key is accepted there. Backend addresses must be loopback HTTP origins without credentials, path, query or fragment.
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.13.2",instance_id,connection_id}`. Lightweight instance identification.
-- `GET /api/config`: `{backend_url,project}`.
-- `GET /api/workbench-assets`: a read-only local-media presence map with optional `video`, `captions` and `scoreMap` keys. It checks only nonempty, nonsymlink files beneath `public/assets/` at the fixed MP4/VTT/PNG/JPG filenames documented below. It does not enumerate arbitrary directories or write a file.
-- `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
-- `GET /api/status`: `{app,version,backend_url,project,connected,project_found,skills,resources,detail}`. Cached for 15 seconds; `?fresh=1` bypasses the wrapper cache for an explicit connection refresh. VISTA still owns its facility-status cache. `connected` means VISTA responded; `project_found` means its selected project exists. `resources` contains `{id,name,state,message,checked_at,planned}` for Odo, Frontier, Lux and planned CCSI. Facility readiness is distinct from TVA skill/runtime validation.
-- `GET /api/skills`: `{project,connected,project_found,count,skills,detail}`. Only the selected project's loaded skills are included. Each skill has `{name,description,body,hpc_jobs,loaded:true,detail_available,bundled}`. `count` is the number of distinct skill names declared by that project, including a loaded name whose detail record could not be read. An unavailable backend or missing project returns `count:null`, not a misleading zero. An empty connected project returns `count:0`. Add `?fresh=1` to bypass its 15-second cache. The adapter reads each declared `/skills/{name}` individually and never reads or exposes the unrelated global skill library.
-- `/api/vista/<backend route>` preserves allowed VISTA responses and error status codes. SSE event types, data and sequence IDs pass through unchanged. No redirect is followed.
+The wrapper binds only to `127.0.0.1` for use on the presenting laptop. An occupied preferred port falls back to an OS-selected free port without stopping other processes. The printed URL is authoritative. Reopening reuses only a matching folder, version and connection identity. `.local/instance.json` stores launch metadata. Browser-open failures print a copyable URL.
 
-Selected-project routes supported:
+Ctrl+C stops the wrapper. A backend-owned VISTA turn can continue after its browser/wrapper closes; use **Stop** or VISTA itself to cancel it. SSE reconnection can watch that running turn, but does not provide durable resumption after a VISTA backend restart.
 
-| Method | Backend path after `/projects/{project}` |
+## Project setup and verified upgrades
+
+Setup creates or recognizes the dedicated project, loads **eight replay skills**, and indexes **eight documents**: the original six lead sources, the TVA answer guide and the HEADWATER development guide. It polls document/index status before reporting setup ready. It reads only the secret-free `/settings/inference` view to report whether a model and credential are configured; that check does not test actual model access.
+
+Known original **v0.13.1 and v0.13.2** installations have packaged migration baselines. Before replacing old global skills, setup verifies the project policy, ownership/body metadata and mounted file hashes, and refuses an upgrade if another project shares those old globals. Original project metadata and complete skill files are backed up under ignored `.local/upgrade-backups`. Replacement uses VISTA's supported full-folder import, not a body-only edit. Verified temporary staging folders are removed. An interrupted upgrade can resume from known old/current items.
+
+Unknown project/skill edits and differing saved evidence are preserved and reported. Matching evidence is not rewritten. New guide documents are appended for indexing; existing sources are not deleted. The package excludes `.local/`, credentials, caches, chat history and local project IDs. The installed API reviewed for compatibility is VISTA 0.2.4; later VISTA API changes may require adapter updates.
+
+## Context-specific saved-evidence readers
+
+The interface remains one Water4Energy project with two contexts. **HEADWATER development** opens first; **TVA · 16–22 April 2019** is a selectable case. Context changes do not create or rename projects. Each context has its own question list, draft, conversation association and evidence pane. An unlabelled history item requires a context choice, and the switcher is disabled during an active turn.
+
+HEADWATER requests explicitly select `--context headwater` and a matching profile:
+
+| Profile | Reader | Source boundary |
+| --- | --- | --- |
+| `headwater-ledger` | `lab.ledger` | Recorded development results and remaining questions |
+| `headwater-brief` | `lab.design` | The 6 November review pack; no selected current brief is established |
+| `headwater-data` | `lab.download` | Dated Frontier preparation/inventory records; no live remote file check |
+| `headwater-board` | `lab.board` | Separate original board and supplied 12 November demo record |
+| `headwater-score` | `lab.ledger` | H100 four-week error comparison, its limitations and exact stored-week label |
+| `headwater-history` | `lab.ledger` | Four dated records; readable retrospective plus a source-linked CSV |
+
+The reader validates profile/task/context combinations. Guided and project-method requests require the returned verified narrative, actual `display_file` calls for `display_paths`, and readable source titles/URLs from `source_citations`. Raw paths remain available for inspection. Missing records or a missing selected brief must be stated; a saved critique or referee record is not a newly executed role.
+
+HEADWATER proposal, critique, referee and protocol artifacts use distinct `w4e-v0140-headwater-*` outputs from the same November pack. The historical record dates identify documents, not training start/completion times. The score is temperature error over four 2019 target weeks: about 0.77 degrees Celsius versus 0.86 degrees Celsius for **the 1979–2017 week already in the example files**. Lower is better. The comparison does not isolate soil's contribution, and some weeks/rain remain weak. The supplied files do not establish which next proposal a person selected as the current brief.
+
+The six April guided questions and original catalog remain intact. Their dates are 16–22 April 2019, issued 15 April. The original manifest, source JSON and figures keep their bytes; their versioned readout names remain distinct from HEADWATER. Weather/Trial 0 PNGs are pinned originals. Runoff is a frozen chart derived from a committed observed ERA5 valley receipt, not a spatial map or supplied forecast. Trial 0's standardized test-split aggregates are separate from the displayed 19 April wet-day maps. The exact original Trial 0 scorer command remains unavailable. The optional dam skill is uninstalled until an agreed reservoir/rule exists.
+
+## Browser API contract
+
+- `GET /api/health`: `{app:"tva-workbench",version:"0.14.0",instance_id,connection_id}`.
+- `GET /api/config`: `{backend_url,project}`. `POST`/`PUT` accepts only those two fields.
+- `GET /api/status`: connection/project availability, loaded skill names and read-only resource status. Results are cached for 15 seconds; `?fresh=1` bypasses the wrapper cache. A connection or facility badge does not validate a science result or job environment.
+- `GET /api/skills`: selected-project declarations/details and distinct loaded count. A missing/unavailable project returns `count:null`, an empty connected project returns `count:0`. `?fresh=1` refreshes the cache; unrelated global skills are not exposed.
+- `GET /api/knowledge`: sanitized status only for knowledge-base slugs attached to the selected project. Index readiness and required source coverage are separate checks.
+- `GET /api/workbench-assets`: presence of approved nonempty, nonsymlink local media at the fixed filenames below. It does not enumerate arbitrary directories or certify scientific validity.
+- `/api/vista/<backend route>`: allowlisted project routes preserve VISTA status codes and SSE types/data/sequence IDs. Redirects are refused.
+
+Selected-project routes after `/projects/{project}`:
+
+| Method | Backend path |
 | --- | --- |
-| GET | project record itself; `/chat-sessions`; `/chat-session?chat_session_id=UUID`; `/chat-runs/status`; `/models` |
-| POST | `/chat-sessions` with `{title}` |
+| GET | Project record; `/chat-sessions`; `/chat-session?chat_session_id=UUID`; `/chat-runs/status`; `/models` |
+| POST | `/chat-sessions` with `{title}`; `/agent/run` with `{user_prompt,stream:true,chat_session_id}` |
 | PUT | `/chat-session?chat_session_id=UUID` with VISTA's session update body |
-| POST | `/agent/run` with `{user_prompt,stream:true,chat_session_id}` |
-| GET | `/chat-sessions/UUID/run/events?after=N` |
+| GET | `/chat-sessions/UUID/run/events?after=N`; `/chat-sessions/UUID/displayed-files` |
 | POST | `/chat-sessions/UUID/run/stop` |
-| GET | `/chat-sessions/UUID/displayed-files` |
 | GET | `/uploads`; `/outputs`; `/uploads/PATH`; `/outputs/PATH` |
-| POST | `/uploads` with a multipart form containing `files` fields |
-| POST | `/elicitation` with `{id,action:"accept"\|"decline"\|"cancel",content}` |
-| POST | `/reports/generate` with `{message_history,hint,chat_session_id}`; `/reports` with `{title,summary,slug,body,chat_session_id}` |
-| POST | `/mcp/call` restricted to `get_hpc_job_status` and `get_hpc_job_outputs` |
+| POST | `/uploads` multipart file upload; `/elicitation` response |
+| POST | `/reports/generate`; `/reports` for explicit report saving |
+| POST | `/mcp/call`, limited to `get_hpc_job_status` and `get_hpc_job_outputs` |
 
-Session IDs are UUIDs. VISTA stream mode requires a session ID created through `/chat-sessions`. VISTA owns turn persistence and history. SSE reconnect replays an active backend run; it does not provide durable resumption after a VISTA backend restart.
+Session IDs are UUIDs and streaming requires a created session. VISTA owns history and turn persistence. File entries use `{name,size,created,modified,shown_in}`. Generated report drafts use `{title,slug_suggestion,summary,body}` and are not saved until explicitly posted. Requests/uploads have a 64 MiB limit and upstream inactivity timeout is 120 seconds.
 
-File list entries use `{name,size,created,modified,shown_in}`. Generated report drafts use `{title,slug_suggestion,summary,body}`. A generated report is not saved until explicitly posted to `/reports`.
+Raw global skill/knowledge routes, generic settings/credential routes, skill edit/publish endpoints and job submission are not available through the browser proxy. The separate local setup process uses its narrowly scoped import/upgrade API operations before the wrapper starts.
 
-## Local state and limits
+## Evidence workspace and libraries
 
-The wrapper saves only the selected backend address and project name in `.local/config.json`. No tokens or API keys are accepted in that configuration. Do not distribute `.local/` or Python cache directories. VISTA retains its own credentials, conversations and artifacts; each laptop must have its own working VISTA configuration and project/skills.
+The HEADWATER workspace explains the saved record relevant to a known prepared/sent/reopened question. Unknown questions use the overview. This topic selection does not assert agent progress or a completed review. Sources/technical details open on demand. Session/context revision guards prevent stale reads from replacing the active transcript or evidence.
 
-HTTP requests and file uploads have a 64 MiB limit. Upstream request inactivity timeout is 120 seconds. An idle live stream may disconnect, but a backend-owned turn continues and can be watched again through its event endpoint.
+For April conversation images, the browser combines actual display records with the real output listing. Only current passive raster files are accepted. Display identity uses bounded run/tool/time metadata; newest records deduplicate by filename and sort chronologically. A successful redisplay can select an existing checked case card without duplicating it. Manual selection pauses following; Resume returns to the latest actual display. Unchanged polling preserves image DOM. Missing/changed records remain excluded, while stable replay avoids restamping identical files.
 
-The existing CCSI connection remains a placeholder for a future resource adapter; the development view separately presents Dali's supplied historical H100 training record. Adding its name to the interface does not register it in VISTA, authenticate to the node, or make existing Frontier-only scripts compatible with it. Similarly, Odo and Lux resource availability does not imply the TVA inference skill supports those clusters.
+Artifact reads coalesce and poll every four seconds only while a turn is active. The manifest-checked April panels remain separate from unverified conversation images. Text mentioning a tool or role does not certify its execution.
 
-The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.13.1.
+Results Library uses the selected project's output store, with compact file rows and explicit previews/downloads. There is no second output store. Literature is a packaged metadata snapshot with source links, no runtime GitHub credential or bundled paper bytes. Compute badges are read-only; the CCSI connection placeholder remains separate from the supplied historical H100 record.
 
-## Verification
+## Supplied media and checks
 
-Run `python3 -m unittest discover -s tests -v`. The v0.13.1 Python suite has 41 checks, including adapter/project knowledge, media presence, launch identity and the study catalog, using isolated mock servers where needed. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. During the v0.12.1 read-only check, the local `Water4Energy-TVA-agent-loop` project was absent. This package reports that missing state and does not create or substitute a project.
+The local media endpoint recognizes these files under `public/assets/`:
 
-## Results Library
-
-The library uses the selected project's existing `GET /outputs` listing and scoped individual output-file downloads. VISTA stores output files in its project output directory; the wrapper does not create a second file store. Input uploads are excluded from this library. Safe image previews use the same file endpoint with `?preview=true`; original files remain downloadable. The library refreshes after agent work and through its refresh control.
-
-## Hypothesis-lab readiness and launch identity
-
-`GET /api/knowledge?fresh=1` reads only knowledge-base slugs attached to the selected VISTA project, then their sanitized build/document status. It does not expose raw global knowledge routes or publication contents. Index readiness does not imply the six required lead documents are covered; the browser checks source coverage separately.
-
-Health includes opaque instance/connection IDs so another extracted folder or differently configured process is not mistaken for this copy. `.local/instance.json` stores only validated port/instance metadata. An occupied preferred port uses an OS-selected free port without stopping any process. Browser-opening failures print a copyable URL. Explicit `--port` is also a preferred port; `--port 0` requests an OS-selected port.
-
-## Inline conversation artifacts and literature
-
-The browser combines the selected session's displayed-files listing with actual output names, accepts only current passive raster outputs, and rejects stale or unsafe references. Coalesced reads follow tool calls/results and a four-second timer while busy. Session/backend/context changes invalidate pending reads. The right-side gallery keeps unchecked conversation images separate from manifest-validated fixed-case panels. Structured tool events identify guide topics without certifying role execution or scientific success.
-
-Compute status is rendered read-only on HEADWATER development and inside Connection settings; only Connection settings saves the backend URL and project. No credential routes or job actions were added. Literature is static metadata in public/data/literature.json, audited from four shared repository trees at pinned commits. It uses no runtime GitHub credential and bundles no papers.
-
-
-## Project context and supplied media in v0.13.1
-
-The on-screen product is **Water4Energy workbench**. The backend project ID stays `Water4Energy-TVA-agent-loop`; changing the Case Lab switcher does not create or rename a VISTA project. The initial context is HEADWATER development. Selecting the TVA case enables the existing April questions and checked evidence. Browser session/draft associations include a context, and a revision guard rejects late responses from another context. An unlabelled saved conversation requires a context choice before opening. The case switcher is disabled during an active turn.
-
-The shell's independent `WORKBENCH_VERSION` and server version are `0.13.1`. Protected `public/data/demo-case.json` still contains `0.12.1`; that is preserved case metadata and is not used as the shell compatibility version. `prompts.json`, `hypothesis-guide.js`, the case definition and its evidence schema remain byte-identical. The April manifest/source validation logic is unchanged.
-
-The local-media endpoint recognizes only:
-
-| Response key | Local asset filenames |
+| Key | Filename |
 | --- | --- |
 | `video` | `water4energy-workbench-90s.mp4` |
 | `captions` | `water4energy-workbench-90s.vtt` |
 | `scoreMap` | `water4energy-april-2019-score.png`, otherwise `.jpg` |
 
-The player is hidden unless both video and captions are present. It has controls, no autoplay, captions enabled and a six-node-map poster. The score frame stays labelled empty until an approved raster is present. These files were not supplied for this release. The endpoint reports presence, not scientific validity; Dali supplies the video, captions, map and voiceover. No upload/configuration or execution action is attached to these mounts.
+The player requires both video and captions, has controls/captions enabled, and does not autoplay. The April score frame remains empty until an approved raster is supplied; it stays inside the Score details. Dali supplies these media and the voiceover. The numerical four-week comparison is independent of that April image slot.
 
-The v0.13.1 browser recognizes the exact VISTA kebab-case aliases for the eight dotted demo contracts, including `lab.show_command` → `lab-show-command`. A similarly prefixed or unrelated skill does not count. Lead-source title matching ignores a trailing document extension, permitting meaningful indexed Markdown filenames while still refusing a generic README. Case validation and step logic are unchanged. Backend replay setup is an explicit separate configuration action, never a startup side effect.
+The interface/setup version is **0.14.0**. The case definition's embedded `0.12.1` is retained case metadata. The April prompts, hypothesis-step logic, case contract and ORNL/Genesis marks remain preserved.
 
-## v0.13.2 combined setup and figure following
+Run the checks below and see [VERIFICATION.md](VERIFICATION.md) for final automated/live results and their scope:
 
-The one launcher now prepares the included local backend project before starting the wrapper. Setup uses direct, scoped local VISTA API operations, never an LLM turn. The old v0.13.1 global skill upgrade requires exact metadata/body/source hashes, a matching project policy and no other projects sharing those globals; backups stay in ignored `.local/`. New source documents are appended for indexing without deleting existing sources. Unknown local edits or differing evidence are preserved and reported.
-
-Conversation images retain bounded actual display identity and time. Current records deduplicate by filename and sort by display time, so the last successful display selects the right case or conversation card. Repeated refreshes do not steal focus; manual pause and explicit Resume retain their meanings. Missing/changed records are still rejected. The replay readers preserve identical file bytes and mtimes, including the frozen receipt-summary chart, so later evidence reads do not invalidate valid display history.
-
-The v0.13.2 source guide and task-specific tool facts correct the live narration's units, dates, score scopes and review chronology. The exact original Trial 0 scorer command is still unavailable; reporting that limitation is the correct answer. There is no new training, scoring, dataset download or reservoir operation in setup or acceptance testing.
+```sh
+python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s backend/tests -v
+node --test tests/*.cjs
+```

@@ -494,25 +494,28 @@ class PortableSetupTests(unittest.TestCase):
         self.assertEqual(conflict.read_bytes(), b"Existing different scientific evidence")
         self.assertEqual(conflict.stat().st_mtime_ns, timestamp)
 
-    def install_legacy_fixture(self):
+    def install_legacy_fixture(self, version='0.13.1'):
         """Populate a real old install without relying on this folder's local state."""
         backend = self.root / 'backend'
-        migration_path = backend / 'migrations/v0131.json'
-        vault = backend / 'migrations/v0131-original-files.zip'
+        slug = 'v' + version.replace('.', '')
+        migration_path = backend / 'migrations' / (slug + '.json')
+        vault = backend / 'migrations' / (slug + '-original-files.zip')
         if not migration_path.exists():
             migration_path.parent.mkdir(exist_ok=True)
             project = copy.deepcopy(self.fake.template['project'])
-            project['system_prompt'] = 'Previous Water4Energy replay policy.'
-            migration = {'version': '0.13.1', 'project': project, 'skills': {}}
+            project['system_prompt'] = 'Previous Water4Energy replay policy ' + version + '.'
+            migration = {'version': version, 'project': project, 'skills': {}}
             with ZipFile(vault, 'w') as archive:
                 for name in SKILLS:
                     folder = backend / 'skills' / name
                     files = {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
                     text = files['SKILL.md'].decode()
                     front = text.split('---', 2)[1]
-                    files['SKILL.md'] = ('---' + front + '---\n\n# Legacy ' + name + '\n\nPrevious saved-file reader.\n').encode()
-                    files['scripts/replay.py'] = b'print("old saved-file replay")\n'
                     metadata = json.loads(next(line.split(':', 1)[1].strip() for line in front.splitlines() if line.startswith('metadata:')))
+                    metadata['replay-version'] = version
+                    front = '\n'.join('metadata: ' + json.dumps(metadata) if line.startswith('metadata:') else line for line in front.splitlines()) + '\n'
+                    files['SKILL.md'] = ('---' + front + '---\n\n# Legacy ' + version + ' ' + name + '\n\nPrevious saved-file reader.\n').encode()
+                    files['scripts/replay.py'] = ('print("old saved-file replay ' + version + '")\n').encode()
                     body = files['SKILL.md'].decode().split('---', 2)[2].strip()
                     migration['skills'][name] = {'metadata': metadata, 'body_sha256': hashlib.sha256(body.encode()).hexdigest(),
                         'files': {relative: hashlib.sha256(value).hexdigest() for relative, value in files.items()}}
@@ -524,22 +527,28 @@ class PortableSetupTests(unittest.TestCase):
         self.fake.project = dict(copy.deepcopy(migration['project']), id='11111111-2222-4333-8444-555555555555',
                                  skills=list(SKILLS), knowledge_bases=[SLUG])
         self.fake.kb = self.fake.matching_kb()
-        self.fake.kb['publications'] = [{'filename': p.name, 'index_status': 'indexed'}
-                                       for p in (backend / 'lead-documents').iterdir() if p.name != 'TVA_demo_answer_guide.md']
+        old_docs = migration.get('lead_documents')
+        if old_docs is None:
+            old_docs = [p.name for p in (backend / 'lead-documents').iterdir()
+                        if p.name != 'TVA_demo_answer_guide.md' and '0140' not in p.name and 'HEADWATER_demo' not in p.name]
+        self.fake.kb['publications'] = [{'filename': name, 'index_status': 'indexed'} for name in old_docs]
         with ZipFile(vault) as archive:
             for name, old in migration['skills'].items():
                 files = {}
                 for relative, sha in old['files'].items():
                     key = name + '/' + relative
-                    value = archive.read(key) if key in archive.namelist() else (backend / 'skills' / name / relative).read_bytes()
+                    entry = migration.get('original_file_entries', {}).get(key, key)
+                    value = archive.read(entry) if entry in archive.namelist() else (backend / 'skills' / name / relative).read_bytes()
                     self.assertEqual(hashlib.sha256(value).hexdigest(), sha)
                     files[relative] = value
-                legacy = self.root / '.legacy-source' / name
-                legacy.mkdir(parents=True)
+                legacy = self.root / '.legacy-source' / version / name
+                legacy.mkdir(parents=True, exist_ok=True)
                 (legacy / 'SKILL.md').write_bytes(files['SKILL.md'])
                 self.fake.skills[name] = skill_detail(legacy)
                 self.fake.skill_files[name] = files
-        self.fake.outputs = dict(self.fake.expected_evidence, **{'user-result.csv': b'week,inflow\n2019-04-16,12\n'})
+        old_evidence = migration.get('evidence', self.fake.expected_evidence)
+        self.fake.outputs = {name: self.fake.expected_evidence[name] for name in old_evidence}
+        self.fake.outputs['user-result.csv'] = b'week,inflow\n2019-04-16,12\n'
         return migration
 
     def test_known_v0131_upgrade_replaces_complete_owned_skill_folders_and_backs_up(self):
@@ -557,7 +566,7 @@ class PortableSetupTests(unittest.TestCase):
         self.assertEqual(len(replacements), 8)
         self.assertTrue(all(data['replace'] is True for data in replacements))
         self.assertEqual(self.fake.outputs['user-result.csv'], b'week,inflow\n2019-04-16,12\n')
-        self.assertFalse(any(name.startswith('w4e-v0132-') and '/' in name for name in self.fake.outputs))
+        self.assertFalse(any(name.startswith('w4e-v' + self.module.VERSION.replace('.', '') + '-') and '/' in name for name in self.fake.outputs))
         backups = list((self.root / '.local/upgrade-backups').glob('*/original-skills.zip'))
         self.assertEqual(len(backups), 1)
         with ZipFile(backups[0]) as archive:
@@ -598,6 +607,78 @@ class PortableSetupTests(unittest.TestCase):
         replacements = [data for method, path, data in self.fake.requests if path.endswith('/skills/from-output')]
         self.assertEqual(len(replacements), 7)
         self.assertFalse(any('-' + name + '-' in data['folder'] for data in replacements))
+
+    def test_known_v0132_upgrade_preserves_evidence_and_backs_up_every_old_file(self):
+        migration = self.install_legacy_fixture('0.13.2')
+        original_outputs = dict(self.fake.outputs)
+        original_id = self.fake.project['id']
+        report = self.run_setup()
+        self.assertEqual(report['upgraded_from'], '0.13.2')
+        self.assertEqual(report['upgrade_sources'], ['0.13.2'])
+        self.assertEqual(self.fake.project['id'], original_id)
+        self.assertEqual(report['interface_version'], '0.14.0')
+        for name, data in original_outputs.items():
+            self.assertEqual(self.fake.outputs[name], data)
+        replacements = [data for method, path, data in self.fake.requests if path.endswith('/skills/from-output')]
+        self.assertEqual(len(replacements), 8)
+        self.assertTrue(all(data['folder'].startswith('w4e-v0140-') for data in replacements))
+        backups = list((self.root / '.local/upgrade-backups').glob('v0132-*/original-skills.zip'))
+        self.assertEqual(len(backups), 1)
+        with ZipFile(backups[0]) as archive:
+            for name, old in migration['skills'].items():
+                for relative, sha in old['files'].items():
+                    self.assertEqual(hashlib.sha256(archive.read(name + '/' + relative)).hexdigest(), sha)
+        self.fake.requests.clear()
+        self.run_setup()
+        self.assertFalse([path for method, path, _ in self.fake.requests if method != 'GET'])
+        self.assert_no_agent_or_job()
+
+    def test_v0132_extra_local_file_is_preserved_before_policy_upgrade(self):
+        self.install_legacy_fixture('0.13.2')
+        name = SKILLS[0]
+        self.fake.skill_files[name]['local-science-note.txt'] = b'A local change to preserve.'
+        project = copy.deepcopy(self.fake.project)
+        with self.assertRaises(self.module.SetupError):
+            self.run_setup()
+        self.assertEqual(self.fake.project, project)
+        self.assertFalse([path for method, path, _ in self.fake.requests if method == 'PUT' or path.endswith('/skills/from-output')])
+        self.assertEqual(self.fake.skill_files[name]['local-science-note.txt'], b'A local change to preserve.')
+
+    def test_v0132_partial_upgrade_with_current_policy_resumes_seven_old_skills(self):
+        self.install_legacy_fixture('0.13.2')
+        self.fake.project.update({key: copy.deepcopy(self.fake.template['project'][key])
+                                  for key in ['system_prompt', 'description', 'tools', 'usage_limits']})
+        name = SKILLS[0]
+        folder = self.root / 'backend/skills' / name
+        self.fake.skills[name] = skill_detail(folder)
+        self.fake.skill_files[name] = {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+        report = self.run_setup()
+        self.assertEqual(report['upgraded_from'], '0.13.2')
+        replacements = [data for method, path, data in self.fake.requests if path.endswith('/skills/from-output')]
+        self.assertEqual(len(replacements), 7)
+        self.assertFalse(any('-' + name + '-' in data['folder'] for data in replacements))
+
+    def test_mixed_known_v0131_and_v0132_skills_get_separate_complete_backups(self):
+        first = self.install_legacy_fixture('0.13.1')
+        first_skills = copy.deepcopy(self.fake.skills)
+        first_files = copy.deepcopy(self.fake.skill_files)
+        second = self.install_legacy_fixture('0.13.2')
+        for name in SKILLS[:4]:
+            self.fake.skills[name] = first_skills[name]
+            self.fake.skill_files[name] = first_files[name]
+        report = self.run_setup()
+        self.assertEqual(report['upgrade_sources'], ['0.13.1', '0.13.2'])
+        backups = list((self.root / '.local/upgrade-backups').glob('*/original-skills.zip'))
+        self.assertEqual(len(backups), 2)
+        for path in backups:
+            version = '0.13.1' if path.parent.name.startswith('v0131-') else '0.13.2'
+            baseline = first if version == '0.13.1' else second
+            names = SKILLS[:4] if version == '0.13.1' else SKILLS[4:]
+            with ZipFile(path) as archive:
+                for name in names:
+                    for relative, sha in baseline['skills'][name]['files'].items():
+                        self.assertEqual(hashlib.sha256(archive.read(name + '/' + relative)).hexdigest(), sha)
+        self.assert_no_agent_or_job()
 
 
 if __name__ == "__main__":

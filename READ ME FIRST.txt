@@ -1,5 +1,5 @@
 Water4Energy workbench — combined Mac package 1
-Interface v0.13.2
+Interface v0.14.0
 
 Send this single ZIP to Dali. There is no second setup download.
 
@@ -9,10 +9,10 @@ Send this single ZIP to Dali. There is no second setup download.
 
 The first launch opens installed VISTA, imports the Water4Energy project and its
 eight replay skills, uploads/indexes the six original source documents plus the
-source-grounded demo answer guide, loads the saved April
+two source-grounded guides for the April case and HEADWATER development, loads the saved April
 figures, and opens the webpage. Indexing may take a few minutes. Later launches
 verify and reuse matching items; they do not create duplicate projects or
-overwrite different existing projects, skills, or results. Recognized v0.13.1
+overwrite different existing projects, skills, or results. Recognized v0.13.1 and v0.13.2
 demo installations are upgraded automatically after verification and a local
 backup. Locally edited or shared skills are preserved and reported for review.
 
@@ -33,8 +33,8 @@ launcher prints and opens another local port. Use the printed address rather
 than an older saved browser tab. Ctrl+C stops the workbench; VISTA stays under
 its own application's control. Reopening this same package resumes setup safely.
 
-Included: v0.13.2 interface; ORNL/Genesis marks; eight saved-evidence adapters
-with pinned source snapshots and provenance; seven lead documents; original
+Included: v0.14.0 interface; ORNL/Genesis marks; eight saved-evidence adapters
+with pinned source snapshots and provenance; eight lead documents; original
 saved evidence plus versioned answer readouts; integrity manifest; and one Mac
 launcher.
 Excluded: account secrets, Yang's VISTA database/settings, chats, local UUIDs,
@@ -47,8 +47,12 @@ checks/copies in the project sandbox. It sends no agent prompt and starts no tra
 new scientific inference/scoring, data download, or HPC job. The optional dam
 skill remains absent until a reservoir and agreed rule are supplied.
 
-This version supplies explicit source facts and metric scopes for the six demo
-questions, and repairs figure following and stable replay file writes. Review
+Start with HEADWATER development: five short steps explain the question, test,
+and result. Technical records are folded below. Case Lab keeps conversation
+on the left and the matching evidence on the right. Its five development
+questions use dated, source-cited records; an optional history question exports
+the four-record timeline. Select TVA to use the six unchanged April questions.
+The interface identifies unreadable agent responses and offers manual retry. Review
 live answers alongside their cited evidence. The saved figures retain their original
 scope: April weather, observed ERA5 receipt summary (no runoff forecast), and
 frozen Trial 0 maps with aggregate test-split scores. Dali's video, voiceover and

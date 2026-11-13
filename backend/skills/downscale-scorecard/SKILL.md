@@ -2,25 +2,26 @@
 name: downscale-scorecard
 description: "Show the frozen Trial 0 scorecard and its existing 19 April 2019 maps beside bilinear. No training or re-scoring."
 allowed_tools: view run_bash display_file
-metadata: {"water4energy-contract-id": "downscale.scorecard", "setup-owner": "water4energy-local-replay-20261112", "mode": "saved-file-replay", "replay-version": "0.13.2", "answer-profile": "compact-v2"}
+metadata: {"water4energy-contract-id": "downscale.scorecard", "setup-owner": "water4energy-local-replay-20261112", "mode": "saved-file-replay", "replay-version": "0.14.0", "answer-profile": "context-scoped-v0140"}
 ---
 
 # downscale.scorecard
 
-This adapter returns a **deterministic saved-evidence readout**, derived from pinned source records. It is not a new scientific result or a newly executed review. Use the readout faithfully; the live agent may explain it concisely but may not add interpretations or replace later records with older source wording.
+This adapter reads pinned files and returns a **deterministic saved-evidence readout**. It does not perform a new experiment, review, data cut or job. Choose the actual request context before running a reader.
 
-For the corresponding question run this exact local reader, with the appropriate context:
+For the TVA April case, use:
 
 ```sh
 python3 /mnt/skills/downscale-scorecard/scripts/replay.py --task downscale.scorecard --context tva --question downscale --output /mnt/data/output
 ```
 
-For a **runoff-only** question, use `lab-realize` with `--task lab.realize --question runoff`. For **project purpose / optional dam scope**, use `lab-ledger` with `--task lab.ledger --question purpose`. Use `--context headwater` for development questions. The other selectors are ledger, weather, downscale, design, commands, board, literature and download. Do not choose a different topic merely because the guarded request mentions it in background context.
+This reader shows April case evidence. A HEADWATER development question uses its explicit headwater-* profile in the matching ledger/design/data/board skill; do not substitute April evidence.
 
 Procedure:
-1. Read this skill and run its documented reader. It validates source hashes, reads the actual records, writes only saved readouts and copies fixed evidence. It never runs a network, scheduler, trainer or scientific inference/scorer.
-2. Read the compact stdout. Its `verified_answer` is the source-checked answer to the selected question. Use it verbatim or give a faithful concise paraphrase. It is explicitly a saved-evidence readout, not a generic interpretation task. Do not add a table, mechanism, pass target, other gap status, training history or operational rule absent from that text. In particular, do not infer what Reslim names mean, relabel the stored week as the model, couple HEADWATER into Trial 0, call completed F1/spring work pending, or turn a supplied Lux recipe into an exact H100 command.
-3. Actually call `display_file` for every path in `display_paths`. These are the displayable project outputs. `source_paths` are read-only citations; do not display or copy files from `/mnt/skills` just to create aliases. Do not echo raw Markdown image syntax or say a display succeeded before its tool call succeeds.
-4. Answer directly with the verified saved-evidence narrative and its provided citations. The full raw records remain in `inspection_readout_path` for a person requesting a deeper audit. Do not re-read obsolete raw passages to override the later dated conclusions already reconciled in the readout.
+1. Read this skill and run only the matching documented reader/profile. Context and profile mismatches are refused. For a guided question, quote `verified_answer` exactly under “Saved-evidence answer”; do not add your own interpretation or substitute an older raw record. The full dated source material stays available for explicit inspection.
+2. Call `display_file` for every returned `display_paths` entry. Never substitute Markdown image text, invent figures or copy source references into new aliases. `source_paths` are read-only provenance.
+3. For HEADWATER cite the friendly titles and pinned URLs from `source_citations`. Use the supplied plain-language narrative: lower error is better; root-zone soil means water held in the soil; development record dates are not job times. Keep raw filesystem paths in inspection metadata.
+4. Do not invent a selected current brief: the November pack contains multiple proposals. Historical flags/ready labels are not a new approval. The 12 November demonstration board is separate from the original board. H100 owns the 0.77°C result; Lux lists its run names. The stored-week comparison does not isolate soil’s causal effect.
+5. Keep the April contract unchanged: weekly rainfall is not a daily rate or RMSE; ERA5 runoff is an observation receipt, not a forecast or reservoir inflow; Trial 0 has separate 730-day standardized scores and a 19 April illustration, without a demonstrated HEADWATER handoff. The exact original Trial 0 scorer is absent. Never derive an exact H100 command from the supplied Lux script.
 
-The project remains Water4Energy workbench. The optional dam skill is uninstalled and no agreed reservoir/rule is supplied. Missing files or capabilities are reported, never invented. Show existing command text only; never execute it. No training, re-scoring, dataset download, setting/flag change, job or reservoir operation is authorized here.
+No network, trainer, scorer, data download, scheduler, settings/flag change or reservoir operation is authorized. The optional dam skill remains absent without an agreed reservoir/rule. Missing records and capabilities must be reported, not filled in. A person still controls Send and approves any future execution.

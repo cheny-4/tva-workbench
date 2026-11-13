@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 import csv
 import hashlib
+import io
 import json
 import runpy
 
@@ -17,6 +18,12 @@ SOURCES = ROOT / 'references'
 HW = SOURCES / 'HEADWATER'
 EX = SOURCES / 'water4energy_experiment'
 MANIFEST = 'tva-demo-20190416-20190422.json'
+HEADWATER_PROFILES = {
+    'headwater-ledger': 'lab.ledger', 'headwater-brief': 'lab.design',
+    'headwater-data': 'lab.download', 'headwater-board': 'lab.board',
+    'headwater-score': 'lab.ledger', 'headwater-history': 'lab.ledger',
+    'headwater-commands': 'lab.show_command', 'headwater-literature': 'lab.literature',
+}
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -38,7 +45,7 @@ def write_json(path, value):
     return write_bytes(path, (json.dumps(value, indent=2, ensure_ascii=False) + '\n').encode('utf-8'))
 
 def readout_filename(task, context):
-    prefix = 'w4e-v0132-headwater-' if context == 'headwater' else 'w4e-v0132-'
+    prefix = 'w4e-v0140-headwater-' if context == 'headwater' else 'w4e-v0132-'
     return prefix + task.replace('.', '-') + '-readout.json'
 
 def provenance(path):
@@ -52,7 +59,25 @@ def provenance(path):
         raise ValueError('Source hash mismatch: ' + rel)
     return record
 
-def stage_research(out):
+def stage_research(out, context='tva'):
+    if context == 'headwater':
+        pack = HW / 'hypothesis_lab/runs/20261106_second_model'
+        files = {
+            'w4e-v0140-headwater-experiment-ledger.json': HW / 'hypothesis_lab/experiment_ledger.json',
+            'w4e-v0140-headwater-proposer.json': pack / 'hypotheses.json',
+            'w4e-v0140-headwater-critic.json': pack / 'critique.json',
+            'w4e-v0140-headwater-referee.md': pack / 'referee_brief.md',
+            'w4e-v0140-headwater-experiments.json': pack / 'experiments.json',
+        }
+        for name, source in files.items():
+            provenance(source)
+            copy_stable(source, out / name)
+        write_json(out / 'w4e-v0140-headwater-source-provenance.json', load(ROOT / 'source-provenance.json'))
+        return {'ledger_file': 'w4e-v0140-headwater-experiment-ledger.json',
+                'proposal_file': 'w4e-v0140-headwater-proposer.json',
+                'critic_file': 'w4e-v0140-headwater-critic.json',
+                'referee_file': 'w4e-v0140-headwater-referee.md',
+                'protocol_file': 'w4e-v0140-headwater-experiments.json'}
     files = {
         'experiment_ledger.json': HW / 'hypothesis_lab/experiment_ledger.json',
         'proposer_brief.md': HW / 'hypothesis_lab/runs/20261018_iter1_april/PROPOSER_BRIEF.md',
@@ -165,12 +190,204 @@ def source_ref(path):
     return {'path': '/mnt/skills/' + ROOT.name + '/references/' + record['repo'] + '/' + record['path'], 'repo_path': record['repo'] + '/' + record['path'],
             'commit': record['commit'], 'url': record['url']}
 
+def headwater_story():
+    story = load(ROOT / 'assets/headwater-story.json')
+    for row in story['history']:
+        for source in row['sources']:
+            record = provenance(SOURCES / source['repo_path'])
+            if record['commit'] != source['commit'] or record['url'] != source['url']:
+                raise ValueError('The development story cites a different source snapshot.')
+    return story
+
+def headwater_facts(task):
+    ledger = load(HW / 'hypothesis_lab/experiment_ledger.json')
+    soil = next(row for row in ledger['runs'] if row['id'] == 'det_v2_soil_k9')
+    board = load(HW / 'hypothesis_lab/board.json')
+    protocol = load(HW / 'hypothesis_lab/runs/20261106_second_model/experiments.json')
+    return {
+        'project': 'Water4Energy workbench', 'context': 'headwater',
+        'recorded_example': 'The soil-input model with a larger 9×9 first convolution',
+        'ledger_record_date': ledger['updated'], 'recorded_run': soil,
+        'score_scope': 'Temperature error across four 2019 target weeks, not a real temperature or a single April score.',
+        'comparison': {'model_error_C': .77, 'stored_week_error_C': .86,
+                       'label': 'the 1979–2017 week already in the example files',
+                       'attribution': 'H100 / CCSI; Lux contributes its listed scored run names.',
+                       'causal_scope': 'This comparison does not isolate the effect of soil information alone.'},
+        'frontier_inventory_record_date': '2026-10-21', 'weekly_examples': 153,
+        'root_zone_soil_copy': 'headwater_examples_v1_soil',
+        'inventory_scope': 'The committed inventory reports what was present on 21 October; no live cluster lookup is performed.',
+        'v0_examples': ['example_train_20100115.npz', 'example_val_20180115.npz'],
+        'latest_staged_review': '20261106_second_model',
+        'review_proposal_ids': [row['id'] for row in protocol['experiments']],
+        'selected_current_brief_established': False,
+        'original_board_record_date': board['updated'],
+        'original_board_rows': [{key: row.get(key) for key in ['id', 'state', 'human_flag', 'family_closed']} for row in board['rows']],
+        'supplied_demo_board_date': '2026-11-12',
+        'supplied_H100_training_flag': False, 'supplied_Lux_training_flag': False,
+        'approval_rule': 'A recorded status or old true flag does not authorize a new run. A person chooses and approves a specific brief.',
+        'story': headwater_story(), 'jobs_submitted': 0,
+    }
+
+def headwater_profile(task, question=None):
+    default = {'lab.ledger': 'headwater-ledger', 'lab.design': 'headwater-brief',
+               'lab.download': 'headwater-data', 'lab.board': 'headwater-board',
+               'lab.show_command': 'headwater-commands', 'lab.literature': 'headwater-literature'}
+    topic = question or default.get(task)
+    if topic not in HEADWATER_PROFILES or HEADWATER_PROFILES[topic] != task:
+        raise ValueError('Use the matching HEADWATER question profile and reader. April weather/downscale evidence belongs to the TVA case.')
+    return topic
+
+def validate_requested_profile(task, context, question):
+    if context == 'headwater':
+        return headwater_profile(task, question)
+    if question and question.startswith('headwater-'):
+        raise ValueError('A HEADWATER question profile requires --context headwater, not the TVA case.')
+    return question
+
+def history_markdown(story):
+    def cell(value):
+        return value.replace('|', '\\|').replace('\n', ' ')
+    lines = ['# Recorded HEADWATER development history', '', story['date_note'], '',
+             '| Record date | What was documented | What it means | Next decision |',
+             '| --- | --- | --- | --- |']
+    for row in story['history']:
+        lines.append('| ' + ' | '.join(cell(value) for value in [row['date'], row['record'], row['meaning'], row['next_decision']]) + ' |')
+    lines += ['', '## Sources', '']
+    seen = set()
+    for row in story['history']:
+        for source in row['sources']:
+            if source['url'] not in seen:
+                seen.add(source['url'])
+                lines.append('- [' + source['repo_path'] + '](' + source['url'] + ')')
+    return '\n'.join(lines) + '\n'
+
+def history_csv(story):
+    stream = io.StringIO(newline='')
+    writer = csv.writer(stream, lineterminator='\n')
+    writer.writerow(['record_date', 'documented_record', 'meaning', 'next_decision', 'source_urls'])
+    for row in story['history']:
+        writer.writerow([row['date'], row['record'], row['meaning'], row['next_decision'],
+                         ' '.join(source['url'] for source in row['sources'])])
+    return stream.getvalue()
+
+def compact_headwater(result, question=None):
+    topic = headwater_profile(result['contract_id'], question)
+    ledger = HW / 'hypothesis_lab/experiment_ledger.json'
+    actions = SOURCES / 'water4energy_SC26Demo/Water4Energy_Workbench_Actions_20261112.md'
+    review = HW / 'hypothesis_lab/runs/20261106_second_model'
+    inventory = HW / 'docs/FRONTIER_DATASET_AGENT.md'
+    board = HW / 'hypothesis_lab/board.json'
+    sources = [ledger, actions]
+    displays = []
+    if topic == 'headwater-ledger':
+        text = ('The development record shows a completed test of a small weather model that reads soil information and a '
+                '9×9 neighborhood of grid cells. The ledger dated 26 October 2026 marks this model, det_v2_soil_k9, as scored. '
+                'Dali’s 12 November record attributes it to the H100 / CCSI machines.\n\n'
+                'Across four 2019 target weeks, its valley temperature error was about 0.77 degrees Celsius, compared with '
+                '0.86 degrees Celsius for the 1979–2017 week already in the example files. Lower error is better; these are '
+                'errors, not actual air temperatures. The comparison does not isolate the contribution of soil information alone.\n\n'
+                'The model still misses much of the April rain, and it does not improve every week. The ledger therefore keeps '
+                'open research questions. Repeating an unchanged tested setup is not a new experiment. The next step needs a '
+                'clearly stated change and a person’s review. This is a reading of saved records, not a new run.')
+    elif topic == 'headwater-brief':
+        text = ('The supplied files do not establish one selected current brief. The latest staged HEADWATER review is dated '
+                '6 November 2026 and contains several proposed follow-up tests, together with the proposer’s ideas, a critique '
+                'and a referee’s assessment. A saved review is available, but it does not show which proposal a person chose '
+                'as the next one-change experiment.\n\n'
+                'For this walkthrough, keep that distinction visible: the recorded soil-input 9×9 result is completed work; '
+                'the next experiment is still a decision to be made from the documented proposals. Before execution, the chosen '
+                'brief must identify one change, why it is worth testing, the inputs, the comparison and the person’s approval. '
+                'It would be misleading to call the April rain problem itself the selected amendment. No new brief, review, '
+                'approval or training run is created by reading these files.')
+        sources = [review / 'experiments.json', review / 'hypotheses.json', review / 'critique.json', review / 'referee_brief.md', actions]
+    elif topic == 'headwater-data':
+        text = ('The committed Frontier inventory, dated 21 October 2026, lists 153 weekly examples and a copy that includes '
+                'root-zone soil information: water held in the soil that plant roots can reach. Dali’s 12 November development '
+                'record describes the same preparation sequence: the weekly examples, then the soil-information copy. These '
+                'were inputs available for the documented model work.\n\n'
+                'The dates and destinations were written into the preparation plan. The inventory also distinguishes directories '
+                'that were present from later cuts or copy targets that were absent at that time. Its two older version-0 examples '
+                'are January 2010 training and January 2018 validation files.\n\n'
+                'This answer reports that dated inventory; it does not check Frontier live, confirm today’s file availability, '
+                'or claim that a historical preflight state is the current state of every job. A person reviews any new data '
+                'preparation or training request. No download or dataset job is started here.')
+        sources = [inventory, HW / 'docs/DATA_PREP_PLAN_20261021.md', actions]
+    elif topic == 'headwater-board':
+        text = ('Use the supplied 12 November 2026 board for the demonstration: the H100 and Lux training flags are both off. '
+                'The April rain-rank item reads existing soil files; the Lux device check only identifies the device. The '
+                'column-water and 90-day-filter items are described as designed work. Temporal attention along the 90 days '
+                'has no script and no row in this supplied demo record.\n\n'
+                'The original board dated 2 November is a different snapshot. For example, its rain-rank and Lux-device-check '
+                'rows say ready while their human flags are false. E_daily90 has a historical true flag, but is already '
+                'scored and its experiment family is closed. Several other rows also have true flags.\n\n'
+                'A status or an old flag alone is not permission for a new run. A person must choose and approve the specific '
+                'brief before any future execution. These are saved records, not live scheduler status, and nothing is submitted here.')
+        sources = [actions, board]
+    elif topic == 'headwater-score':
+        text = ('The recorded H100 9×9 result has a four-week 2019 valley temperature error of about 0.77 degrees Celsius, '
+                'against 0.86 degrees Celsius for the 1979–2017 week already in the example files. Lower error is better. '
+                'These numbers describe the size of the error across four target weeks; they are not actual temperatures '
+                'and are not the score for the April week alone.\n\n'
+                'The result belongs to det_v2_soil_k9 on H100 / CCSI. Lux is represented by its listed scored run names, '
+                'not this H100 valley number. The ledger records the result so the next design can build on what was learned.\n\n'
+                'The limitations matter too: July is worse than its stored comparison, and the April rain map remains close '
+                'to the stored week. For that April illustration, observed rain is 55.9 mm, the stored week is 24.4 mm, '
+                'and the 9×9 map is 24.7 mm. The temperature improvement does not establish that all weather problems are solved. '
+                'No new score is calculated here.')
+    elif topic == 'headwater-history':
+        story = result['answer_facts']['story']
+        text = ('These dates identify documents, not training start or completion times. The development history in 2026 is '
+                'separate from the 2019 weeks used to check the model. The accompanying CSV contains the dated record, '
+                'its meaning, the next decision and the source links.\n\n'
+                'On 21 October, the Frontier inventory lists 153 weekly examples and the soil-information copy. The 26 October '
+                'ledger records the soil-input 9×9 result together with its rain and seasonal weaknesses. The 6 November pack '
+                'contains several reviewed follow-up proposals; it does not establish which brief a person selected. The supplied '
+                '12 November demo record identifies the H100 result and records both training flags as off.\n\n'
+                'Together, these records explain how documented inputs, a tested model, measured limitations and proposed next '
+                'tests connect. A person must still choose and approve a specific next brief. This source-based retrospective '
+                'does not create a new scientific conclusion, selected experiment or job.')
+        sources = [inventory, ledger, review / 'experiments.json', review / 'referee_brief.md', actions]
+        displays = ['w4e-v0140-headwater-history.csv']
+    elif topic == 'headwater-commands':
+        text = ('The supplied Lux training recipe can be read as an existing command reference. Its presence does not establish '
+                'the exact command that produced the H100 result. The selected next HEADWATER brief is not established by '
+                'the supplied review pack. A person must review the actual host, inputs, comparison, command and approval '
+                'before any future execution. Reading a recipe or a historical true flag does not authorize a run. '
+                'This readout shows saved information and starts no training or job.')
+        sources = [HW / 'lux/train_k9.sh', actions, review / 'experiments.json']
+        displays = [readout_filename('lab.show_command', 'headwater')]
+    else:
+        text = ('The saved literature catalog and download notes record the project’s reading material and documented gaps. '
+                'They are useful background for a new proposal, but a catalog entry does not prove that a paper was read '
+                'or that its PDF is included in this package. This readout performs no search or download. Any follow-up '
+                'proposal should identify its source evidence and the change it would test.')
+        sources = [HW / 'docs/literature/catalog.csv', HW / 'docs/literature/DOWNLOAD.md']
+    titles = {
+        str(ledger): 'Experiment ledger — 26 October 2026', str(actions): 'Supplied demonstration record — 12 November 2026',
+        str(inventory): 'Frontier data inventory — 21 October 2026', str(board): 'Historical board — 2 November 2026',
+        str(HW / 'docs/DATA_PREP_PLAN_20261021.md'): 'Written data-preparation plan — 21 October 2026',
+        str(review / 'experiments.json'): 'Proposed follow-up tests — 6 November 2026',
+        str(review / 'hypotheses.json'): 'Proposer record — 6 November 2026',
+        str(review / 'critique.json'): 'Critic record — 6 November 2026',
+        str(review / 'referee_brief.md'): 'Referee record — 6 November 2026',
+    }
+    refs = [source_ref(path) for path in sources]
+    return {'mode': 'deterministic saved-evidence readout; not a new scientific result', 'context': 'headwater',
+            'topic': topic, 'verified_answer': text,
+            'display_paths': ['/mnt/data/output/' + name for name in displays], 'source_paths': refs,
+            'source_citations': [{'title': titles.get(str(path), path.name), 'url': ref['url']} for path, ref in zip(sources, refs)],
+            'inspection_readout_path': '/mnt/data/output/' + readout_filename(result['contract_id'], 'headwater'),
+            'must_not_infer': 'Quote this saved readout faithfully. Do not select a current brief, infer permission from flags, confuse record dates with execution dates, or substitute April mode for HEADWATER development.',
+            'jobs_submitted': 0}
+
 def answer_facts(task, context):
     """Short scoped readings, always traceable to the unchanged pinned records.
 
     These are evidence fields for the live agent, not prewritten user answers.
     Numeric values are selected directly from JSON or the labelled saved maps.
     """
+    if context == 'headwater':
+        return headwater_facts(task)
     ledger_path = HW / 'hypothesis_lab/experiment_ledger.json'
     ledger = load(ledger_path)
     soil = next(row for row in ledger['runs'] if row['id'] == 'det_v2_soil_k9')
@@ -295,6 +512,10 @@ def compact_readout(result, question=None):
     Keeping obsolete raw review paragraphs out of stdout prevents them from
     drowning out the later source record that completes the same measurement.
     """
+    if result['context'] == 'headwater':
+        return compact_headwater(result, question)
+    if question and question.startswith('headwater-'):
+        raise ValueError('A HEADWATER profile requires the HEADWATER context.')
     task = result['contract_id']
     default = {'lab.ledger': 'ledger', 'lab.realize': 'weather',
                'downscale.scorecard': 'downscale', 'lab.design': 'design',
@@ -410,7 +631,11 @@ def compact_readout(result, question=None):
 
 def run(task, out, context='tva'):
     out.mkdir(parents=True, exist_ok=True)
-    research = stage_research(out)
+    research = stage_research(out, context)
+    if context == 'headwater':
+        write_bytes(out / 'w4e-v0140-headwater-history.md', history_markdown(headwater_story()).encode('utf-8'))
+        write_bytes(out / 'w4e-v0140-headwater-history.csv', history_csv(headwater_story()).encode('utf-8'))
+        write_json(out / 'w4e-v0140-headwater-history.json', headwater_story())
     if task == 'lab.realize':
         result = realization(out)
     elif task == 'downscale.scorecard':
@@ -437,6 +662,13 @@ def run(task, out, context='tva'):
                 {'item': '90-day daily filter', 'where': 'Designed', 'record': 'An odd temporal kernel cannot see all 90 days.'},
                 {'item': 'Temporal attention along the 90 days', 'where': 'Not a row', 'record': 'No script and no board row.'},
             ], 'note': 'Supplied demo record; distinguish it from the older original board.json snapshot and from live scheduler status.'}
+    elif task == 'lab.download' and context == 'headwater':
+        source = HW / 'docs/FRONTIER_DATASET_AGENT.md'
+        result = {'inventory_record_date': '2026-10-21', 'source': provenance(source),
+                  'inventory_and_design_record': read(source),
+                  'written_preparation_plan': read(HW / 'docs/DATA_PREP_PLAN_20261021.md'),
+                  'scope': 'A committed, dated inventory; not live filesystem status or a new data-preparation run.',
+                  'downloads_performed': 0, 'display_files': []}
     elif task in ('lab.literature', 'lab.download'):
         with (HW / 'docs/literature/catalog.csv').open(encoding='utf-8', newline='') as handle:
             catalog = list(csv.DictReader(handle))
@@ -463,8 +695,9 @@ def run(task, out, context='tva'):
             'display_files': [readout_filename(task, context)]}
     result = {'answer_facts': answer_facts(task, context), **result}
     result['display_paths'] = ['/mnt/data/output/' + name for name in result.get('display_files', [])]
-    result.update({'contract_id': task, 'case': CASE, 'context': context, 'mode': 'saved-file replay', 'jobs_submitted': 0,
-                   'reader_version': '0.13.2'})
+    result.update({'contract_id': task, 'case': CASE if context == 'tva' else None, 'context': context,
+                   'mode': 'saved-file replay', 'jobs_submitted': 0,
+                   'reader_version': '0.13.2' if context == 'tva' else '0.14.0'})
     write_json(out / readout_filename(task, context), result)
     return result
 
@@ -472,8 +705,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--task', required=True, choices=TASKS)
     parser.add_argument('--output', type=Path, default=Path('/mnt/data/output'))
-    parser.add_argument('--context', choices=['headwater', 'tva'], default='tva')
-    parser.add_argument('--question', choices=['ledger', 'weather', 'runoff', 'downscale', 'design', 'commands', 'board', 'literature', 'download', 'purpose'])
+    parser.add_argument('--context', choices=['headwater', 'tva'], required=True)
+    parser.add_argument('--question', choices=['ledger', 'weather', 'runoff', 'downscale', 'design', 'commands', 'board', 'literature', 'download', 'purpose', *HEADWATER_PROFILES])
     args = parser.parse_args()
+    validate_requested_profile(args.task, args.context, args.question)
     result = run(args.task, args.output, args.context)
     print(json.dumps(compact_readout(result, args.question), indent=2, ensure_ascii=False))

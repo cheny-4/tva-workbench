@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "title": "A recorded HEADWATER development cycle",
+  "question": "Can soil conditions and nearby spatial information improve a weekly weather estimate?",
+  "plain_terms": {
+    "root_zone_soil": "Water held in the soil that plant roots can reach.",
+    "9x9": "A small model reads a neighborhood of grid cells.",
+    "temperature_error": "The typical size of an estimate’s temperature error; lower is better."
+  },
+  "scope": "A retrospective of existing records, not a new experiment. Development record dates in 2026 are separate from the forecast-valid weeks in 2019.",
+  "change": "The recorded soil-input model uses a 9×9 first convolution and a 1×1 second convolution.",
+  "result": {
+    "model": "det_v2_soil_k9",
+    "machine": "H100 / CCSI",
+    "model_error_C": 0.77,
+    "stored_week_error_C": 0.86,
+    "comparison_label": "the 1979–2017 week already in the example files",
+    "score_scope": "Temperature error across four 2019 target weeks; not an actual temperature or a single April score.",
+    "causal_scope": "The 0.77 versus 0.86 comparison does not isolate the contribution of soil information alone."
+  },
+  "conclusion": "The recorded model improves the four-week temperature comparison; it still misses much of the April rain and does not improve every week.",
+  "next_decision": "Use the recorded weaknesses to define one changed test. A person chooses the brief and approves any future execution.",
+  "date_note": "Record dates below identify documentation, not job submission or completion times.",
+  "history": [
+    {
+      "date": "2026-10-21",
+      "label": "Data documented",
+      "record": "The Frontier inventory lists 153 weekly examples and a copy containing root-zone soil information.",
+      "meaning": "The recorded inputs were available for preparing the model test; this inventory is not a new file check.",
+      "next_decision": "Use the recorded inputs and a written test design; review any additional data preparation.",
+      "sources": [
+        {
+          "repo_path": "HEADWATER/docs/FRONTIER_DATASET_AGENT.md",
+          "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+          "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/docs/FRONTIER_DATASET_AGENT.md"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-26",
+      "label": "Result recorded",
+      "record": "The ledger marks det_v2_soil_k9 as scored: a soil-input model with a 9×9 first convolution and a 1×1 second convolution.",
+      "meaning": "Its four-week 2019 valley temperature error is 0.7668 K. Rain remains near the stored comparison, and July is weaker.",
+      "next_decision": "Keep the temperature result and remaining weaknesses together when designing a changed test.",
+      "sources": [
+        {
+          "repo_path": "HEADWATER/hypothesis_lab/experiment_ledger.json",
+          "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+          "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/experiment_ledger.json"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-06",
+      "label": "Further tests reviewed",
+      "record": "A saved Proposer, Critic, Referee and experiment pack contains several proposed follow-up tests.",
+      "meaning": "A review pack exists, but these files do not establish which proposal a person selected as the current one-change brief.",
+      "next_decision": "Identify one selected change and its approval before describing a current execution plan.",
+      "sources": [
+        {
+          "repo_path": "HEADWATER/hypothesis_lab/runs/20261106_second_model/experiments.json",
+          "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+          "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/experiments.json"
+        },
+        {
+          "repo_path": "HEADWATER/hypothesis_lab/runs/20261106_second_model/referee_brief.md",
+          "commit": "5ea54ac4dd817ab38c82284331974d6668afde09",
+          "url": "https://github.com/daliwang/HEADWATER/blob/5ea54ac4dd817ab38c82284331974d6668afde09/hypothesis_lab/runs/20261106_second_model/referee_brief.md"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-12",
+      "label": "Demo record supplied",
+      "record": "Dali attributes det_v2_soil_k9 to H100 / CCSI and records a four-week error of 0.77°C against 0.86°C for the 1979–2017 week already in the example files.",
+      "meaning": "Lower error is better. This comparison is not an isolated measurement of the effect of soil information alone. The supplied H100 and Lux training flags are off.",
+      "next_decision": "Explain the recorded result, show the remaining rain problem, and let a person choose the next reviewed test.",
+      "sources": [
+        {
+          "repo_path": "water4energy_SC26Demo/Water4Energy_Workbench_Actions_20261112.md",
+          "commit": "d9c185da04bb72e51414c72c4004447cd38292ee",
+          "url": "https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md"
+        }
+      ]
+    }
+  ]
+}

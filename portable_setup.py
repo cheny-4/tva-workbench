@@ -17,7 +17,7 @@ PROJECT = 'Water4Energy-TVA-agent-loop'
 SLUG = 'water4energy-tva-demo-2019'
 SKILLS = {'lab-literature', 'lab-download', 'lab-ledger', 'lab-board',
           'lab-design', 'lab-show-command', 'lab-realize', 'downscale-scorecard'}
-VERSION = '0.13.2'
+VERSION = '0.14.0'
 
 
 class SetupError(RuntimeError):
@@ -134,35 +134,60 @@ class Setup:
             raise SetupError('The existing Water4Energy project has different tools, skills or sources. It was preserved.')
 
     def check_skill(self, skill, folder, owner):
-        body = (folder / 'SKILL.md').read_text(encoding='utf-8').split('---', 2)[2].strip()
-        if (skill.get('metadata', {}).get('setup-owner') != owner
+        front, body = (folder / 'SKILL.md').read_text(encoding='utf-8').split('---', 2)[1:]
+        body = body.strip()
+        metadata = json.loads(next(line.split(':', 1)[1].strip() for line in front.splitlines() if line.startswith('metadata:')))
+        if (metadata.get('setup-owner') != owner or skill.get('metadata') != metadata
                 or skill.get('body', '').strip() != body or skill.get('hpc_jobs')):
             raise SetupError('An existing skill differs from this bundle: ' + folder.name + '. It was preserved; no global skills are replaced.')
 
     def migration(self):
+        """Retained for callers inspecting the original v0.13.1 baseline."""
         path = self.backend / 'migrations/v0131.json'
         return load(path) if path.is_file() else None
 
-    def project_version(self, project, wanted, migration):
+    def migrations(self):
+        known = {}
+        for path in sorted((self.backend / 'migrations').glob('v*.json')):
+            baseline = load(path)
+            version = baseline.get('version', '')
+            if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version) or version == VERSION or version in known:
+                raise SetupError('The bundled upgrade baselines are invalid. Extract the complete ZIP again.')
+            known[version] = baseline
+        return known
+
+    @staticmethod
+    def baseline_list(migrations):
+        if not migrations:
+            return []
+        if 'skills' in migrations:  # Compatibility with an individual known baseline.
+            return [migrations]
+        return sorted(migrations.values(), key=lambda b: tuple(map(int, b['version'].split('.'))), reverse=True)
+
+    def project_version(self, project, wanted, migrations):
         try:
             self.check_project(project, wanted)
             return VERSION
         except SetupError:
-            if migration:
-                self.check_project(project, migration['project'])
-                return migration['version']
-            raise
+            for baseline in self.baseline_list(migrations):
+                try:
+                    self.check_project(project, baseline['project'])
+                    return baseline['version']
+                except SetupError:
+                    continue
+            raise SetupError('The existing Water4Energy project is neither this version nor a known original version. It was preserved.')
 
-    def skill_version(self, skill, folder, owner, migration):
+    def skill_version(self, skill, folder, owner, migrations):
         try:
             self.check_skill(skill, folder, owner)
             return VERSION
         except SetupError:
-            old = (migration or {}).get('skills', {}).get(folder.name)
-            if (not old or skill.get('metadata') != old['metadata'] or skill.get('hpc_jobs')
-                    or skill.get('bundled') or digest(skill.get('body', '').strip().encode()) != old['body_sha256']):
-                raise SetupError('An existing skill has local changes or an unknown version: ' + folder.name + '. It was preserved.')
-            return migration['version']
+            for baseline in self.baseline_list(migrations):
+                old = baseline.get('skills', {}).get(folder.name)
+                if (old and skill.get('metadata') == old['metadata'] and not skill.get('hpc_jobs')
+                        and not skill.get('bundled') and digest(skill.get('body', '').strip().encode()) == old['body_sha256']):
+                    return baseline['version']
+            raise SetupError('An existing skill has local changes or an unknown version: ' + folder.name + '. It was preserved.')
 
     def call_local_tool(self, script, marker):
         status, result = self.request('/projects/' + PROJECT + '/mcp/call',
@@ -184,7 +209,8 @@ class Setup:
             raise SetupError('VISTA could not verify whether another project uses the older demo skills.')
         if any(p.get('name') != PROJECT and set(p.get('skills', [])).intersection(upgrade_names) for p in projects):
             raise SetupError('Another project also uses an older demo skill. It was preserved; upgrade a reviewed project copy before replacing shared skills.')
-        expected = {name: migration['skills'][name]['files'] for name in upgrade_names}
+        # A resumed install can contain known skills from different old versions.
+        expected = {name: (migration if 'skills' in migration else migration[name])['skills'][name]['files'] for name in upgrade_names}
         script = '''from pathlib import Path
 import hashlib
 for name, expected in EXPECTED.items():
@@ -204,9 +230,10 @@ print('W4E_SKILL_PREFLIGHT_OK')
 
     def backup_upgrade(self, project, skills, migration):
         """Reconstruct the verified old files, excluding all settings/credentials."""
-        target = self.root / '.local/upgrade-backups' / ('v0131-' + digest(json.dumps({'api': self.api, 'id': project['id']}, sort_keys=True).encode())[:16])
+        version_slug = 'v' + migration['version'].replace('.', '')
+        target = self.root / '.local/upgrade-backups' / (version_slug + '-' + digest(json.dumps({'api': self.api, 'id': project['id']}, sort_keys=True).encode())[:16])
         target.mkdir(parents=True, exist_ok=True)
-        vault = self.backend / 'migrations/v0131-original-files.zip'
+        vault = self.backend / 'migrations' / (version_slug + '-original-files.zip')
         if digest(vault.read_bytes()) != migration['original_files_archive_sha256']:
             raise SetupError('The original skill backup vault failed verification.')
         backup = target / 'original-skills.zip'
@@ -214,10 +241,12 @@ print('W4E_SKILL_PREFLIGHT_OK')
             temporary = backup.with_suffix('.tmp')
             try:
                 with zipfile.ZipFile(vault) as originals, zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as output:
-                    for name, old in migration['skills'].items():
+                    for name in sorted(skills):
+                        old = migration['skills'][name]
                         for relative, sha in old['files'].items():
                             key = name + '/' + relative
-                            data = originals.read(key) if key in originals.namelist() else (self.backend / 'skills' / name / relative).read_bytes()
+                            entry = migration.get('original_file_entries', {}).get(key, key)
+                            data = originals.read(entry) if entry in originals.namelist() else (self.backend / 'skills' / name / relative).read_bytes()
                             if digest(data) != sha:
                                 raise SetupError('Cannot reconstruct the original skill backup: ' + key)
                             output.writestr(key, data)
@@ -239,7 +268,7 @@ print('W4E_SKILL_PREFLIGHT_OK')
                 archive.writestr(relative, content)
         content = data.getvalue()
         file_hashes = {n: digest(b) for n, b in files.items()}
-        stage_name = 'w4e-v0132-' + name + '-' + digest(json.dumps(file_hashes, sort_keys=True).encode())[:12]
+        stage_name = 'w4e-v' + VERSION.replace('.', '') + '-' + name + '-' + digest(json.dumps(file_hashes, sort_keys=True).encode())[:12]
         payload, kind = multipart([], [('files', stage_name + '.zip', content)])
         status, uploads = self.request('/projects/' + PROJECT + '/uploads', payload, 'POST', kind)
         self.require(status, 200, 'Staging ' + name)
@@ -386,7 +415,7 @@ print(json.dumps({'copied': count, 'verified': len(EXPECTED), 'jobs_submitted': 
     def run(self):
         self.print('1/4 Verifying the included sources and saved figures…', flush=True)
         template, folders, evidence = self.validate_local()
-        migration = self.migration()
+        migrations = self.migrations()
         # Check all global-name conflicts before creating or attaching anything.
         status, schema = self.request('/openapi.json')
         self.require(status, 200, 'Checking local VISTA')
@@ -395,7 +424,7 @@ print(json.dumps({'copied': count, 'verified': len(EXPECTED), 'jobs_submitted': 
         status, project = self.request('/projects/' + PROJECT)
         if status not in {200, 404}:
             self.require(status, 200, 'Checking the project')
-        project_version = self.project_version(project, template['project'], migration) if status == 200 else None
+        project_version = self.project_version(project, template['project'], migrations) if status == 200 else None
         create_project = status == 404
         status, kb = self.request('/knowledge-bases/' + SLUG)
         if status not in {200, 404}:
@@ -406,23 +435,29 @@ print(json.dumps({'copied': count, 'verified': len(EXPECTED), 'jobs_submitted': 
         existing_skills = set()
         upgrade_names = []
         old_skills = {}
+        old_versions = {}
         for name, folder in sorted(folders.items()):
             status, skill = self.request('/skills/' + name)
             if status == 200:
-                version = self.skill_version(skill, folder, template['skill_owner'], migration)
+                version = self.skill_version(skill, folder, template['skill_owner'], migrations)
                 if version != VERSION:
                     upgrade_names.append(name)
                     old_skills[name] = skill
+                    old_versions[name] = version
                 existing_skills.add(name)
             elif status != 404:
                 self.require(status, 200, 'Checking ' + name)
         if not create_project:
             self.evidence_status(evidence)
-        self.preflight_upgrade(project if not create_project else None, upgrade_names, migration)
-        backup = None
-        if upgrade_names or (project_version and project_version != VERSION):
-            backup = self.backup_upgrade(project, old_skills, migration)
-            self.print('Verified v0.13.1 upgrade; local backup: ' + str(backup), flush=True)
+        baselines = {name: migrations[version] for name, version in old_versions.items()}
+        self.preflight_upgrade(project if not create_project else None, upgrade_names, baselines)
+        upgrade_sources = set(old_versions.values())
+        if project_version and project_version != VERSION:
+            upgrade_sources.add(project_version)
+        for version in sorted(upgrade_sources):
+            group = {name: old_skills[name] for name in old_skills if old_versions[name] == version}
+            backup = self.backup_upgrade(project, group, migrations[version])
+            self.print('Verified v' + version + ' upgrade; local backup: ' + str(backup), flush=True)
 
         self.print('2/4 Preparing the Water4Energy project and eight skills…', flush=True)
         if create_project:
@@ -468,7 +503,8 @@ print(json.dumps({'copied': count, 'verified': len(EXPECTED), 'jobs_submitted': 
                   'backend_url': self.api, 'skills_loaded': len(folders), 'indexed_documents': indexed,
                   'evidence_files': len(evidence), 'backend_ready': True, 'model_configured': model_configured,
                   'model_access_tested': False, 'agent_turns_started': 0, 'hpc_jobs_submitted': 0,
-                  'upgraded_from': '0.13.1' if backup else None}
+                  'upgraded_from': ', '.join(sorted(upgrade_sources)) if upgrade_sources else None,
+                  'upgrade_sources': sorted(upgrade_sources)}
         local = self.root / '.local'
         local.mkdir(exist_ok=True)
         (local / 'setup-receipt.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')

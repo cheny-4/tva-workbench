@@ -62,14 +62,20 @@ class ReplayTests(unittest.TestCase):
             name = task.replace('.', '-').replace('_', '-')
             replay = reader(BACKEND / 'skills' / name)
             result = replay.run(task, self.out, 'headwater')
-            compact = replay.compact_readout(result)
-            inspection = Path(compact['inspection_readout_path']).name
-            self.assertTrue(inspection.startswith('w4e-v0132-headwater-'))
+            if task in ('lab.realize', 'downscale.scorecard'):
+                with self.assertRaisesRegex(ValueError, 'April weather/downscale'):
+                    replay.compact_readout(result)
+                inspection = replay.readout_filename(task, 'headwater')
+                compact = {'display_paths': []}
+            else:
+                compact = replay.compact_readout(result)
+                inspection = Path(compact['inspection_readout_path']).name
+            self.assertTrue(inspection.startswith('w4e-v0140-headwater-'))
             self.assertTrue((self.out / inspection).is_file())
             self.assertTrue(all((self.out / Path(path).name).is_file() for path in compact['display_paths']))
         after = fingerprints(self.out)
         self.assertEqual({name: after[name] for name in before}, before)
-        self.assertEqual(len(set(after) - set(before)), 8)
+        self.assertEqual(len(set(after) - set(before)), 17)
         for task in self.reader.TASKS:
             name = task.replace('.', '-').replace('_', '-')
             replay = reader(BACKEND / 'skills' / name)
@@ -161,6 +167,78 @@ class ReplayTests(unittest.TestCase):
         self.assertIn('one selectable case', purpose['verified_answer'])
         self.assertIn('1° to 0.25° in degrees', purpose['verified_answer'])
         self.assertNotIn('0.0301', purpose['verified_answer'])
+
+    def test_approved_april_narratives_are_byte_identical(self):
+        expected = json.loads((BACKEND / 'tests/tva-narrative-sha256.json').read_text())
+        profiles = {'ledger': 'lab.ledger', 'weather': 'lab.realize', 'runoff': 'lab.realize',
+                    'downscale': 'downscale.scorecard', 'design': 'lab.design',
+                    'commands': 'lab.show_command', 'purpose': 'lab.ledger'}
+        for question, task in profiles.items():
+            text = self.reader.compact_readout(self.reader.run(task, self.out, 'tva'), question)['verified_answer']
+            self.assertEqual(hashlib.sha256(text.encode()).hexdigest(), expected[question])
+
+    def test_headwater_profiles_require_matching_context_and_task(self):
+        for question, task in self.reader.HEADWATER_PROFILES.items():
+            self.assertEqual(self.reader.validate_requested_profile(task, 'headwater', question), question)
+            with self.assertRaisesRegex(ValueError, 'requires --context headwater'):
+                self.reader.validate_requested_profile(task, 'tva', question)
+        with self.assertRaisesRegex(ValueError, 'matching HEADWATER'):
+            self.reader.validate_requested_profile('lab.ledger', 'headwater', 'headwater-brief')
+        with self.assertRaisesRegex(ValueError, 'matching HEADWATER'):
+            self.reader.validate_requested_profile('lab.design', 'headwater', 'design')
+        command = [sys.executable, str(BACKEND / 'skills/lab-ledger/scripts/replay.py'),
+                   '--task', 'lab.ledger', '--context', 'tva', '--question', 'headwater-ledger', '--output', str(self.out)]
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(list(self.out.iterdir()), [])
+
+    def test_headwater_artifacts_are_all_from_the_november_review(self):
+        replay = reader(BACKEND / 'skills/lab-design')
+        result = replay.run('lab.design', self.out, 'headwater')
+        self.assertEqual(result['saved_review_folder'], '20261106_second_model')
+        self.assertIsNone(result['case'])
+        self.assertEqual(result['reader_version'], '0.14.0')
+        pack = BACKEND / 'sources/HEADWATER/hypothesis_lab/runs/20261106_second_model'
+        expected = {'w4e-v0140-headwater-proposer.json': 'hypotheses.json',
+                    'w4e-v0140-headwater-critic.json': 'critique.json',
+                    'w4e-v0140-headwater-referee.md': 'referee_brief.md',
+                    'w4e-v0140-headwater-experiments.json': 'experiments.json'}
+        self.assertEqual(set(result['display_files']), set(expected))
+        for output, original in expected.items():
+            self.assertEqual((self.out / output).read_bytes(), (pack / original).read_bytes())
+        self.assertEqual(result['saved_protocol'], json.loads((pack / 'experiments.json').read_text()))
+
+    def test_headwater_answers_keep_selection_dates_flags_and_score_scopes(self):
+        values = {}
+        for question, task in self.reader.HEADWATER_PROFILES.items():
+            replay = reader(BACKEND / 'skills' / task.replace('.', '-').replace('_', '-'))
+            values[question] = replay.compact_readout(replay.run(task, self.out, 'headwater'), question)
+            self.assertEqual(values[question]['context'], 'headwater')
+            self.assertTrue(values[question]['source_citations'])
+            self.assertTrue(all(c['url'].startswith('https://github.com/daliwang/') for c in values[question]['source_citations']))
+        self.assertIn('do not establish one selected current brief', values['headwater-brief']['verified_answer'])
+        self.assertIn('January 2010 training and January 2018 validation', values['headwater-data']['verified_answer'])
+        self.assertIn('not check Frontier live', values['headwater-data']['verified_answer'])
+        self.assertIn('already scored', values['headwater-board']['verified_answer'])
+        self.assertIn('both off', values['headwater-board']['verified_answer'])
+        self.assertIn('0.77 degrees Celsius', values['headwater-score']['verified_answer'])
+        self.assertIn('0.86 degrees Celsius', values['headwater-score']['verified_answer'])
+        self.assertIn('the 1979–2017 week already in the example files', values['headwater-score']['verified_answer'])
+        self.assertIn('not the score for the April week alone', values['headwater-score']['verified_answer'])
+        self.assertIn('H100 / CCSI', values['headwater-score']['verified_answer'])
+
+    def test_history_export_uses_record_dates_and_source_links(self):
+        result = self.reader.run('lab.ledger', self.out, 'headwater')
+        compact = self.reader.compact_readout(result, 'headwater-history')
+        self.assertEqual(compact['display_paths'], ['/mnt/data/output/w4e-v0140-headwater-history.csv'])
+        self.assertNotIn('| Record date |', compact['verified_answer'])
+        story = json.loads((self.out / 'w4e-v0140-headwater-history.json').read_text())
+        self.assertIn('not job submission', story['date_note'])
+        self.assertEqual([r['date'] for r in story['history']], ['2026-10-21', '2026-10-26', '2026-11-06', '2026-11-12'])
+        self.assertTrue(all(r['sources'] for r in story['history']))
+        csv_text = (self.out / 'w4e-v0140-headwater-history.csv').read_text()
+        self.assertIn('record_date,documented_record,meaning,next_decision,source_urls', csv_text)
+        self.assertIn('https://github.com/daliwang/', csv_text)
 
 
 if __name__ == '__main__':

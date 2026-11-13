@@ -1,11 +1,11 @@
 'use strict';
-const WORKBENCH_VERSION='0.13.2';
+const WORKBENCH_VERSION='0.14.0';
 
 // No external services or frontend dependencies. Live calls stay behind server.py.
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const state = {
-  mode: 'live', view: 'development', activeContext:'headwater', contextRevision:0, drafts:{}, config: {project: 'Water4Energy-TVA-agent-loop'},
+  mode: 'live', view: 'development', activeContext:'headwater', contextRevision:0, headwaterEvidenceTopic:'overview', drafts:{}, config: {project: 'Water4Energy-TVA-agent-loop'},
   status: null, geo: null, siteIndex: 0,
   busy: false, sessionId: null, history: [], events: [], lastSeq: 0,
   stream: null, pending: null, liveFiles: [], liveStudy: null,
@@ -33,7 +33,7 @@ function updateContextUI(){
   $$('[data-april-only]').forEach(el=>el.hidden=!april);
   $('#development-evidence').hidden=april;
   $('#case-question-controls').innerHTML=april?TVACaseJourney.questionMenuHTML():Water4EnergyWorkflow.questionMenuHTML();
-  if(!april)Water4EnergyWorkflow.renderContextEvidence($('#development-evidence'));
+  if(!april)refreshHeadwaterEvidence();
   renderDemoStatus();window.TVAComposerResize?.refresh();
 }
 function selectContext(next,{restore=true}={}){
@@ -42,14 +42,24 @@ function selectContext(next,{restore=true}={}){
   if(state.busy){toast('Finish or stop the current turn before changing context.');if($('#active-context'))$('#active-context').value=state.activeContext;return false;}
   state.drafts[state.activeContext]=$('#prompt').value;rememberSession();
   state.stream?.abort();state.stream=null;clearLiveConversation(true);TVAHypothesisDemo.reset();
-  state.contextRevision++;state.activeContext=next;state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.demoEvidence=null;
+  state.contextRevision++;state.activeContext=next;state.headwaterEvidenceTopic='overview';state.sessionId=null;state.history=[];state.liveFiles=[];state.liveStudy=null;state.demoEvidence=null;
   resetActivity();updateContextUI();showWelcome();renderResults();$('#prompt').value=state.drafts[next]||'';
   if(restore){state.sessionId=readSessionId();if(state.sessionId&&state.status?.project_found)void loadSession(state.sessionId,true);}
   if(isAprilContext())void refreshDemo();return true;
 }
 function openTVACase(view='workspace'){if(!selectContext('tva'))return false;switchView(view==='network'?'network':'workspace');return true;}
-function prepareProjectPrompt(text){if(selectContext('headwater'))prepareDemoPrompt(text);}
+function prepareProjectPrompt(text){if(selectContext('headwater')){refreshHeadwaterEvidence(text);prepareDemoPrompt(text);}}
 function prepareAprilPrompt(text){if(selectContext('tva'))prepareDemoPrompt(text);}
+
+function refreshHeadwaterEvidence(prompt=null) {
+  if(isAprilContext())return;
+  const workflow=globalThis.Water4EnergyWorkflow;
+  if(!workflow?.renderContextEvidence)return;
+  const topic=typeof prompt==='string'?(workflow.evidenceTopicForRequest?.(prompt)||'overview'):(state.headwaterEvidenceTopic||'overview');
+  state.headwaterEvidenceTopic=topic;
+  const container=$('#development-evidence');
+  if(container)workflow.renderContextEvidence(container,{topic});
+}
 
 
 async function api(url, options={}) {
@@ -124,7 +134,13 @@ function addMessage(role,text,options={}) {
   $('.agent-panel')?.classList.add('has-messages');
   const el=document.createElement('div'); el.className=`message ${role}${options.error?' error':''}`;
   const label=role==='agent' ? '<div class="message-label"><b>Water4Energy agent</b><span>VISTA</span></div>' : '';
-  el.innerHTML=`${label}<div class="message-body">${formatText(text)}</div>`;
+  const preview=role==='user'?globalThis.Water4EnergyAgentResponse?.requestPreview?.(text):null;
+  el.innerHTML=`${label}<div class="message-body">${preview?`${formatText(preview.question)}<details class="request-details"><summary>Request details</summary><div>${formatText(preview.details)}</div></details>`:formatText(text)}</div>`;
+  if(options.retryPrompt){
+    const retry=document.createElement('button');retry.type='button';retry.className='text-button';retry.textContent='Prepare question again';
+    retry.addEventListener('click',()=>{if(!state.busy)prepareDemoPrompt(options.retryPrompt);});
+    el.append(retry);
+  }
   $('#chat-messages').append(el); scrollChat(); return el.querySelector('.message-body');
 }
 function scrollChat() { $('#chat-scroll').scrollTop=$('#chat-scroll').scrollHeight; }
@@ -271,7 +287,7 @@ async function sendLive(prompt) {
   if(state.demoCase && state.status?.version && state.status.version!==WORKBENCH_VERSION){addMessage('system',`This tab is served by Workbench ${state.status.version}. Open the v${WORKBENCH_VERSION} launcher and use its printed local address before starting this conversation.`,{error:true});return;}
   if(!state.status?.project_found){addMessage('system','Open VISTA and connect the project in Connection settings before sending a live message.',{error:true});showSettings();return;}
   if(state.busy)return;
-  if(isAprilContext())TVAHypothesisGuide.beginTurn();
+  if(isAprilContext())TVAHypothesisGuide.beginTurn();else refreshHeadwaterEvidence(prompt);
   addMessage('user',prompt);setBusy(true,'Contacting VISTA');setStage(0);state.lastSeq=0;
   const sendRevision=state.contextRevision;
   try {
@@ -285,7 +301,7 @@ async function sendLive(prompt) {
 }
 async function watchStream(url,options={}) {
   const streamContext=liveContext();
-  const controller=new AbortController();state.stream=controller;let finished=false,bodyNode=null,parts=new Map(),lastIndex=null;
+  const controller=new AbortController();state.stream=controller;let finished=false,bodyNode=null,parts=new Map(),lastIndex=null,actualToolCalls=0;
   const response=await fetch(url,{...options,signal:controller.signal});
   if(response.status===204){if(!isLiveContext(streamContext))return;state.stream=null;setBusy(false,'Turn ended');await loadSession(state.sessionId,false);await renderFiles();return;}
   if(!response.ok){let data;try{data=await response.json();}catch{};throw new Error(typeof data?.detail==='string'?data.detail:`VISTA request failed (${response.status}).`);}
@@ -293,7 +309,8 @@ async function watchStream(url,options={}) {
   const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
   const outputText=()=>{
     if(!bodyNode)bodyNode=addMessage('agent','');
-    bodyNode.innerHTML=formatText([...parts.values()].join('\n\n'));bodyNode.classList.add('stream-cursor');scrollChat();
+    const text=[...parts.values()].join('\n\n');
+    bodyNode.innerHTML=formatText(globalThis.Water4EnergyAgentResponse?.isMalformedToolResponse(text,actualToolCalls)?'Checking the agent response…':text);bodyNode.classList.add('stream-cursor');scrollChat();
   };
   async function eventReceived(block) {
     let type='message',data=[],seq;
@@ -315,6 +332,7 @@ async function watchStream(url,options={}) {
     else if(type==='part_delta' && event.delta?.part_delta_kind==='text') {const index=event.index ?? lastIndex;parts.set(index,(parts.get(index)||'')+(event.delta.content_delta||''));outputText();}
     else if(type==='part_end' && event.part?.part_kind==='text') {parts.set(event.index,event.part.content||parts.get(event.index)||'');outputText();}
     else if(type==='function_tool_call') {
+      actualToolCalls++;
       const tool=event.part?.tool_name || event.tool_name || 'Scientific tool';
       addActivity(`Tool call · ${tool}`,'Actual VISTA tool event.','tool',event.part);
       queueLiveArtifacts();
@@ -331,9 +349,11 @@ async function watchStream(url,options={}) {
     }
     else if(type==='run_finished') {
       finished=true;bodyNode?.classList.remove('stream-cursor');
-      const ok=event.state==='done';
-      addActivity(ok?'Agent turn completed':`Agent turn ${event.state}`,event.error ? String(event.error) : 'A completed agent turn does not by itself verify an HPC job.');
-      setBusy(false,ok?'Turn completed':`Turn ${event.state}`);
+      const malformed=globalThis.Water4EnergyAgentResponse?.isMalformedToolResponse([...parts.values()].join('\n\n'),actualToolCalls);
+      const ok=event.state==='done' && !malformed;
+      addActivity(malformed?'Answer unavailable':ok?'Agent turn completed':`Agent turn ${event.state}`,malformed?Water4EnergyAgentResponse.MALFORMED_TOOL_MESSAGE:event.error ? String(event.error) : 'A completed agent turn does not by itself verify an HPC job.');
+      if(malformed && bodyNode)bodyNode.textContent=Water4EnergyAgentResponse.MALFORMED_TOOL_MESSAGE;
+      setBusy(false,malformed?'Answer unavailable':ok?'Turn completed':`Turn ${event.state}`);
       $$('#workflow-strip .active').forEach(el=>el.classList.remove('active'));
       if(event.error)addMessage('system',String(event.error),{error:true});
       state.pending=null;$('#elicitation-dialog').close();
@@ -358,15 +378,24 @@ async function watchStream(url,options={}) {
 function messagesFromHistory(session) {
   const history=Array.isArray(session.message_history)?session.message_history:[];
   state.history=history;
-  const transcript=[];
+  const transcript=[];let turn=[],actualToolCalls=0,prompt='';
+  const flushTurn=()=>{
+    for(const message of turn){
+      if(message.role==='agent' && globalThis.Water4EnergyAgentResponse?.isMalformedToolResponse(message.text,actualToolCalls))transcript.push({role:'system',text:Water4EnergyAgentResponse.MALFORMED_TOOL_MESSAGE,error:true,retryPrompt:prompt});
+      else transcript.push(message);
+    }
+    turn=[];actualToolCalls=0;
+  };
   for(const message of history){
     for(const part of message.parts || []) {
       if(part.part_kind==='user-prompt'){
         const content=typeof part.content==='string'?part.content:(part.content||[]).filter(x=>typeof x==='string').join('\n');
-        if(content)transcript.push({role:'user',text:content});
-      } else if(part.part_kind==='text' && part.content)transcript.push({role:'agent',text:part.content});
+        if(content){flushTurn();prompt=content;turn.push({role:'user',text:content});}
+      } else if(part.part_kind==='tool-call')actualToolCalls++;
+      else if(part.part_kind==='text' && part.content)turn.push({role:'agent',text:part.content});
     }
   }
+  flushTurn();
   if(!transcript.length && Array.isArray(session.messages))for(const m of session.messages)if(m.role==='user'||m.role==='assistant')transcript.push({role:m.role==='user'?'user':'agent',text:m.content || m.text || ''});
   return transcript;
 }
@@ -377,17 +406,20 @@ async function loadSession(id,reconnect=false) {
     if(state.sessionId!==id || !isLiveContext(scope))return;
     state.sessionId=id;rememberSession();
     const messages=messagesFromHistory(session);
-    if(messages.length){$('#chat-messages').replaceChildren();messages.forEach(m=>addMessage(m.role,m.text));}
+    const unreadable=[...messages].reverse().find(message=>message.role==='agent'||message.error)?.error===true;
+    if(!isAprilContext() && typeof refreshHeadwaterEvidence==='function')refreshHeadwaterEvidence([...messages].reverse().find(message=>message.role==='user')?.text||'');
+    if(messages.length){$('#chat-messages').replaceChildren();messages.forEach(m=>addMessage(m.role,m.text,m));}
     else showWelcome();
     if(reconnect){resetActivity();if(isAprilContext())TVAHypothesisGuide.resetConversation();for(const entry of session.run_events || []){
       const data=entry.data || {};
       if(isAprilContext())TVAHypothesisGuide.handleEvent(data.event_kind || entry.event,data);
       if(entry.event==='log')addActivity(data.area || 'VISTA',data.message || '');
       else if(entry.event==='function_tool_call'||entry.event==='function_tool_result')addActivity(`${entry.event==='function_tool_call'?'Tool call':'Tool returned'} · ${data.part?.tool_name || 'Scientific tool'}`,'Saved VISTA activity.','tool',data.part);
-      else if(entry.event==='run_finished')addActivity(`Agent turn ${data.state || 'ended'}`,'Saved VISTA turn state; inspect outputs for job evidence.');
+      else if(entry.event==='run_finished')addActivity(unreadable?'Answer unavailable':`Agent turn ${data.state || 'ended'}`,unreadable?Water4EnergyAgentResponse.MALFORMED_TOOL_MESSAGE:'Saved VISTA turn state; inspect outputs for job evidence.');
     }}
     await loadLiveArtifacts();
     if(state.sessionId!==id || !isLiveContext(scope))return;
+    if(unreadable && !['working','needs_you'].includes(session.run_status))setBusy(false,'Answer unavailable');
     if(reconnect && ['working','needs_you'].includes(session.run_status)) {
       setBusy(true,'Reconnecting');state.lastSeq=0;
       watchStream(projectUrl(`/chat-sessions/${id}/run/events?after=0`)).catch(error=>{if(!isLiveContext(scope))return;addMessage('system',error.message,{error:true});setBusy(false,'Disconnected');if(isAprilContext())TVAHypothesisGuide.finishTurn('disconnected');});
@@ -397,7 +429,7 @@ async function loadSession(id,reconnect=false) {
 async function newConversation() {
   if(state.busy)return;
   clearLiveConversation();state.sessionId=null;rememberSession();state.history=[];state.liveFiles=[];state.liveStudy=null;
-  resetActivity();showWelcome();renderResults();switchView('workspace');toast('A new conversation will be created when you send your first message.');
+  resetActivity();if(!isAprilContext()){state.headwaterEvidenceTopic='overview';refreshHeadwaterEvidence();}showWelcome();renderResults();switchView('workspace');toast('A new conversation will be created when you send your first message.');
 }
 async function renderHistory(){
   $('#history-list').innerHTML='<div id="live-history"><div class="empty-state">Loading project conversations…</div></div>';

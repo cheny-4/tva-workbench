@@ -41,3 +41,12 @@ Current VISTA accepts kebab-case skill names. The eight exact demo aliases are r
 Use the current dated source record rather than an older referee sentence when later evidence exists. The April persistence diagnosis and the later spring score are already recorded; a proposed next experiment must state its new change and cannot present completed work as missing. Weekly precipitation totals are not daily rates or RMSE. Trial 0 test-split aggregates and its single displayed wet day have different scopes, and the pinned files do not establish a HEADWATER-to-Trial-0 handoff. The 12 November demo flags are distinct from historical board flags. Without an agreed rule the optional dam panel cannot invent a fill/hold decision.
 
 Figure following now observes successful display identity, including a redisplay of a checked case figure. Source files remain stable across replay, preserving current conversation history. The scientific hypothesis-step logic, April prompts, case metadata and evidence schema remain unchanged.
+
+
+## v0.14.0 recorded development story
+
+Lead with a plain question, five recorded steps and a scoped result. Keep history, machine details and the board behind disclosures. Document dates in October–November 2026 describe the development record; 2019 identifies the target weather weeks. H100 four-week temperature error is not an all-weeks improvement or proof of soil causality.
+
+Each HEADWATER question selects matching saved evidence and its own reader profile. The November review outputs share one provenance pack; no selected current proposal is invented. The optional history export supplies a source-linked four-record CSV. April prompts and verified narratives remain unchanged.
+
+Guided requests remain fully editable and sent only by a person. After sending, their long instructions fold under Request details. Raw unexecuted provider tool framing is an unavailable answer, with a manual prepare-and-Send retry; it is never interpreted as an actual tool event or executed by the frontend.

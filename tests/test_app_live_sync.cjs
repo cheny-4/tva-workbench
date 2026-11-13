@@ -12,7 +12,7 @@ const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;})
 
 function fixture(){
  const initial=deferred(),artifacts=deferred(),artifactEntered=deferred();
- const effects={watchers:[],busy:[],guideEvents:[],visible:'Current transcript',artifactReads:0};
+ const effects={watchers:[],busy:[],guideEvents:[],evidenceTopics:[],visible:'Current transcript',artifactReads:0};
  const state={sessionId:first,activeContext:'tva',contextRevision:0,config:{project:'Water4Energy-TVA-agent-loop',backend_url:'http://127.0.0.1:8790'}};
  const context=vm.createContext({
   state,
@@ -21,6 +21,7 @@ function fixture(){
   isAprilContext:()=>state.activeContext==='tva',
   api:()=>initial.promise,projectUrl:suffix=>'/projects/'+state.config.project+suffix,
   rememberSession:()=>{},messagesFromHistory:()=>[{role:'agent',text:'First session transcript'}],
+  refreshHeadwaterEvidence:prompt=>effects.evidenceTopics.push(prompt),
   $:()=>({replaceChildren:()=>{effects.visible='';}}),
   addMessage:(role,text)=>{effects.visible+=text;},showWelcome:()=>{effects.visible='Welcome';},
   resetActivity:()=>{},addActivity:()=>{},
@@ -102,6 +103,18 @@ test('a project-context transcript does not replay its saved events into the Apr
  assert.equal(f.effects.visible,'First session transcript');
  assert.deepEqual(f.effects.guideEvents,[]);
  assert.deepEqual(f.effects.watchers,[]);
+});
+
+test('HEADWATER history restores evidence for the latest user question only after its scope matches',{timeout:2000},async()=>{
+ const f=fixture();f.state.activeContext='headwater';
+ f.context.messagesFromHistory=()=>[{role:'user',text:'First question'},{role:'agent',text:'First answer'},{role:'user',text:'Latest question'}];
+ const pending=f.context.loadSession(first,true);
+ f.initial.resolve({...saved,run_status:'done'});await f.artifactEntered.promise;f.artifacts.resolve();await pending;
+ assert.deepEqual(f.effects.evidenceTopics,['Latest question']);
+ const stale=fixture();stale.state.activeContext='headwater';
+ const old=stale.context.loadSession(first,true);stale.state.contextRevision++;
+ stale.initial.resolve({...saved,run_status:'done'});await old;
+ assert.deepEqual(stale.effects.evidenceTopics,[]);
 });
 
 

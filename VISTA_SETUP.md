@@ -93,3 +93,12 @@ The combined release includes the local project setup and pinned replay skills. 
 The six April questions use compact, explicitly deterministic saved-evidence readouts rather than flooding the model with obsolete and current archive paragraphs together. Full original records and complete versioned inspection JSON remain available. The agent must use actual `display_file` calls for returned figure paths and distinguish original figures, a derived receipt chart, aggregate scores and the selected week. The optional dam gate still requires an agreed reservoir and rule; the exact original Trial 0 scorer command remains unavailable.
 
 The original 24 staged evidence files retain their bytes. Eight versioned readouts supply the corrected scopes and review chronology. Stable copying preserves identical files and mtimes so later evidence reads do not invalidate saved conversation figures. The original April case dates, manifest schema and guarded prompts remain unchanged.
+
+
+## v0.14.0 development and combined setup
+
+The current combined launcher includes eight lead documents: the original six, the April answer guide, and a source-cited HEADWATER development guide. Known v0.13.1 and v0.13.2 installations are verified against complete file/policy snapshots, backed up, and upgraded; unknown edits remain protected. The project ID and eight skill aliases are retained.
+
+Five HEADWATER question profiles and an optional development-history export use their matching reader in the HEADWATER context. Development review artifacts now all come from the same November review pack. Dates on the history table are document dates, separate from 2019 weather weeks. The supplied records do not identify a selected current next brief.
+
+The original six April guided requests and their verified narratives remain unchanged. Live validation and its provider-response limitation are recorded in VERIFICATION.md. Setup itself starts no conversations or science jobs. The original 32 staged v0.13.2 evidence files retain their hashes.
