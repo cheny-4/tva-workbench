@@ -1,3 +1,17 @@
+# v0.13.1 verification
+
+- 106 JavaScript checks and 41 Python checks passed. New regressions cover exact VISTA kebab-case skill aliases, descriptive indexed Markdown filenames, and clearing the setup hint only when required skills and source index are available.
+- All protected April prompts, the complete hypothesis guide, case definition, evidence schema, launcher files and original partner marks remain byte-identical to the prior release.
+- Local project `Water4Energy-TVA-agent-loop` has eight actual imported replay skills, one Ready knowledge base and six indexed lead documents. A real read-only retrieval query returned the pinned demo plan.
+- All eight replay-reader entry points were run inside VISTA's sandbox without an LLM conversation, inference, training, ERA5 download, scoring or an HPC submission. HEADWATER design selects the saved 6 November review; the April design reads the archived October review. No recorded review is treated as a new run or approval.
+- The actual output listing and evidence manifest passed the unchanged four-panel validator. Original weather/Trial 0 figure hashes are recorded with pinned source paths. Runoff is a receipt-derived valley summary, explicitly labelled as such, not a spatial map or forecast.
+- Browser checks confirm eight loaded checklist entries, four available April figures, working figure selection and a cleared setup hint. Configuration is switched to the dedicated project; the existing Genesis project is not modified. No Send was pressed.
+- The runnable archive is checked after extraction through its actual launcher, manifest hashes and version identity. The local replay data is separate from this application archive.
+
+Remaining: conversational cold-open acceptance requires the person to Send and review the six answers; the exact Trial 0 scorer command, spatial runoff arrays, optional dam rule and Dali's video/home-score-map/voiceover are not supplied by this setup.
+
+Previous interface verification follows for historical context.
+
 # v0.13.0 verification
 
 Water4Energy workbench v0.13.0 follows Dali's [12 November 2026 action list](https://github.com/daliwang/water4energy_SC26Demo/blob/d9c185da04bb72e51414c72c4004447cd38292ee/Water4Energy_Workbench_Actions_20261112.md), pinned at `d9c185da04bb72e51414c72c4004447cd38292ee`.

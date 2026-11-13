@@ -58,12 +58,14 @@
   }
   function skillReadiness(skills, expectedProject) {
     const known=Boolean(skills?.project_found && skills.project===expectedProject && Number.isInteger(skills.count));
-    const loaded=new Set(known?(skills.skills || []).filter(skill=>skill && typeof skill.name==='string').map(skill=>skill.name):[]);
+    const names=known?(skills.skills || []).filter(skill=>skill && typeof skill.name==='string').map(skill=>skill.name):[];
+    // Current VISTA requires kebab-case names; the demo retains its original contract IDs.
+    const loaded=new Set([...CORE_SKILLS,'dam.readout'].filter(id=>names.includes(id)||names.includes(id.replace(/[._]/g,'-'))));
     return {known,loaded:known?CORE_SKILLS.filter(name=>loaded.has(name)).length:null,
       required:CORE_SKILLS.map(name=>({name,state:known?(loaded.has(name)?'loaded':'missing'):'unknown'})),
       optional:known?(loaded.has('dam.readout')?'loaded':'missing'):'unknown'};
   }
-  function normalizeName(value) {return String(value || '').replace(/\\/g,'/').toLowerCase().replace(/[^a-z0-9/]+/g,' ').trim();}
+  function normalizeName(value) {return String(value || '').replace(/\\/g,'/').replace(/\.(?:md|txt|pdf|json)$/i,'').toLowerCase().replace(/[^a-z0-9/]+/g,' ').trim();}
   function sourceMatches(source, document) {
     const filename=String(document.filename || '').replace(/\\/g,'/');
     const title=normalizeName(document.title);

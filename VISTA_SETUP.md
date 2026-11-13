@@ -56,3 +56,32 @@ Open the project; inspect actual skill/KB readiness; ask the agent what the ledg
 Enable the dam panel only if the team elects to include it. Choose one reservoir and enter the agreed rule. Request a file-grounded readout; do not derive an operations policy from a single rainfall number in the browser.
 
 Source: [TVA agent demo plan](https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md). Backend project creation, scientific wrappers, original predictions, ERA5 observation files and compute access remain VISTA/HEADWATER setup work.
+
+## Local replay setup completed 12 November 2026
+
+The dedicated project has eight local replay adapters. These were authored to read pinned source files; they are not existing team-certified wrappers or a new science run.
+
+| Demo contract | Actual VISTA skill |
+| --- | --- |
+| lab.literature | lab-literature |
+| lab.download | lab-download |
+| lab.ledger | lab-ledger |
+| lab.board | lab-board |
+| lab.design | lab-design |
+| lab.show_command | lab-show-command |
+| lab.realize | lab-realize |
+| downscale.scorecard | downscale-scorecard |
+
+The six-source knowledge base `water4energy-tva-demo-2019` was indexed to Ready and a real retrieval query returned the demo plan. Original Markdown notes and Markdown renderings of the original Trial 0 JSON and derived April ledger excerpt are indexed. Their filenames retain descriptive source identity. Index status and source coverage are checked separately.
+
+Sources are pinned to HEADWATER `5ea54ac4dd817ab38c82284331974d6668afde09`, water4energy_experiment `ee96c2cc2e257c22c1e0bac6c5a7ec9b9c197ea5`, and the provenance receipt for the briefing/actions. Each replay adapter carries a SHA-256 provenance manifest and validates its source bytes. Original inputs, saved proposals and new proposals stay distinct. The older board/ledger snapshots are labelled by their original dates; the supplied 12 November demo board is a separate record.
+
+Four panels are staged in project outputs using the unchanged evidence contract:
+
+- Original 16–22 April temperature and precipitation maps, with their existing comparison columns retained. Committed plotting code maps Residual 9×9 to `det_v2_soil_k9`. Values in source JSON are transcribed from published labels, not recomputed predictions. The four-week aggregate RMSE is not labelled as this one-week score.
+- ERA5 surface runoff: 7.364 mm valley mean accumulated over the valid week, from the committed `20261102_sro_sample/receipt.json`. The plotted summary is explicitly not a spatial map. No runoff forecast is supplied.
+- Original Trial 0 wet-day map for 19 April 2019, backed by the original 7 September scorecard. Aggregate standardized test scores over 730 days are not presented as scores for the displayed day.
+
+The readers copy saved figures, read records and render the receipt summary locally. They submit no jobs, train no models and do not rerun inference or scoring. Their eight entry points were checked inside VISTA. Chat sending remains manual; the six conversational cold-open answers have not been certified by this setup. The exact original Trial 0 scorer command is not in the staged bundle and is reported missing rather than invented. The optional dam skill remains unloaded pending an agreed reservoir rule. Video, approved home-score map and voiceover remain with Dali.
+
+The replay project allows file reading, local replay code, file display and retrieval tools. It has no HPC submission tools or HPC job definitions. Existing Genesis_Water4Energy project configuration is retained. Local source bundles and VISTA state are not included in the application ZIP or Git repository.

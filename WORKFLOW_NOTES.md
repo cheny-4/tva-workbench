@@ -31,3 +31,7 @@ The 54-location study network and 12-headwater grouping remain in the TVA case. 
 Dali supplies the video, captions, April score map and voiceover. The read-only local-media endpoint exposes only the approved nonempty MP4/VTT/PNG/JPG paths. The player remains hidden without both MP4 and captions, uses a six-node-map poster and never autoplays. The score stage remains an empty frame labelled April map supplied for the demo until the approved static score figure arrives. Its caption names only 16–22 April 2019 and treats the image as a score returned to the ledger.
 
 No dataset job, training, download, scientific agent run, flag mutation or HPC submission was performed to author this interface. The home page is a supplied development record. Reading it is not a live ledger query, and choosing a stage or question is not execution authorization. The existing skill/source/API contracts are documented in [VISTA_SETUP.md](VISTA_SETUP.md) and [BACKEND.md](BACKEND.md).
+
+## v0.13.1 backend compatibility
+
+Current VISTA accepts kebab-case skill names. The eight exact demo aliases are recognized without changing dotted contract labels or the April prompts/guide/schema. Descriptive Markdown filenames identify indexed lead documents. The local replay setup uses original pinned weather/Trial 0 maps and an explicitly labelled ERA5 receipt-summary chart. It is not a new train, inference, re-score or agent conversation. Local VISTA data remains separate from the source package.

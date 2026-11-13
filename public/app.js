@@ -1,5 +1,5 @@
 'use strict';
-const WORKBENCH_VERSION='0.13.0';
+const WORKBENCH_VERSION='0.13.1';
 
 // No external services or frontend dependencies. Live calls stay behind server.py.
 const $ = (selector) => document.querySelector(selector);
@@ -162,7 +162,7 @@ function renderDemoStatus() {
     const required=state.skills?.skills || [];
     const known=state.skills?.project_found && Number.isInteger(state.skills.count);
     const names=new Set(required.map(skill=>skill.name));
-    const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id));
+    const missing=known && (state.demoCase?.requiredSkills || []).some(skill=>!names.has(skill.id)&&!names.has(skill.id.replace(/[._]/g,'-')));
     const knowledgePending=state.knowledge?.project_found && state.knowledge.all_ready===false;
     line.textContent=missing || knowledgePending?'Connected to VISTA. Some project tools or sources still need setup.':isAprilContext()?'Connected to the April case project.':'Connected to the Water4Energy project.';
     line.dataset.state='connected';

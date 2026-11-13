@@ -73,6 +73,22 @@ test('a ready index does not imply all six lead sources are present',()=>{
   const rebuilding=JSON.parse(JSON.stringify(knowledge));rebuilding.knowledge_bases[0].ready=false;
   assert.equal(demo.knowledgeCoverage(rebuilding,definition.sources,definition.project).rows.find(row=>row.source.id==='plan').state,'listed');
 });
+test('current VISTA kebab-case names map only to the exact eight demo contracts',()=>{
+  const names=['lab-literature','lab-download','lab-ledger','lab-board','lab-design','lab-show-command','lab-realize','downscale-scorecard'];
+  const result=demo.skillReadiness({project:definition.project,project_found:true,count:8,skills:names.map(name=>({name}))},definition.project);
+  assert.equal(result.loaded,8);
+  assert.equal(result.optional,'missing');
+  const unrelated=demo.skillReadiness({project:definition.project,project_found:true,count:2,skills:[{name:'lab-ledger-extra'},{name:'tva-weekly-inflow-path2'}]},definition.project);
+  assert.equal(unrelated.loaded,0);
+});
+test('indexed descriptive Markdown filenames identify lead sources without accepting a generic README',()=>{
+  const documents=['HEADWATER_hypothesis_lab.md','Where_the_hypothesis_lab_runs.md','TVA_AGENT_DEMO_PLAN_20261102.md','TVA_Task3_Briefing_Summary_20260915.md','Trial_0_scorecard_7_September_2026.md','April_2019_ledger_excerpt.md'].map(filename=>({filename,title:filename,index_status:'indexed'}));
+  const knowledge={project:definition.project,project_found:true,count:1,knowledge_bases:[{ready:true,documents}]};
+  const result=demo.knowledgeCoverage(knowledge,definition.sources,definition.project);
+  assert.equal(result.listed,6);
+  assert.ok(result.rows.every(row=>row.state==='listed-ready-index'));
+  assert.equal(demo.sourceMatches(definition.sources[0],{filename:'README.md',title:'README.md'}),false);
+});
 test('the dam readout stays unavailable until explicitly enabled with matching rule and source',()=>{
   const manifestation=demo.validateManifest(fixture(),files);
   const selection={enabled:false,reservoir:'Normandy',rule:'Agreed test rule'};

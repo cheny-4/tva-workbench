@@ -17,7 +17,7 @@ The wrapper binds only to `127.0.0.1`. It is intended for presenting from the sa
 
 ## Browser contract
 
-- `GET /api/health`: `{app:"tva-workbench",version:"0.13.0",instance_id,connection_id}`. Lightweight instance identification.
+- `GET /api/health`: `{app:"tva-workbench",version:"0.13.1",instance_id,connection_id}`. Lightweight instance identification.
 - `GET /api/config`: `{backend_url,project}`.
 - `GET /api/workbench-assets`: a read-only local-media presence map with optional `video`, `captions` and `scoreMap` keys. It checks only nonempty, nonsymlink files beneath `public/assets/` at the fixed MP4/VTT/PNG/JPG filenames documented below. It does not enumerate arbitrary directories or write a file.
 - `POST /api/config` or `PUT /api/config`: accepts only `backend_url` and/or `project`; returns the updated configuration. Backend URLs must be local HTTP endpoints without a path, query, credentials, or fragment.
@@ -54,11 +54,11 @@ HTTP requests and file uploads have a 64 MiB limit. Upstream request inactivity 
 
 The existing CCSI connection remains a placeholder for a future resource adapter; the development view separately presents Dali's supplied historical H100 training record. Adding its name to the interface does not register it in VISTA, authenticate to the node, or make existing Frontier-only scripts compatible with it. Similarly, Odo and Lux resource availability does not imply the TVA inference skill supports those clusters.
 
-The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.13.0.
+The adapter reads VISTA's nonsecret `/settings/hpc-status` route for resource cards. It never proxies generic `/settings` routes. Skill catalog reads use the separate adapter-owned `/api/skills` endpoint; raw global `/api/vista/skills` and skill import/edit/delete/publish routes stay blocked. Adding, loading or removing skills remains in VISTA. The installed API reviewed for this package was VISTA 0.2.4; VISTA is pre-1.0, so future releases may need adapter changes. The Workbench package version is 0.13.1.
 
 ## Verification
 
-Run `python3 -m unittest discover -s tests -v`. The v0.13.0 Python suite has 41 checks, including adapter/project knowledge, media presence, launch identity and the study catalog, using isolated mock servers where needed. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. During the v0.12.1 read-only check, the local `Water4Energy-TVA-agent-loop` project was absent. This package reports that missing state and does not create or substitute a project.
+Run `python3 -m unittest discover -s tests -v`. The v0.13.1 Python suite has 41 checks, including adapter/project knowledge, media presence, launch identity and the study catalog, using isolated mock servers where needed. They cover forwarding, SSE flush behavior, multipart uploads, project scope, status refresh, traversal prevention, origin/host checks, loopback-only configuration, refusal of upstream redirects, and Skills scope/cache/offline/missing-detail behavior. They do not run a real VISTA agent or submit an HPC job. During the v0.12.1 read-only check, the local `Water4Energy-TVA-agent-loop` project was absent. This package reports that missing state and does not create or substitute a project.
 
 ## Results Library
 
@@ -77,11 +77,11 @@ The browser combines the selected session's displayed-files listing with actual 
 Compute status is rendered read-only on HEADWATER development and inside Connection settings; only Connection settings saves the backend URL and project. No credential routes or job actions were added. Literature is static metadata in public/data/literature.json, audited from four shared repository trees at pinned commits. It uses no runtime GitHub credential and bundles no papers.
 
 
-## Project context and supplied media in v0.13.0
+## Project context and supplied media in v0.13.1
 
 The on-screen product is **Water4Energy workbench**. The backend project ID stays `Water4Energy-TVA-agent-loop`; changing the Case Lab switcher does not create or rename a VISTA project. The initial context is HEADWATER development. Selecting the TVA case enables the existing April questions and checked evidence. Browser session/draft associations include a context, and a revision guard rejects late responses from another context. An unlabelled saved conversation requires a context choice before opening. The case switcher is disabled during an active turn.
 
-The shell's independent `WORKBENCH_VERSION` and server version are `0.13.0`. Protected `public/data/demo-case.json` still contains `0.12.1`; that is preserved case metadata and is not used as the shell compatibility version. `prompts.json`, `hypothesis-guide.js`, the case definition and its evidence schema remain byte-identical. The April manifest/source validation logic is unchanged.
+The shell's independent `WORKBENCH_VERSION` and server version are `0.13.1`. Protected `public/data/demo-case.json` still contains `0.12.1`; that is preserved case metadata and is not used as the shell compatibility version. `prompts.json`, `hypothesis-guide.js`, the case definition and its evidence schema remain byte-identical. The April manifest/source validation logic is unchanged.
 
 The local-media endpoint recognizes only:
 
@@ -92,3 +92,5 @@ The local-media endpoint recognizes only:
 | `scoreMap` | `water4energy-april-2019-score.png`, otherwise `.jpg` |
 
 The player is hidden unless both video and captions are present. It has controls, no autoplay, captions enabled and a six-node-map poster. The score frame stays labelled empty until an approved raster is present. These files were not supplied for this release. The endpoint reports presence, not scientific validity; Dali supplies the video, captions, map and voiceover. No upload/configuration or execution action is attached to these mounts.
+
+The v0.13.1 browser recognizes the exact VISTA kebab-case aliases for the eight dotted demo contracts, including `lab.show_command` → `lab-show-command`. A similarly prefixed or unrelated skill does not count. Lead-source title matching ignores a trailing document extension, permitting meaningful indexed Markdown filenames while still refusing a generic README. Case validation and step logic are unchanged. Backend replay setup is an explicit separate configuration action, never a startup side effect.
