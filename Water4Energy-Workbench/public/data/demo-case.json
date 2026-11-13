@@ -1,0 +1,188 @@
+{
+  "version": "0.2.0",
+  "project": "Water4Energy-TVA-agent-loop",
+  "title": "One week. A traceable scientific story.",
+  "case": {
+    "start": "2019-04-16",
+    "end": "2019-04-22",
+    "issued": "2019-04-15"
+  },
+  "manifest": "tva-demo-20190416-20190422.json",
+  "evidenceSchema": "/data/demo-evidence.schema.json",
+  "description": "Live VISTA skills walk existing HEADWATER evidence for one issued week. Figures and numbers are read from saved project files.",
+  "requiredSkills": [
+    {
+      "id": "lab.literature",
+      "description": "Read the literature shelf for gaps left open by the ledger."
+    },
+    {
+      "id": "lab.download",
+      "description": "Report what is already local; no live ERA5 download."
+    },
+    {
+      "id": "lab.ledger",
+      "description": "Read scored, closed and blocked experiment records."
+    },
+    {
+      "id": "lab.board",
+      "description": "Show open rows without launching work."
+    },
+    {
+      "id": "lab.design",
+      "description": "Propose a ledger-grounded protocol for human review."
+    },
+    {
+      "id": "lab.show_command",
+      "description": "Display the existing command; do not execute it."
+    },
+    {
+      "id": "lab.realize",
+      "description": "Read saved 9×9 predictions and ERA5 runoff; write the case figure."
+    },
+    {
+      "id": "downscale.scorecard",
+      "description": "Read the frozen Trial 0 comparison with bilinear."
+    }
+  ],
+  "optionalSkill": {
+    "id": "dam.readout",
+    "description": "Read one agreed fill/hold rule from the realization file."
+  },
+  "panels": [
+    {
+      "id": "temperature",
+      "title": "Temperature",
+      "subtitle": "Climate week + frozen residual 9×9",
+      "kind": "frozen_prediction",
+      "sourceLabel": "det_v2_soil_k9",
+      "promptId": "realization"
+    },
+    {
+      "id": "precipitation",
+      "title": "Precipitation",
+      "subtitle": "The same model and issued week",
+      "kind": "frozen_prediction",
+      "sourceLabel": "det_v2_soil_k9",
+      "promptId": "realization",
+      "note": "Keep the April rain shortfall visible; report only values present in the source file."
+    },
+    {
+      "id": "runoff",
+      "title": "Surface runoff",
+      "subtitle": "ERA5 observation · 16–22 April 2019",
+      "kind": "observation",
+      "sourceLabel": "ERA5 sro",
+      "promptId": "runoff",
+      "note": "HEADWATER runoff forecast is unavailable. This panel shows observed ERA5 surface runoff only."
+    },
+    {
+      "id": "downscale",
+      "title": "Downscaling",
+      "subtitle": "Frozen Trial 0 · 1° → 0.25°",
+      "kind": "frozen_comparison",
+      "sourceLabel": "Trial 0 · scored 7 September 2026",
+      "promptId": "downscale",
+      "note": "U-Net beside bilinear for a day in the case week. This is an existing comparison, not a new train."
+    }
+  ],
+  "questions": [
+    {
+      "id": "purpose",
+      "question": "What is this project for, and which week does it show?"
+    },
+    {
+      "id": "closed",
+      "question": "What did the ledger already close for this week?"
+    },
+    {
+      "id": "weather",
+      "question": "What did the frozen 9×9 do on April temperature and rain?"
+    },
+    {
+      "id": "runoff",
+      "question": "Why is the runoff panel ERA5 rather than a forecast?"
+    },
+    {
+      "id": "downscale",
+      "question": "Is the downscale panel a new training run?"
+    },
+    {
+      "id": "dam",
+      "question": "What is the optional dam panel allowed to say?"
+    }
+  ],
+  "sources": [
+    {
+      "id": "readme",
+      "title": "HEADWATER hypothesis-lab README",
+      "url": "https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/README.md",
+      "paths": [
+        "hypothesis_lab/README.md"
+      ],
+      "titles": [
+        "HEADWATER hypothesis lab"
+      ]
+    },
+    {
+      "id": "runtime",
+      "title": "Hypothesis-lab runtime",
+      "url": "https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/RUNTIME.md",
+      "paths": [
+        "hypothesis_lab/RUNTIME.md"
+      ],
+      "titles": [
+        "Where the hypothesis lab runs"
+      ]
+    },
+    {
+      "id": "plan",
+      "title": "TVA agent demo plan · 2 November 2026",
+      "url": "https://github.com/daliwang/HEADWATER/blob/main/docs/TVA_AGENT_DEMO_PLAN_20261102.md",
+      "paths": [
+        "TVA_AGENT_DEMO_PLAN_20261102.md"
+      ],
+      "titles": [
+        "TVA agent demo, 2 November 2026"
+      ]
+    },
+    {
+      "id": "briefing",
+      "title": "TVA briefing · 15 September 2026",
+      "url": "https://github.com/daliwang/water4energy_projectPlan/blob/main/TVA_Task3_Briefing_Summary_20260915.md",
+      "paths": [
+        "TVA_Task3_Briefing_Summary_20260915.md"
+      ],
+      "titles": [
+        "TVA / Task 3 briefing — 15 Sep 2026 transcript summary and demo candidates"
+      ]
+    },
+    {
+      "id": "trial0",
+      "title": "Frozen Trial 0 scorecard",
+      "url": "https://github.com/daliwang/water4energy_experiment/blob/main/Trial0_run_20260907_220510_scorecard_ext.json",
+      "paths": [
+        "Trial0_run_20260907_220510_scorecard_ext.json"
+      ],
+      "titles": [
+        "Trial 0 scorecard · 7 September 2026"
+      ]
+    },
+    {
+      "id": "ledger",
+      "title": "April 2019 ledger excerpt",
+      "url": "https://github.com/daliwang/HEADWATER/blob/main/hypothesis_lab/experiment_ledger.json",
+      "paths": [
+        "ledger_april2019_excerpt.json",
+        "april2019_ledger_excerpt.json"
+      ],
+      "titles": [
+        "April 2019 ledger excerpt"
+      ]
+    }
+  ],
+  "scope": [
+    "No new 9×9 or U-Net fit.",
+    "No RiverWare, river-temperature or plant-MW calculation.",
+    "Optional dam readout stays last and uses an agreed rule."
+  ]
+}

@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cheny-4/tva-workbench/demo-evidence.schema.json",
+  "title": "TVA fixed-case evidence manifest",
+  "description": "Adapter metadata only. No sample predictions or dam decisions are bundled. File existence, safe paths and source/selection correspondence are additionally checked by the Workbench.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "case",
+    "panels"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "example_only": {
+      "const": false
+    },
+    "case": {
+      "$ref": "#/$defs/case"
+    },
+    "panels": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/panel"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "model"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "frozen_prediction"
+                },
+                "model": {
+                  "const": "det_v2_soil_k9"
+                }
+              }
+            }
+          ]
+        },
+        "precipitation": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/panel"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "model"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "frozen_prediction"
+                },
+                "model": {
+                  "const": "det_v2_soil_k9"
+                }
+              }
+            }
+          ]
+        },
+        "runoff": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/panel"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "dataset",
+                "variable",
+                "forecast_available"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "observation"
+                },
+                "dataset": {
+                  "const": "ERA5"
+                },
+                "variable": {
+                  "const": "sro"
+                },
+                "forecast_available": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "downscale": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/panel"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "trial",
+                "scored",
+                "input_resolution_deg",
+                "output_resolution_deg",
+                "date"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "frozen_comparison"
+                },
+                "trial": {
+                  "const": "Trial 0"
+                },
+                "scored": {
+                  "const": "2026-09-07"
+                },
+                "input_resolution_deg": {
+                  "const": 1
+                },
+                "output_resolution_deg": {
+                  "const": 0.25
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "One day within 16–22 April 2019."
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "research": {
+      "type": "object",
+      "properties": {
+        "ledger_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Relative project-output path. The adapter also rejects traversal, URLs and ambiguous encodings and checks actual file presence."
+        },
+        "proposal_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Relative project-output path. The adapter also rejects traversal, URLs and ambiguous encodings and checks actual file presence."
+        },
+        "critic_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Relative project-output path. The adapter also rejects traversal, URLs and ambiguous encodings and checks actual file presence."
+        },
+        "referee_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Relative project-output path. The adapter also rejects traversal, URLs and ambiguous encodings and checks actual file presence."
+        },
+        "protocol_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Relative project-output path. The adapter also rejects traversal, URLs and ambiguous encodings and checks actual file presence."
+        }
+      }
+    },
+    "dam": {
+      "type": "object",
+      "required": [
+        "source_file"
+      ],
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Existing JSON output following the damReadout definition. It is displayed only when the optional panel is enabled and the selected reservoir/rule match."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "issued"
+      ],
+      "properties": {
+        "start": {
+          "const": "2019-04-16"
+        },
+        "end": {
+          "const": "2019-04-22"
+        },
+        "issued": {
+          "const": "2019-04-15"
+        }
+      }
+    },
+    "panel": {
+      "type": "object",
+      "required": [
+        "figure",
+        "source_file",
+        "source",
+        "kind"
+      ],
+      "properties": {
+        "figure": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Existing PNG/JPEG/GIF/WebP output path."
+        },
+        "source_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Existing backing JSON output path, separate from the manifest."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "damReadout": {
+      "type": "object",
+      "required": [
+        "case",
+        "reservoir",
+        "rule",
+        "decision",
+        "realization_source_file"
+      ],
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/case"
+        },
+        "reservoir": {
+          "enum": [
+            "Normandy",
+            "Norris"
+          ]
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "enum": [
+            "fill",
+            "hold"
+          ]
+        },
+        "realization_source_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "A backing JSON file used by this manifest’s case realization panels."
+        }
+      }
+    }
+  }
+}

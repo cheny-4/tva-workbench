@@ -1,0 +1,26 @@
+/* Live workspace additions to the fuller v0.2.1 ORNL / Genesis layout. */
+.network-overview{grid-template-columns:repeat(3,minmax(0,1fr))}
+.network-group-heading{grid-column:1/-1;margin:6px 0 2px;padding:9px 0 5px;font-size:12px;font-weight:600;color:var(--genesis-navy);letter-spacing:.2px}
+.network-group-heading:not(:first-child){border-top:1px solid var(--line);margin-top:12px;padding-top:19px}
+.network-site-card.network-headwater{border-left:3px solid var(--ornl-green);background:#f2f8f4}
+.network-site-card.network-headwater:hover,.network-site-card.network-headwater.selected{background:#e7f3eb;border-color:#71a786;border-left-color:var(--ornl-green)}
+.headwater-badge{display:inline-flex;align-items:center;align-self:flex-start;border:1px solid #c3ddcc;border-radius:4px;padding:3px 5px;background:#e7f3eb;color:var(--ornl-green);font-size:8px;font-weight:600;line-height:1.4;letter-spacing:.1px}
+.network-map-legend{display:flex;align-items:center;flex-wrap:wrap;gap:9px 17px;padding:11px 20px;color:#536c7e;font-size:10px;background:#f8fafc;border-top:1px solid #e2e9ef}
+.network-map-legend>span{display:inline-flex;align-items:center;gap:7px}
+.network-map-legend i{width:7px;height:7px;display:inline-block;border-radius:50%;background:#71899a}
+.network-map-legend .headwater-key,.network-map-legend .legend-headwater{background:var(--ornl-green);border-radius:1px;transform:rotate(45deg)}
+#focus-site optgroup{font-weight:700;color:var(--genesis-navy)}
+#focus-site option{font-weight:400;color:var(--ink)}
+.scenario-form .focus-label{margin-top:20px}
+.scenario-form #resource-note{font-size:10px;line-height:1.75;color:#607487}
+.agent-panel{min-height:620px;max-height:760px}
+.results-panel:has(.live-result-empty) .chart-layout{grid-template-columns:1fr;gap:0}
+.results-panel:has(.live-result-empty) #result-stats{display:none}
+.results-panel:has(.live-result-empty) .live-result-empty{min-height:150px;display:grid;align-content:center;line-height:1.9}
+.results-panel:not(.has-live-study):not(.has-live-artifacts) .result-toolbar{display:none}
+.results-panel:not(.has-live-study):not(.has-live-artifacts) .result-chart{height:auto;min-height:0}
+.results-panel:not(.has-live-study):not(.has-live-artifacts) .live-result-empty{min-height:65px;padding:5px 0}
+.network-map-note a{color:var(--ornl-green)}
+#live-files{padding:20px 24px}
+@media(max-width:900px){.agent-panel{min-height:0;height:650px}.network-map-legend{padding:11px 17px;font-size:9px}}
+@media(max-width:640px){.network-overview>div{padding:14px 10px}.network-group-heading{font-size:11px}.headwater-badge{font-size:7px;padding:2px 4px}.agent-panel{height:650px}.network-map-legend{gap:9px 13px}.network-map-legend>span{max-width:100%}.scenario-form .focus-label{margin-top:15px}#live-files{padding:16px}}

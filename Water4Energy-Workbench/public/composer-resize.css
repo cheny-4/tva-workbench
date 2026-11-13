@@ -1,0 +1,13 @@
+/* The separator controls only the message input; Send and Stop stay in flow. */
+.composer-resize-handle{display:flex;align-items:center;justify-content:center;gap:8px;height:20px;min-height:20px;flex-shrink:0;margin:0 16px;color:#7a8f9e;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:5px}
+.composer-resize-handle[hidden]{display:none}
+.composer-resize-grip{display:block;width:32px;height:4px;flex-shrink:0;border-top:1px solid #9bb0bb;border-bottom:1px solid #9bb0bb}
+.composer-resize-label{font-size:9px;line-height:1.4;color:#6f8594}
+.composer-resize-handle:hover,.composer-resize-handle.is-resizing{background:#eef5f1;color:var(--ornl-green)}
+.composer-resize-handle:hover .composer-resize-grip,.composer-resize-handle.is-resizing .composer-resize-grip{border-color:var(--ornl-green)}
+.composer-resize-handle:focus-visible{outline:3px solid #8bb8a0;outline-offset:-3px;background:#f0f7f2}
+.hypothesis-lab-grid .demo-agent-primary.composer-resize-ready .composer{margin-top:0}
+.demo-agent-primary.composer-resize-ready #prompt{display:block;resize:none;min-height:55px;max-height:none}
+.hypothesis-lab-grid .demo-agent-primary.composer-resize-ready>#chat-hints{min-height:0;max-height:min(30%,var(--composer-hints-max,30%))}
+body.composer-resizing,body.composer-resizing *{cursor:ns-resize!important;user-select:none!important;-webkit-user-select:none!important}
+@media(max-width:640px){.composer-resize-handle{margin:0 14px;height:24px;min-height:24px}.composer-resize-label{font-size:9px}}
